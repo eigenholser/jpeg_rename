@@ -63,7 +63,8 @@ def get_new_fn(workdir, old_fn):
 def move_filename(old_fn, new_fn):
     """Move old_fn to new_fn."""
 
-    print( "Renaming: {0} ==> {1}".format(old_fn, new_fn))
+    print( "{0} ==> {1}".format(
+        os.path.basename(old_fn), os.path.basename(new_fn)))
 
 
 def init_file_map(workdir):
