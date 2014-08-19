@@ -125,9 +125,13 @@ def process_file_map(workdir, file_map, clobber, move_func=move):
     """
 
     for old_fn, new_fn in file_map.iteritems():
-        if clobber and move_func:
-            move_func(os.path.join(workdir, old_fn),
-                    os.path.join(workdir, new_fn))
+        try:
+            if clobber and move_func:
+                move_func(os.path.join(workdir, old_fn),
+                        os.path.join(workdir, new_fn))
+        except Exception as e:
+            print("{0}".format(e.message), file=sys.stderr)
+            break
 
 
 def process_all_files(workdir=None, clobber=None):
