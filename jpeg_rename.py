@@ -104,7 +104,7 @@ def init_file_map(workdir):
                 '*.{0}'.format(extension))):
             old_fn = os.path.basename(filename)
             exif_data = read_exif_data(workdir, old_fn)
-            file_map[old_fn] = get_new_fn(exif_data)
+            file_map[old_fn] = get_new_fn(old_fn, exif_data)
 
     return file_map
 
