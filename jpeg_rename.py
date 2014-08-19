@@ -111,7 +111,18 @@ def init_file_map(workdir):
 
 def process_file_map(workdir, file_map, clobber, move_func=move):
     """Iterate through the Python dict that maps old filenames to new
-    filenames. Move the file if Simon sez."""
+    filenames. Move the file if Simon sez.
+
+    Args: Takes working directory, file map, clobber, and move function.
+    Returns: None
+
+    >>> file_map = {'IMG0332.JPG': '20140818_20238345.jpg'}
+    >>> def move_func(old_fn, new_fn): pass
+    ...
+    >>> process_file_map('.', file_map, True, move_func)
+    >>>
+
+    """
 
     for old_fn, new_fn in file_map.iteritems():
         if clobber and move_func:
