@@ -29,9 +29,24 @@ def read_exif_data(workdir, old_fn):
 
     return exif_data
 
-def get_new_fn(exif_data):
+
+def get_new_fn(old_fn, exif_data):
     """Generate new filename from old_fn EXIF data if possible. Even if not
-    possible, lowercase old_fn and normalize file extension."""
+    possible, lowercase old_fn and normalize file extension.
+
+    Arguments:
+        Python dict: EXIF data
+
+    Returns:
+        str: Filename derived from EXIF data.
+
+    >>> exif_data = {}
+    >>> old_fn = 'abc123.jpg'
+    >>> exif_data['DateTimeOriginal'] = '2014:08:16 06:20:30'
+    >>> get_new_fn(old_fn, exif_data)
+    '20140816_062030.jpg'
+
+    """
 
     # Start with EXIF DateTimeOriginal
     try:
