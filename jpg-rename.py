@@ -14,10 +14,10 @@ from PIL import Image
 EXTENSIONS = ['JPG', 'jpg', 'jpeg']
 
 
-def get_new_fn(workdir, old_fn):
-    """Generate new filename from old_fn EXIF data if possible. Even if not
-    possible, lowercase old_fn and normalize file extension."""
+def read_exif_data(workdir, old_fn):
+    """Read EXIF data from file. Convert to Python dict. Return dict."""
 
+    # XXX: We already know file exists 'cuz we found it.
     img = Image.open(os.path.join(workdir, old_fn))
     info = img._getexif()
 
@@ -26,6 +26,12 @@ def get_new_fn(workdir, old_fn):
         for tag, value in info.items():
             decoded = TAGS.get(tag, tag)
             exif_data[decoded] = value
+
+    return exif_data
+
+def get_new_fn(exif_data):
+    """Generate new filename from old_fn EXIF data if possible. Even if not
+    possible, lowercase old_fn and normalize file extension."""
 
     # Start with EXIF DateTimeOriginal
     try:
@@ -60,10 +66,10 @@ def get_new_fn(workdir, old_fn):
     return new_fn
 
 
-def move_filename(old_fn, new_fn):
+def move(old_fn, new_fn):
     """Move old_fn to new_fn."""
 
-    print( "{0} ==> {1}".format(
+    print( "Really moving the files: {0} ==> {1}".format(
         os.path.basename(old_fn), os.path.basename(new_fn)))
 
 
@@ -81,18 +87,19 @@ def init_file_map(workdir):
     for extension in EXTENSIONS:
         for filename in glob.glob(os.path.join(workdir, '*.{0}'.format(extension))):
             old_fn = os.path.basename(filename)
-            file_map[old_fn] = get_new_fn(workdir, old_fn)
+            exif_data = read_exif_data(workdir, old_fn)
+            file_map[old_fn] = get_new_fn(exif_data)
 
     return file_map
 
 
-def process_file_map(workdir, file_map, clobber):
+def process_file_map(workdir, file_map, clobber, move_func=move):
     """Iterate through the Python dict that maps old filenames to new
     filenames. Move the file if Simon sez."""
 
     for old_fn, new_fn in file_map.iteritems():
-        if clobber:
-            move_filename(os.path.join(workdir, old_fn),
+        if clobber and move_func:
+            move_func(os.path.join(workdir, old_fn),
                     os.path.join(workdir, new_fn))
 
 
@@ -117,6 +124,7 @@ def process_all_files(workdir=None, clobber=None):
 
     file_map = init_file_map(workdir)
     process_file_map(workdir, file_map, clobber)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
