@@ -11,6 +11,7 @@ from PIL.ExifTags import TAGS
 from PIL import Image
 
 
+# Need to look for *.JPG, *.jpg, and *.jpeg files for consideration.
 EXTENSIONS = ['JPG', 'jpg', 'jpeg']
 
 
@@ -35,7 +36,7 @@ def get_new_fn(old_fn, exif_data):
     possible, lowercase old_fn and normalize file extension.
 
     Arguments:
-        Python dict: EXIF data
+        dict: EXIF data
 
     Returns:
         str: Filename derived from EXIF data.
@@ -98,7 +99,6 @@ def init_file_map(workdir):
     file_map = {}
 
     # Initialize file_map dict.
-    # Need to look for *.JPG, *.jpg, and *.jpeg files for consideration.
     for extension in EXTENSIONS:
         for filename in glob.glob(os.path.join(workdir,
                 '*.{0}'.format(extension))):
@@ -113,8 +113,13 @@ def process_file_map(workdir, file_map, clobber, move_func=move):
     """Iterate through the Python dict that maps old filenames to new
     filenames. Move the file if Simon sez.
 
-    Args: Takes working directory, file map, clobber, and move function.
-    Returns: None
+    Arguments:
+        str: workdir - Working directory.
+        dict: file_map - old_fn to new_fn mapping.
+        boolean: clobber - Dry run or real thing.
+        func: move_func - Move function to use for testing or default.
+    Returns:
+        None
 
     >>> file_map = {'IMG0332.JPG': '20140818_20238345.jpg'}
     >>> def move_func(old_fn, new_fn): pass
