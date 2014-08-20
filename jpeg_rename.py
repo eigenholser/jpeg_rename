@@ -89,6 +89,27 @@ def move(old_fn, new_fn):
         os.path.basename(old_fn), os.path.basename(new_fn)))
 
 
+def make_new_fn_unique(workdir, old_fn, new_fn):
+    """Check new_fn for uniqueness in 'workdir'. Rename, adding a numerical
+    suffix until it is unique.
+    """
+
+    # Rename file by appending number if we have collision.
+    # TODO: I wish I didn't specify \d+_\d+ for the first part.
+    # perhaps not -\d\ before .jpg would be better for the second
+    # match.
+    counter = 1
+    while(os.path.exists(os.path.join(workdir, new_fn))):
+        if (old_fn == new_fn):
+            break
+        new_fn = re.sub(r'^(\d+_\d+)-\d+\.jpg',
+                r'\1-{0}.jpg'.format(counter), new_fn)
+        new_fn = re.sub(r'^(\d+_\d+)\.jpg',
+                r'\1-{0}.jpg'.format(counter), new_fn)
+        counter += 1
+    return new_fn
+
+
 def init_file_map(workdir):
     """Read the work directory looking for files with extensions defined in the
     EXTENSIONS constant. Note that this could use a more elaborate magic
@@ -104,7 +125,11 @@ def init_file_map(workdir):
                 '*.{0}'.format(extension))):
             old_fn = os.path.basename(filename)
             exif_data = read_exif_data(workdir, old_fn)
-            file_map[old_fn] = get_new_fn(old_fn, exif_data)
+
+            new_fn = get_new_fn(old_fn, exif_data)
+            new_fn = make_new_fn_unique(workdir, old_fn, new_fn)
+
+            file_map[old_fn] = new_fn
 
     return file_map
 
