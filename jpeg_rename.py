@@ -88,6 +88,14 @@ def move(old_fn, new_fn):
     print( "Really moving the files: {0} ==> {1}".format(
         os.path.basename(old_fn), os.path.basename(new_fn)))
 
+    # TODO: for now we're just printing what we would do.
+    return
+
+    try:
+        os.rename(old_fn, new_fn)
+    except Exception:
+        print("Unable to rename file: {0}".format(e.message), file=sys.stderr)
+
 
 def make_new_fn_unique(workdir, old_fn, new_fn):
     """Check new_fn for uniqueness in 'workdir'. Rename, adding a numerical
