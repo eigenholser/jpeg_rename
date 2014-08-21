@@ -25,7 +25,8 @@ class FileMap():
     """
 
     def __init__(self, old_fn, exif_data=None):
-        """
+        """Initialize FileMap instance.
+
         >>> filemap = FileMap('abc123.jpeg', {})
         >>> filemap.old_fn
         'abc123.jpeg'
@@ -65,9 +66,6 @@ class FileMap():
 
         Arguments:
             dict: EXIF data
-
-        Returns:
-            str: Filename derived from EXIF data.
 
         >>> filemap = FileMap('abc123.jpeg', {'DateTimeOriginal': '2014:08:16 06:20:30'})
         >>> filemap.new_fn
@@ -150,6 +148,12 @@ def init_file_map(workdir):
     """Read the work directory looking for files with extensions defined in the
     EXTENSIONS constant. Note that this could use a more elaborate magic
     number mechanism that would be cool.
+
+    Arguments:
+        str: workdir - The directory in which all activity will occur.
+
+    Returns:
+        list: file_map - List of FileMap instances.
     """
 
     # Dict with old_fn ==> new_fn mapping.
