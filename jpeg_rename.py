@@ -16,14 +16,32 @@ EXTENSIONS = ['JPG', 'jpg', 'jpeg']
 
 
 class FileMap():
+    """FileMap represents a mapping between the old_fn and the new_fn. It's
+    methods perform all necessary instance functions for the rename.
 
-    def __init__(self, old_fn):
+    Arguments:
+        str: old_fn - Old Filename
+        dict: exif_data - For testing only. Dict with sample EXIF data.
+    """
+
+    def __init__(self, old_fn, exif_data=None):
+        """
+        >>> filemap = FileMap('abc123.jpeg', {})
+        >>> filemap.old_fn
+        'abc123.jpeg'
+        >>> filemap.new_fn
+        'abc123.jpg'
+        >>>
+        """
         self.old_fn_fq = old_fn
         self.workdir = os.path.dirname(old_fn)
         self.old_fn = os.path.basename(old_fn)
 
         # Read EXIF data from old filename
-        self.read_exif_data()
+        if exif_data is None:
+            self.read_exif_data()
+        else:
+            self.exif_data = exif_data
 
         self.get_new_fn()
         self.make_new_fn_unique()
@@ -51,10 +69,8 @@ class FileMap():
         Returns:
             str: Filename derived from EXIF data.
 
-        >>> exif_data = {}
-        >>> old_fn = 'abc123.jpg'
-        >>> exif_data['DateTimeOriginal'] = '2014:08:16 06:20:30'
-        >>> get_new_fn(old_fn, exif_data)
+        >>> filemap = FileMap('abc123.jpeg', {'DateTimeOriginal': '2014:08:16 06:20:30'})
+        >>> filemap.new_fn
         '20140816_062030.jpg'
 
         """
@@ -148,7 +164,7 @@ def init_file_map(workdir):
     return file_map
 
 
-def process_file_map(file_map, clobber):
+def process_file_map(file_map, clobber, move_func=None):
     """Iterate through the Python dict that maps old filenames to new
     filenames. Move the file if Simon sez.
 
@@ -160,10 +176,10 @@ def process_file_map(file_map, clobber):
     Returns:
         None
 
-    >>> file_map = {'IMG0332.JPG': '20140818_20238345.jpg'}
+    >>> filemap = FileMap('IMG0332.JPG', {'DateTimeOriginal': '2014-08-18 20:23:83'})
     >>> def move_func(old_fn, new_fn): pass
     ...
-    >>> process_file_map('.', file_map, True, move_func)
+    >>> process_file_map([filemap], True, move_func)
     >>>
 
     """
@@ -171,7 +187,10 @@ def process_file_map(file_map, clobber):
     for fm in file_map:
         try:
             if clobber:
-                fm.move()
+                if move_func is None:
+                    fm.move()
+                else:
+                    move_func(fm.old_fn, fm.new_fn)
         except Exception as e:
             print("{0}".format(e.message), file=sys.stderr)
             break
