@@ -15,107 +15,119 @@ from PIL import Image
 EXTENSIONS = ['JPG', 'jpg', 'jpeg']
 
 
-def read_exif_data(workdir, old_fn):
-    """Read EXIF data from file. Convert to Python dict. Return dict."""
+class FileMap():
 
-    # XXX: We already know file exists 'cuz we found it.
-    img = Image.open(os.path.join(workdir, old_fn))
-    info = img._getexif()
+    def __init__(self, old_fn):
+        self.old_fn_fq = old_fn
+        self.workdir = os.path.dirname(old_fn)
+        self.old_fn = os.path.basename(old_fn)
 
-    exif_data ={}
-    if info is not None:
-        for tag, value in info.items():
-            decoded = TAGS.get(tag, tag)
-            exif_data[decoded] = value
+        # Read EXIF data from old filename
+        self.read_exif_data()
 
-    return exif_data
+        self.get_new_fn()
+        self.make_new_fn_unique()
 
+    def read_exif_data(self):
+        """Read EXIF data from file. Convert to Python dict."""
 
-def get_new_fn(old_fn, exif_data):
-    """Generate new filename from old_fn EXIF data if possible. Even if not
-    possible, lowercase old_fn and normalize file extension.
+        # XXX: We already know file exists 'cuz we found it.
+        img = Image.open(self.old_fn_fq)
+        info = img._getexif()
 
-    Arguments:
-        dict: EXIF data
+        self.exif_data ={}
+        if info is not None:
+            for tag, value in info.items():
+                decoded = TAGS.get(tag, tag)
+                self.exif_data[decoded] = value
 
-    Returns:
-        str: Filename derived from EXIF data.
+    def get_new_fn(self):
+        """Generate new filename from old_fn EXIF data if possible. Even if not
+        possible, lowercase old_fn and normalize file extension.
 
-    >>> exif_data = {}
-    >>> old_fn = 'abc123.jpg'
-    >>> exif_data['DateTimeOriginal'] = '2014:08:16 06:20:30'
-    >>> get_new_fn(old_fn, exif_data)
-    '20140816_062030.jpg'
+        Arguments:
+            dict: EXIF data
 
-    """
+        Returns:
+            str: Filename derived from EXIF data.
 
-    # Start with EXIF DateTimeOriginal
-    try:
-        new_fn = exif_data['DateTimeOriginal']
-    except KeyError:
-        new_fn = None
+        >>> exif_data = {}
+        >>> old_fn = 'abc123.jpg'
+        >>> exif_data['DateTimeOriginal'] = '2014:08:16 06:20:30'
+        >>> get_new_fn(old_fn, exif_data)
+        '20140816_062030.jpg'
 
-    # If this pattern does not strictly match then keep original name.
-    # YYYY:MM:DD HH:MM:SS
-    if (new_fn and not
-            re.match(r'^\d{4}:\d\d:\d\d \d\d:\d\d:\d\d$', new_fn)):
-        # Setup for next step.
-        new_fn = None
+        """
 
-    # Don't assume exif tag exists. If it does not, keep original filename.
-    # Lowercase filename base and extension
-    if new_fn is None:
-        new_fn = old_fn.lower()
-        new_fn = re.sub(r'.jpeg$', r'.jpg', new_fn)
-    else:
-        new_fn = "{0}.jpg".format(new_fn)
+        # Start with EXIF DateTimeOriginal
+        try:
+            new_fn = self.exif_data['DateTimeOriginal']
+        except KeyError:
+            new_fn = None
 
-    # XXX: One may argue that the next step should be an 'else' clause of the
-    # previous 'if' statement. But the intention here is to clean up just a bit
-    # even if we're not really renaming the file. Windows doesn't like colons
-    # in filenames.
+        # If this pattern does not strictly match then keep original name.
+        # YYYY:MM:DD HH:MM:SS
+        if (new_fn and not
+                re.match(r'^\d{4}:\d\d:\d\d \d\d:\d\d:\d\d$', new_fn)):
+            # Setup for next step.
+            new_fn = None
 
-    # Rename using exif DateTimeOriginal
-    new_fn = re.sub(r':', r'', new_fn)
-    new_fn = re.sub(r' ', r'_', new_fn)
+        # Don't assume exif tag exists. If it does not, keep original filename.
+        # Lowercase filename base and extension
+        if new_fn is None:
+            new_fn = self.old_fn.lower()
+            new_fn = re.sub(r'.jpeg$', r'.jpg', new_fn)
+        else:
+            new_fn = "{0}.jpg".format(new_fn)
 
-    return new_fn
+        # XXX: One may argue that the next step should be an 'else' clause of the
+        # previous 'if' statement. But the intention here is to clean up just a bit
+        # even if we're not really renaming the file. Windows doesn't like colons
+        # in filenames.
 
+        # Rename using exif DateTimeOriginal
+        new_fn = re.sub(r':', r'', new_fn)
+        new_fn = re.sub(r' ', r'_', new_fn)
 
-def move(old_fn, new_fn):
-    """Move old_fn to new_fn."""
+        self.new_fn = new_fn
+        self.new_fn_fq = os.path.join(self.workdir, new_fn)
 
-    print( "Really moving the files: {0} ==> {1}".format(
-        os.path.basename(old_fn), os.path.basename(new_fn)))
+    def move(self):
+        """Move old_fn to new_fn."""
 
-    # TODO: for now we're just printing what we would do.
-    return
+        print( "Really moving the files: {0} ==> {1}".format(
+            os.path.basename(self.old_fn), os.path.basename(self.new_fn)))
 
-    try:
-        os.rename(old_fn, new_fn)
-    except Exception:
-        print("Unable to rename file: {0}".format(e.message), file=sys.stderr)
+        # TODO: for now we're just printing what we would do.
+        return
 
+        try:
+            os.rename(old_fn, new_fn)
+        except Exception:
+            print("Unable to rename file: {0}".format(e.message), file=sys.stderr)
 
-def make_new_fn_unique(workdir, old_fn, new_fn):
-    """Check new_fn for uniqueness in 'workdir'. Rename, adding a numerical
-    suffix until it is unique.
-    """
+    def make_new_fn_unique(self):
+        """Check new_fn for uniqueness in 'workdir'. Rename, adding a numerical
+        suffix until it is unique.
+        """
 
-    # Rename file by appending number if we have collision.
-    # TODO: I wish I didn't specify \d+_\d+ for the first part.
-    # perhaps not -\d\ before .jpg would be better for the second
-    # match.
-    counter = 1
-    while(os.path.exists(os.path.join(workdir, new_fn))):
-        if (old_fn == new_fn):
-            break
-        new_fn = re.sub(r'^(\d+_\d+)-\d+\.jpg',
-                r'\1-{0}.jpg'.format(counter), new_fn)
-        new_fn = re.sub(r'^(\d+_\d+)\.jpg',
-                r'\1-{0}.jpg'.format(counter), new_fn)
-        counter += 1
-    return new_fn
+        # Rename file by appending number if we have collision.
+        # TODO: I wish I didn't specify \d+_\d+ for the first part.
+        # perhaps not -\d\ before .jpg would be better for the second
+        # match.
+        new_fn = self.new_fn
+        counter = 1
+        while(os.path.exists(self.new_fn_fq)):
+            if (self.old_fn == self.new_fn):
+                break
+            new_fn = re.sub(r'^(\d+_\d+)-\d+\.jpg',
+                    r'\1-{0}.jpg'.format(counter), self.new_fn)
+            new_fn = re.sub(r'^(\d+_\d+)\.jpg',
+                    r'\1-{0}.jpg'.format(counter), self.new_fn)
+            counter += 1
+            self.new_fn_fq = os.path.join(self.workdir, new_fn)
+        self.new_fn = new_fn
+        self.new_fn_fq = os.path.join(self.workdir, new_fn)
 
 
 def init_file_map(workdir):
@@ -125,24 +137,18 @@ def init_file_map(workdir):
     """
 
     # Dict with old_fn ==> new_fn mapping.
-    file_map = {}
+    file_map = []
 
     # Initialize file_map dict.
     for extension in EXTENSIONS:
         for filename in glob.glob(os.path.join(workdir,
                 '*.{0}'.format(extension))):
-            old_fn = os.path.basename(filename)
-            exif_data = read_exif_data(workdir, old_fn)
-
-            new_fn = get_new_fn(old_fn, exif_data)
-            new_fn = make_new_fn_unique(workdir, old_fn, new_fn)
-
-            file_map[old_fn] = new_fn
+            file_map.append(FileMap(filename))
 
     return file_map
 
 
-def process_file_map(workdir, file_map, clobber, move_func=move):
+def process_file_map(file_map, clobber):
     """Iterate through the Python dict that maps old filenames to new
     filenames. Move the file if Simon sez.
 
@@ -162,11 +168,10 @@ def process_file_map(workdir, file_map, clobber, move_func=move):
 
     """
 
-    for old_fn, new_fn in file_map.iteritems():
+    for fm in file_map:
         try:
-            if clobber and move_func:
-                move_func(os.path.join(workdir, old_fn),
-                        os.path.join(workdir, new_fn))
+            if clobber:
+                fm.move()
         except Exception as e:
             print("{0}".format(e.message), file=sys.stderr)
             break
@@ -192,7 +197,7 @@ def process_all_files(workdir=None, clobber=None):
         clobber = False
 
     file_map = init_file_map(workdir)
-    process_file_map(workdir, file_map, clobber)
+    process_file_map(file_map, clobber)
 
 
 if __name__ == '__main__':
