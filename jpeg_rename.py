@@ -24,10 +24,10 @@ class FileMap():
         dict: exif_data - For testing only. Dict with sample EXIF data.
     """
 
-    def __init__(self, old_fn, exif_data=None):
+    def __init__(self, old_fn, avoid_collisions=None, exif_data=None):
         """Initialize FileMap instance.
 
-        >>> filemap = FileMap('abc123.jpeg', {})
+        >>> filemap = FileMap('abc123.jpeg', None, {})
         >>> filemap.old_fn
         'abc123.jpeg'
         >>> filemap.new_fn
@@ -38,6 +38,14 @@ class FileMap():
         self.workdir = os.path.dirname(old_fn)
         self.old_fn = os.path.basename(old_fn)
 
+        # Avoid filename collisions (dangerous) or log a message if there
+        # would be one, and fail the move.
+        self.collision_detected = False
+        if avoid_collisions is None:
+            self.avoid_collisions = False
+        else:
+            self.avoid_collisions = avoid_collisions
+
         # Read EXIF data from old filename
         if exif_data is None:
             self.read_exif_data()
@@ -45,7 +53,6 @@ class FileMap():
             self.exif_data = exif_data
 
         self.get_new_fn()
-        self.make_new_fn_unique()
 
     def read_exif_data(self):
         """Read EXIF data from file. Convert to Python dict."""
@@ -111,6 +118,17 @@ class FileMap():
     def move(self):
         """Move old_fn to new_fn."""
 
+        # XXX: This call deliberately placed here instead of __init__(). All
+        # initialization is performed before any files are moved. The file move
+        # will change state and may introduce a collision. Doing the uniqueness
+        # check here will check current state.
+        self.make_new_fn_unique()
+
+        if self.collision_detected:
+            print( "{0} => {1} Destination collision. Aborting.".format(
+                os.path.basename(self.old_fn), os.path.basename(self.new_fn)))
+            return
+
         print( "Really moving the files: {0} ==> {1}".format(
             os.path.basename(self.old_fn), os.path.basename(self.new_fn)))
 
@@ -135,6 +153,11 @@ class FileMap():
         counter = 1
         while(os.path.exists(self.new_fn_fq)):
             if (self.old_fn == self.new_fn):
+                # Same file, faux collision.
+                break
+            if (not self.avoid_collisions):
+                # Do not attempt to rename.
+                self.collision_detected = True
                 break
             new_fn = re.sub(r'^(\d+_\d+)-\d+\.jpg',
                     r'\1-{0}.jpg'.format(counter), self.new_fn)
@@ -146,7 +169,7 @@ class FileMap():
         self.new_fn_fq = os.path.join(self.workdir, new_fn)
 
 
-def init_file_map(workdir):
+def init_file_map(workdir, avoid_collisions=None):
     """Read the work directory looking for files with extensions defined in the
     EXTENSIONS constant. Note that this could use a more elaborate magic
     number mechanism that would be cool.
@@ -166,21 +189,21 @@ def init_file_map(workdir):
         for filename in glob.glob(os.path.join(workdir,
                 '*.{0}'.format(extension))):
             try:
-                file_map.append(FileMap(filename))
+                file_map.append(FileMap(filename, avoid_collisions))
             except:
                 print("{0}".format(e.message), file=sys.stderr)
 
     return file_map
 
 
-def process_file_map(file_map, clobber, move_func=None):
+def process_file_map(file_map, simon_sez=None, move_func=None):
     """Iterate through the Python dict that maps old filenames to new
     filenames. Move the file if Simon sez.
 
     Arguments:
         str: workdir - Working directory.
         dict: file_map - old_fn to new_fn mapping.
-        boolean: clobber - Dry run or real thing.
+        boolean: simon_sez - Dry run or real thing.
         func: move_func - Move function to use for testing or default.
     Returns:
         None
@@ -193,9 +216,13 @@ def process_file_map(file_map, clobber, move_func=None):
 
     """
 
+    # XXX: Of marginal utility
+    if simon_sez is None:
+        simon_sez = False
+
     for fm in file_map:
         try:
-            if clobber:
+            if simon_sez:
                 if move_func is None:
                     fm.move()
                 else:
@@ -205,7 +232,7 @@ def process_file_map(file_map, clobber, move_func=None):
             break
 
 
-def process_all_files(workdir=None, clobber=None):
+def process_all_files(workdir=None, simon_sez=None, avoid_collisions=None):
     """Manage the entire process of gathering data and renaming files."""
 
     if workdir is None:
@@ -221,19 +248,19 @@ def process_all_files(workdir=None, clobber=None):
                 file=sys.stderr)
         sys.exit(1)
 
-    if clobber is None:
-        clobber = False
-
-    file_map = init_file_map(workdir)
-    process_file_map(file_map, clobber)
+    file_map = init_file_map(workdir, avoid_collisions)
+    process_file_map(file_map, simon_sez)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--clobber",
+    parser.add_argument("-s", "--simon-sez",
             help="Really, Simon sez rename the files!", action="store_true")
+    parser.add_argument("-a", "--avoid-collisions",
+            help="Rename until filenames do not collide. Danger!", action="store_true")
     parser.add_argument("-d", "--directory",
             help="Read files from this directory.")
     args = parser.parse_args()
-    process_all_files(workdir=args.directory, clobber=args.clobber)
+    process_all_files(workdir=args.directory, simon_sez=args.simon_sez,
+            avoid_collisions=args.avoid_collisions)
 
