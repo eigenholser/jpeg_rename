@@ -1,4 +1,5 @@
-
+import pytest
+from mock import Mock, patch
 from jpeg_rename import *
 
 def test_process_file_map():
@@ -43,6 +44,46 @@ def test_get_new_fn_with_exif_data_and_wrong_ext():
     filemap = FileMap(old_fn, exif_data)
     new_fn = filemap.new_fn
     assert new_fn == '20140816_062020.jpg'
+
+
+@patch('jpeg_rename.TAGS')
+@patch.object(Image, 'open')
+def test_get_exif_data(mock_img, mock_tags):
+    """
+    """
+    class TestImage():
+        def _getexif(self):
+            return {'DateTimeOriginal': '2014:08:16 06:20:20'}
+
+    def get(arg1, arg2):
+        return 'DateTimeOriginal'
+
+    old_fn = 'abc123.jpg'
+    mock_img.return_value = TestImage()
+    mock_tags.get = get
+    filemap = FileMap(old_fn)
+    assert filemap.exif_data == {'DateTimeOriginal': '2014:08:16 06:20:20'}
+
+
+@patch('jpeg_rename.TAGS')
+@patch.object(Image, 'open')
+def test_get_exif_data_info_none(mock_img, mock_tags):
+    """
+    """
+    class TestImage():
+        def _getexif(self):
+            return None
+
+    def get(arg1, arg2):
+        return 'DateTimeOriginal'
+
+    old_fn = 'abc123.jpg'
+    mock_img.return_value = TestImage()
+    mock_tags.get = get
+    with pytest.raises(Exception) as excinfo:
+        filemap = FileMap(old_fn)
+
+    assert excinfo.value[0] == "{0} has no EXIF data.".format(old_fn)
 
 
 class TestFileMap():
