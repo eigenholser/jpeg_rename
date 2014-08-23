@@ -59,6 +59,8 @@ class FileMap():
             for tag, value in info.items():
                 decoded = TAGS.get(tag, tag)
                 self.exif_data[decoded] = value
+        else:
+            raise Exception("{0} has no EXIF data.".format(self.old_fn))
 
     def get_new_fn(self):
         """Generate new filename from old_fn EXIF data if possible. Even if not
@@ -163,7 +165,10 @@ def init_file_map(workdir):
     for extension in EXTENSIONS:
         for filename in glob.glob(os.path.join(workdir,
                 '*.{0}'.format(extension))):
-            file_map.append(FileMap(filename))
+            try:
+                file_map.append(FileMap(filename))
+            except:
+                print("{0}".format(e.message), file=sys.stderr)
 
     return file_map
 
