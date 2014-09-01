@@ -124,23 +124,23 @@ class FileMap():
         # initialization is performed before any files are moved. The file move
         # will change state and may introduce a collision. Doing the uniqueness
         # check here will check current state.
-        self.make_new_fn_unique()
+        try:
+            self.make_new_fn_unique()
+        except Exception as e:
+            raise e
 
         if self.collision_detected:
             print( "{0} => {1} Destination collision. Aborting.".format(
                 os.path.basename(self.old_fn), os.path.basename(self.new_fn)))
             return
 
-        print( "Really moving the files: {0} ==> {1}".format(
-            os.path.basename(self.old_fn), os.path.basename(self.new_fn)))
-
-        # TODO: for now we're just printing what we would do.
-        return
-
         try:
-            os.rename(old_fn, new_fn)
-        except Exception:
-            print("Unable to rename file: {0}".format(e.message), file=sys.stderr)
+            print( "Moving the files: {0} ==> {1}".format(
+                os.path.basename(self.old_fn), os.path.basename(self.new_fn)))
+            os.rename(self.old_fn, self.new_fn)
+        except Exception as e:
+            print("Unable to rename file: {0}".format(e.message),
+                    file=sys.stderr)
 
     def make_new_fn_unique(self):
         """Check new_fn for uniqueness in 'workdir'. Rename, adding a numerical
