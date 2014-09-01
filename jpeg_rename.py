@@ -78,7 +78,7 @@ class FileMap():
         Arguments:
             dict: EXIF data
 
-        >>> filemap = FileMap('abc123.jpeg', {'DateTimeOriginal': '2014:08:16 06:20:30'})
+        >>> filemap = FileMap('abc123.jpeg', avoid_collisions=None, exif_data={'DateTimeOriginal': '2014:08:16 06:20:30'})
         >>> filemap.new_fn
         '20140816_062030.jpg'
 
@@ -212,7 +212,7 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
     Returns:
         None
 
-    >>> filemap = FileMap('IMG0332.JPG', {'DateTimeOriginal': '2014-08-18 20:23:83'})
+    >>> filemap = FileMap('IMG0332.JPG', avoid_collisions=None, exif_data={'DateTimeOriginal': '2014-08-18 20:23:83'})
     >>> def move_func(old_fn, new_fn): pass
     ...
     >>> process_file_map([filemap], True, move_func)
