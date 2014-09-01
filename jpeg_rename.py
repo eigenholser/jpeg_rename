@@ -256,7 +256,7 @@ def process_all_files(workdir=None, simon_sez=None, avoid_collisions=None):
     process_file_map(file_map, simon_sez)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--simon-sez",
             help="Really, Simon sez rename the files!", action="store_true")
