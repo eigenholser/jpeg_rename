@@ -13,6 +13,7 @@ from PIL import Image
 
 # Need to look for *.JPG, *.jpg, and *.jpeg files for consideration.
 EXTENSIONS = ['JPG', 'jpg', 'jpeg']
+MAX_RENAME_ATTEMPTS = 10
 
 
 class FileMap():
@@ -34,6 +35,7 @@ class FileMap():
         'abc123.jpg'
         >>>
         """
+        self.MAX_RENAME_ATTEMPTS = MAX_RENAME_ATTEMPTS
         self.old_fn_fq = old_fn
         self.workdir = os.path.dirname(old_fn)
         self.old_fn = os.path.basename(old_fn)
@@ -164,6 +166,8 @@ class FileMap():
             new_fn = re.sub(r'^(\d+_\d+)\.jpg',
                     r'\1-{0}.jpg'.format(counter), self.new_fn)
             counter += 1
+            if counter > self.MAX_RENAME_ATTEMPTS:
+                raise Exception("Too many rename attempts: {0}".format(self.new_fn))
             self.new_fn_fq = os.path.join(self.workdir, new_fn)
         self.new_fn = new_fn
         self.new_fn_fq = os.path.join(self.workdir, new_fn)
