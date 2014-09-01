@@ -99,6 +99,31 @@ def test_move_orthodox(mock_os, mock_fn_unique):
     mock_os.assert_called_with(old_fn, new_fn)
 
 @patch('jpeg_rename.FileMap.make_new_fn_unique')
+@patch('jpeg_rename.os.rename')
+def test_move_orthodox_rename_raises_exeption(mock_os, mock_fn_unique):
+    """Rename file with mocked os.rename. Verify called with args."""
+    mock_fn_unique.return_value = None
+    mock_os.side_effect = Exception("Just testing.")
+    old_fn = 'abc123.jpg'
+    exif_data = {'DateTimeOriginal': '2014:08:16 06:20'}
+    filemap = FileMap(old_fn, avoid_collisions=None, exif_data=exif_data)
+    new_fn = filemap.new_fn
+    filemap.move()
+    mock_os.assert_called_with(old_fn, new_fn)
+
+@patch('jpeg_rename.FileMap.make_new_fn_unique')
+@patch('jpeg_rename.os.rename')
+def test_move_orthodox_fn_unique_raises_exception(mock_os, mock_fn_unique):
+    """Rename file with mocked os.rename. Verify called with args."""
+    mock_fn_unique.side_effect = Exception("Just testing.")
+    old_fn = 'abc123.jpg'
+    exif_data = {'DateTimeOriginal': '2014:08:16 06:20'}
+    filemap = FileMap(old_fn, avoid_collisions=None, exif_data=exif_data)
+    new_fn = filemap.new_fn
+    with pytest.raises(Exception):
+        filemap.move()
+
+@patch('jpeg_rename.FileMap.make_new_fn_unique')
 @patch('jpeg_rename.os.path.exists')
 def test_move_collision_detected(mock_exists, mock_fn_unique):
     """Move file with collision_detected simulating avoid_collisions = False.
