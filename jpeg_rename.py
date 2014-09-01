@@ -140,7 +140,7 @@ class FileMap():
             # XXX: Unit tests did not catch this bug.
             # os.rename(self.old_fn, self.new_fn)
             os.rename(self.old_fn_fq, self.new_fn_fq)
-        except Exception as e:
+        except OSError as e:
             print("Unable to rename file: {0}".format(e.strerror),
                     file=sys.stderr)
 
