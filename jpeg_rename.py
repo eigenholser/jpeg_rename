@@ -233,6 +233,9 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
                     fm.move()
                 else:
                     move_func(fm.old_fn, fm.new_fn)
+            else:
+                if fm.old_fn != fm.new_fn:
+                    print("DRY RUN: {0} ==> {1}".format(fm.old_fn, fm.new_fn))
         except Exception as e:
             print("{0}".format(e.message), file=sys.stderr)
             break
