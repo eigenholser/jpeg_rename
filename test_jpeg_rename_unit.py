@@ -188,6 +188,26 @@ def test_rename_no_collision(mock_exists):
     assert filemap.new_fn == old_fn
 
 #@pytest.mark.skipif('True', reason="Work in progress")
+@patch('jpeg_rename.FileMap')
+@patch('jpeg_rename.glob')
+def test_init_file_map_orthodox(mock_glob, mock_filemap):
+    """
+    """
+    mock_filemap.return_value = True
+    mock_glob.glob.return_value = ['/foo/bar']
+    file_map = init_file_map('.')
+    assert file_map == [True, True, True]
+
+#@pytest.mark.skipif('True', reason="Work in progress")
+@patch('jpeg_rename.FileMap')
+@patch('jpeg_rename.glob')
+def test_init_file_map_raises_exception(mock_glob, mock_filemap):
+    """
+    """
+    mock_filemap.side_effect = Exception("Just testing.")
+    mock_glob.glob.return_value = ['/foo/bar']
+    with pytest.raises(Exception):
+        file_map = init_file_map('.')
 
 class TestFileMap():
 
