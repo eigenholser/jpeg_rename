@@ -150,8 +150,8 @@ class FileMap():
         """
 
         # Rename file by appending number if we have collision.
-        # TODO: I wish I didn't specify \d+_\d+ for the first part.
-        # perhaps not -\d\ before .jpg would be better for the second
+        # TODO: I wish I didn't specify \d+_\d+ for the first part. perhaps not
+        # -\d\ before .jpg would be better for the second
         # match.
         new_fn = self.new_fn
         counter = 1
