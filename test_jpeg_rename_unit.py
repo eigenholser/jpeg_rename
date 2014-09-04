@@ -221,12 +221,30 @@ def test_init_file_map_raises_exception(mock_glob, mock_filemap):
     assert file_map == []
 
 #@pytest.mark.skipif('True', reason="Work in progress")
+#@patch('jpeg_rename.print_function')
 @patch('jpeg_rename.FileMap')
-def test_process_file_map_basic(mock_fm):
-    """Call process_file_map with simon_sez=None, move_func=None."""
+def test_process_file_map_simon_sez_false_fn_eq(mock_fm):
+    """Test process_file_map() with simon_sez=False. Tests else branch with
+    old_fn == new_fn. Verify same_files attribute value is True."""
+    mock_fm.same_files = True
+    mock_fm.old_fn = 'abc123.jpg'
+    mock_fm.new_fn = 'abc123.jpg'
     file_map = [mock_fm]
     process_file_map(file_map)
-    # TODO: assert
+    assert mock_fm.same_files == True
+
+#@pytest.mark.skipif('True', reason="Work in progress")
+@patch('jpeg_rename.print_function')
+@patch('jpeg_rename.FileMap')
+def test_process_file_map_simon_sez_false_fn_ne(mock_fm, mock_print):
+    """Test process_file_map() with simon_sez=False. Tests else branch with
+    old_fn != new_fn. Verify same_files attribute value is False."""
+    mock_fm.same_files = False
+    mock_fm.old_fn = 'abc123.jpg'
+    mock_fm.new_fn = ''
+    file_map = [mock_fm]
+    process_file_map(file_map)
+    assert mock_fm.same_files == False
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 @patch('jpeg_rename.FileMap')
