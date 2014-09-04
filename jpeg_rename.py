@@ -203,8 +203,8 @@ def init_file_map(workdir, avoid_collisions=None):
 
 
 def process_file_map(file_map, simon_sez=None, move_func=None):
-    """Iterate through the Python dict that maps old filenames to new
-    filenames. Move the file if Simon sez.
+    """Iterate through the Python list of FileMap objects. Move the file if
+    Simon sez.
 
     Arguments:
         str: workdir - Working directory.
@@ -236,6 +236,7 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
             else:
                 if fm.old_fn != fm.new_fn:
                     print("DRY RUN: {0} ==> {1}".format(fm.old_fn, fm.new_fn))
+                    fm.same_files = False   # For unit test only.
         except Exception as e:
             print("{0}".format(e.message), file=sys.stderr)
             break
