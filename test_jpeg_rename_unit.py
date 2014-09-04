@@ -13,14 +13,12 @@ def test_process_file_map():
 
     assert process_file_map([TestFileMap()], True, move_func) == None
 
-
 #@pytest.mark.skipif('True', reason="Work in progress")
 def test_process_file_map_raise_exception():
     """Test exception handling in process_file_map()."""
     def move_func(old_fn, new_fn):
         raise Exception("Faux failure")
     assert process_file_map([TestFileMap()], True, move_func) == None
-
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 def test_get_new_fn_with_invalid_exif_data():
@@ -32,7 +30,6 @@ def test_get_new_fn_with_invalid_exif_data():
     new_fn = filemap.new_fn
     assert old_fn == new_fn
 
-
 #@pytest.mark.skipif('True', reason="Work in progress")
 def test_get_new_fn_with_no_exif_data():
     """Test get_new_fn() with no EXIF data and old_fn with correct file
@@ -43,7 +40,6 @@ def test_get_new_fn_with_no_exif_data():
     new_fn = filemap.new_fn
     assert old_fn == new_fn
 
-
 #@pytest.mark.skipif('True', reason="Work in progress")
 def test_get_new_fn_with_exif_data_and_wrong_ext():
     """Test get_new_fn() with valid EXIF data and wrong file extension."""
@@ -52,7 +48,6 @@ def test_get_new_fn_with_exif_data_and_wrong_ext():
     filemap = FileMap(old_fn, None, exif_data)
     new_fn = filemap.new_fn
     assert new_fn == '20140816_062020.jpg'
-
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 @patch('jpeg_rename.TAGS')
@@ -72,7 +67,6 @@ def test_get_exif_data(mock_img, mock_tags):
     mock_tags.get = get
     filemap = FileMap(old_fn)
     assert filemap.exif_data == {'DateTimeOriginal': '2014:08:16 06:20:20'}
-
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 @patch('jpeg_rename.TAGS')
