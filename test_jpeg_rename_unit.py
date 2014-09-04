@@ -213,13 +213,12 @@ def test_init_file_map_orthodox(mock_glob, mock_filemap):
 @patch('jpeg_rename.FileMap')
 @patch('jpeg_rename.glob')
 def test_init_file_map_raises_exception(mock_glob, mock_filemap):
-    """
-    """
+    """Tests init_file_map() with exception handling. Test exception raised
+    when append to file_map list. Verify expected file_map returned."""
     mock_filemap.side_effect = Exception("Just testing.")
     mock_glob.glob.return_value = ['/foo/bar']
-    with pytest.raises(Exception):
-        file_map = init_file_map('.')
-    # TODO: assert
+    file_map = init_file_map('.')
+    assert file_map == []
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 @patch('jpeg_rename.FileMap')
