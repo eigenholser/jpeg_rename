@@ -5,16 +5,35 @@ import pytest
 from mock import Mock, patch
 from jpeg_rename import *
 
+# Setup valid EXIF data with expected new filename
+EXIF_DATA_VALID = {
+    'exif_data': {
+        'DateTimeOriginal': '2014:08:26 06:20:20'
+    },
+}
+
+EXIF_DATA_NOT_VALID = {'DateTimeOriginal': '2014:08:26 06:20'}
+
+expected_new_fn = re.sub(r':', r'',
+        EXIF_DATA_VALID['exif_data']['DateTimeOriginal'])
+expected_new_fn = re.sub(r' ', r'_', expected_new_fn)
+expected_new_fn = '{0}.jpg'.format(expected_new_fn)
+EXIF_DATA_VALID['expected_new_fn'] = expected_new_fn
+
+OLD_FN_JPG_LOWER = 'filename.jpg'
+OLD_FN_JPG_UPPER = 'filename.JPG'
+OLD_FN_JPEG = 'filename.jpeg'
+
 #@pytest.mark.skipif('True', reason="Work in progress")
 @pytest.mark.parametrize("old_fn,expected_new_fn,exif_data", [
-    ('abc123.jpeg', '20140816_062020.jpg', {'DateTimeOriginal': '2014:08:16 06:20:20'},),
-    ('abc123.jpg', 'abc123.jpg', {'DateTimeOriginal': '2014:08:16 06:20'},),
-    ('abc123.jpg', 'abc123.jpg', {},),
-    ('abc123.jpeg', 'abc123.jpg', {},),
+    (OLD_FN_JPG_LOWER, EXIF_DATA_VALID['expected_new_fn'],
+        EXIF_DATA_VALID['exif_data'],),
+    (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, EXIF_DATA_NOT_VALID),
+    (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, {},),
+    (OLD_FN_JPEG, OLD_FN_JPG_LOWER, {},),
 ])
 def test_get_new_fn_parametrized_exif_data(old_fn, expected_new_fn, exif_data):
     """Test get_new_fn() with various EXIF data."""
-
     filemap = FileMap(old_fn, None, exif_data)
     new_fn = filemap.new_fn
     assert new_fn == expected_new_fn
@@ -24,8 +43,8 @@ def test_get_new_fn_parametrized_exif_data(old_fn, expected_new_fn, exif_data):
 def test_get_new_fn_with_invalid_exif_data():
     """Test get_new_fn() with invalid EXIF data."""
 
-    exif_data = {'DateTimeOriginal': '2014:08:16 06:20'}
-    old_fn = 'abc123.jpg'
+    exif_data = EXIF_DATA_NOT_VALID
+    old_fn = OLD_FN_JPG_LOWER
     filemap = FileMap(old_fn, None, exif_data)
     new_fn = filemap.new_fn
     assert old_fn == new_fn
@@ -36,7 +55,7 @@ def test_get_new_fn_with_no_exif_data():
     """Test get_new_fn() with no EXIF data and old_fn with correct file
     extension."""
     exif_data = {}
-    old_fn = 'abc123.jpg'
+    old_fn = OLD_FN_JPG_LOWER
     filemap = FileMap(old_fn, None, exif_data)
     new_fn = filemap.new_fn
     assert old_fn == new_fn
@@ -45,11 +64,11 @@ def test_get_new_fn_with_no_exif_data():
 @pytest.mark.skipif('True', reason="Work in progress")
 def test_get_new_fn_with_exif_data_and_wrong_ext():
     """Test get_new_fn() with valid EXIF data and wrong file extension."""
-    exif_data = {'DateTimeOriginal': '2014:08:16 06:20:20'}
-    old_fn = 'abc123.jpeg'
+    exif_data = EXIF_DATA_VALID['exif_data']
+    old_fn = OLD_FN_JPEG
     filemap = FileMap(old_fn, None, exif_data)
     new_fn = filemap.new_fn
-    assert new_fn == '20140816_062020.jpg'
+    assert new_fn == EXIF_DATA_VALID['expected_new_fn']
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 @patch('jpeg_rename.TAGS')
@@ -59,7 +78,7 @@ def test_get_exif_data(mock_img, mock_tags):
     """
     class TestImage():
         def _getexif(self):
-            return {'DateTimeOriginal': '2014:08:16 06:20:20'}
+            return EXIF_DATA_VALID['exif_data']
 
     def get(arg1, arg2):
         return 'DateTimeOriginal'
@@ -68,7 +87,7 @@ def test_get_exif_data(mock_img, mock_tags):
     mock_img.return_value = TestImage()
     mock_tags.get = get
     filemap = FileMap(old_fn)
-    assert filemap.exif_data == {'DateTimeOriginal': '2014:08:16 06:20:20'}
+    assert filemap.exif_data == EXIF_DATA_VALID['exif_data']
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 @patch('jpeg_rename.TAGS')
@@ -97,8 +116,8 @@ def test_get_exif_data_info_none(mock_img, mock_tags):
 def test_move_orthodox(mock_os, mock_fn_unique):
     """Rename file with mocked os.rename. Verify called with args."""
     mock_fn_unique.return_value = None
-    old_fn = 'abc123.jpg'
-    exif_data = {'DateTimeOriginal': '2014:08:16 06:20'}
+    old_fn = OLD_FN_JPG_LOWER
+    exif_data = EXIF_DATA_NOT_VALID
     filemap = FileMap(old_fn, avoid_collisions=None, exif_data=exif_data)
     new_fn = filemap.new_fn
     filemap.move()
@@ -111,8 +130,8 @@ def test_move_orthodox_rename_raises_exeption(mock_os, mock_fn_unique):
     """Rename file with mocked os.rename. Verify called with args."""
     mock_fn_unique.return_value = None
     mock_os.side_effect = OSError((1, "Just testing.",))
-    old_fn = 'abc123.jpg'
-    exif_data = {'DateTimeOriginal': '2014:08:16 06:20'}
+    old_fn = OLD_FN_JPG_LOWER
+    exif_data = EXIF_DATA_NOT_VALID
     filemap = FileMap(old_fn, avoid_collisions=None, exif_data=exif_data)
     new_fn = filemap.new_fn
     filemap.move()
@@ -124,8 +143,8 @@ def test_move_orthodox_rename_raises_exeption(mock_os, mock_fn_unique):
 def test_move_orthodox_fn_unique_raises_exception(mock_os, mock_fn_unique):
     """Rename file with mocked os.rename. Verify called with args."""
     mock_fn_unique.side_effect = OSError((1, "Just testing.",))
-    old_fn = 'abc123.jpg'
-    exif_data = {'DateTimeOriginal': '2014:08:16 06:20'}
+    old_fn = OLD_FN_JPG_LOWER
+    exif_data = EXIF_DATA_NOT_VALID
     filemap = FileMap(old_fn, avoid_collisions=None, exif_data=exif_data)
     new_fn = filemap.new_fn
     with pytest.raises(OSError):
@@ -139,7 +158,7 @@ def test_move_collision_detected(mock_exists, mock_fn_unique):
     """
     mock_fn_unique.return_value = None
     mock_exists.return_value = True
-    old_fn = 'abc123.jpg'
+    old_fn = OLD_FN_JPG_LOWER
     exif_data = {}
     filemap = FileMap(old_fn, avoid_collisions=None, exif_data=exif_data)
     filemap.collision_detected = True
@@ -152,8 +171,8 @@ def test_move_collision_detected(mock_exists, mock_fn_unique):
 def test_rename_empty_exif_data(mock_exists):
     """Make unique filename with empty EXIF data."""
     mock_exists.return_value = True
-    old_fn = 'abc123.jpg'
-    exif_data = {'DateTimeOriginal': '2014:08:16 06:20'}
+    old_fn = OLD_FN_JPG_LOWER
+    exif_data = EXIF_DATA_NOT_VALID
     filemap = FileMap(old_fn, avoid_collisions=True, exif_data=exif_data)
     new_fn = filemap.new_fn
     filemap.make_new_fn_unique()
@@ -164,14 +183,14 @@ def test_rename_empty_exif_data(mock_exists):
 def test_rename_with_valid_exif_data_and_avoid_collisions(mock_exists):
     """Make unique new filename from valid EXIF data. Avoid collisions."""
     mock_exists.return_value = True
-    old_fn = 'abc123.jpg'
-    exif_data = {'DateTimeOriginal': '2014:08:16 06:20:20'}
+    old_fn = OLD_FN_JPG_LOWER
+    exif_data = EXIF_DATA_VALID['exif_data']
     filemap = FileMap(old_fn, avoid_collisions=True, exif_data=exif_data)
     new_fn = filemap.new_fn
     filemap.MAX_RENAME_ATTEMPTS = 2
     with pytest.raises(Exception):
         filemap.make_new_fn_unique()
-    assert filemap.new_fn == '20140816_062020.jpg'
+    assert filemap.new_fn == EXIF_DATA_VALID['expected_new_fn']
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 @patch('jpeg_rename.os.path.exists')
@@ -179,13 +198,13 @@ def test_rename_with_valid_exif_data_and_no_avoid_collisions(mock_exists):
     """Make unique new filename from valid EXIF data. Do not avoid collisions.
     """
     mock_exists.return_value = True
-    old_fn = 'abc123.jpg'
-    exif_data = {'DateTimeOriginal': '2014:08:16 06:20:20'}
+    old_fn = OLD_FN_JPG_LOWER
+    exif_data = EXIF_DATA_VALID['exif_data']
     filemap = FileMap(old_fn, avoid_collisions=False, exif_data=exif_data)
     new_fn = filemap.new_fn
     filemap.MAX_RENAME_ATTEMPTS = 2
     filemap.make_new_fn_unique()
-    assert filemap.new_fn == '20140816_062020.jpg'
+    assert filemap.new_fn == EXIF_DATA_VALID['expected_new_fn']
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 @patch('jpeg_rename.os.path.exists')
@@ -193,7 +212,7 @@ def test_rename_no_collision(mock_exists):
     """Make unique new filename from valid EXIF data. Do not avoid collisions.
     """
     mock_exists.return_value = False
-    old_fn = 'abc123.jpg'
+    old_fn = OLD_FN_JPG_LOWER
     exif_data = {}
     filemap = FileMap(old_fn, avoid_collisions=False, exif_data=exif_data)
     new_fn = filemap.new_fn
