@@ -219,7 +219,7 @@ def test_init_file_map_raises_exception(mock_glob, mock_filemap):
     mock_glob.glob.return_value = ['/foo/bar']
     with pytest.raises(Exception):
         file_map = init_file_map('.')
-    #assert
+    # TODO: assert
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 @patch('jpeg_rename.FileMap')
@@ -227,7 +227,7 @@ def test_process_file_map_basic(mock_fm):
     """Call process_file_map with simon_sez=None, move_func=None."""
     file_map = [mock_fm]
     process_file_map(file_map)
-    #assert
+    # TODO: assert
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 @patch('jpeg_rename.FileMap')
@@ -235,7 +235,7 @@ def test_process_file_map_simon_sez(mock_fm):
     """Call process_file_map with simon_sez=True, move_func=None."""
     file_map = [mock_fm, mock_fm]
     process_file_map(file_map, simon_sez=True)
-    #assert
+    # TODO: assert
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 @patch('jpeg_rename.FileMap')
