@@ -187,16 +187,16 @@ def init_file_map(workdir, avoid_collisions=None):
         list: file_map - List of FileMap instances.
     """
 
-    # Dict with old_fn ==> new_fn mapping.
+    # List of FileMap objects.
     file_map = []
 
-    # Initialize file_map dict.
+    # Initialize file_map list.
     for extension in EXTENSIONS:
         for filename in glob.glob(os.path.join(workdir,
                 '*.{0}'.format(extension))):
             try:
                 file_map.append(FileMap(filename, avoid_collisions))
-            except:
+            except Exception as e:
                 print("{0}".format(e.message), file=sys.stderr)
 
     return file_map
