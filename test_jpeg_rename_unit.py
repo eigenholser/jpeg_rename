@@ -1,8 +1,10 @@
 import os
 import sys
-sys.path.append('..')
 import pytest
 from mock import Mock, patch
+app_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, app_path + '/../')
+
 from jpeg_rename import *
 
 # Setup valid EXIF data with expected new filename
