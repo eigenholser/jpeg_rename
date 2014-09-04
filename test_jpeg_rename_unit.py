@@ -6,21 +6,21 @@ from mock import Mock, patch
 from jpeg_rename import *
 
 #@pytest.mark.skipif('True', reason="Work in progress")
-def test_process_file_map():
-    """Test process_file_map()."""
-    def move_func(old_fn, new_fn):
-        pass
+@pytest.mark.parametrize("old_fn,expected_new_fn,exif_data", [
+    ('abc123.jpeg', '20140816_062020.jpg', {'DateTimeOriginal': '2014:08:16 06:20:20'},),
+    ('abc123.jpg', 'abc123.jpg', {'DateTimeOriginal': '2014:08:16 06:20'},),
+    ('abc123.jpg', 'abc123.jpg', {},),
+    ('abc123.jpeg', 'abc123.jpg', {},),
+])
+def test_get_new_fn_parametrized_exif_data(old_fn, expected_new_fn, exif_data):
+    """Test get_new_fn() with various EXIF data."""
 
-    assert process_file_map([TestFileMap()], True, move_func) == None
+    filemap = FileMap(old_fn, None, exif_data)
+    new_fn = filemap.new_fn
+    assert new_fn == expected_new_fn
 
-#@pytest.mark.skipif('True', reason="Work in progress")
-def test_process_file_map_raise_exception():
-    """Test exception handling in process_file_map()."""
-    def move_func(old_fn, new_fn):
-        raise Exception("Faux failure")
-    assert process_file_map([TestFileMap()], True, move_func) == None
-
-#@pytest.mark.skipif('True', reason="Work in progress")
+# Contrast with parametrized version
+@pytest.mark.skipif('True', reason="Work in progress")
 def test_get_new_fn_with_invalid_exif_data():
     """Test get_new_fn() with invalid EXIF data."""
 
@@ -30,7 +30,8 @@ def test_get_new_fn_with_invalid_exif_data():
     new_fn = filemap.new_fn
     assert old_fn == new_fn
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+# Contrast with parametrized version
+@pytest.mark.skipif('True', reason="Work in progress")
 def test_get_new_fn_with_no_exif_data():
     """Test get_new_fn() with no EXIF data and old_fn with correct file
     extension."""
@@ -40,7 +41,8 @@ def test_get_new_fn_with_no_exif_data():
     new_fn = filemap.new_fn
     assert old_fn == new_fn
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+# Contrast with parametrized version
+@pytest.mark.skipif('True', reason="Work in progress")
 def test_get_new_fn_with_exif_data_and_wrong_ext():
     """Test get_new_fn() with valid EXIF data and wrong file extension."""
     exif_data = {'DateTimeOriginal': '2014:08:16 06:20:20'}
@@ -218,6 +220,25 @@ def test_init_file_map_raises_exception(mock_glob, mock_filemap):
     mock_glob.glob.return_value = ['/foo/bar']
     file_map = init_file_map('.')
     assert file_map == []
+
+##
+## process_file_map() tests
+##
+
+#@pytest.mark.skipif('True', reason="Work in progress")
+def test_process_file_map():
+    """Test process_file_map()."""
+    def move_func(old_fn, new_fn):
+        pass
+
+    assert process_file_map([TestFileMap()], True, move_func) == None
+
+#@pytest.mark.skipif('True', reason="Work in progress")
+def test_process_file_map_raise_exception():
+    """Test exception handling in process_file_map()."""
+    def move_func(old_fn, new_fn):
+        raise Exception("Faux failure")
+    assert process_file_map([TestFileMap()], True, move_func) == None
 
 #@pytest.mark.skipif('True', reason="Work in progress")
 @patch('jpeg_rename.FileMap')
