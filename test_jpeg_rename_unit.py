@@ -26,53 +26,57 @@ OLD_FN_JPG_LOWER = 'filename.jpg'
 OLD_FN_JPG_UPPER = 'filename.JPG'
 OLD_FN_JPEG = 'filename.jpeg'
 
-#@pytest.mark.skipif('True', reason="Work in progress")
-@pytest.mark.parametrize("old_fn,expected_new_fn,exif_data", [
-    (OLD_FN_JPG_LOWER, EXIF_DATA_VALID['expected_new_fn'],
-        EXIF_DATA_VALID['exif_data'],),
-    (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, EXIF_DATA_NOT_VALID),
-    (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, {},),
-    (OLD_FN_JPEG, OLD_FN_JPG_LOWER, {},),
-])
-def test_get_new_fn_parametrized_exif_data(old_fn, expected_new_fn, exif_data):
-    """Test get_new_fn() with various EXIF data."""
-    filemap = FileMap(old_fn, None, exif_data)
-    new_fn = filemap.new_fn
-    assert new_fn == expected_new_fn
+SKIP_TEST = False
 
-# Contrast with parametrized version
-@pytest.mark.skipif('True', reason="Work in progress")
-def test_get_new_fn_with_invalid_exif_data():
-    """Test get_new_fn() with invalid EXIF data."""
+class TestGetNewFn():
+    @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
+    @pytest.mark.parametrize("old_fn,expected_new_fn,exif_data", [
+        (OLD_FN_JPG_LOWER, EXIF_DATA_VALID['expected_new_fn'],
+            EXIF_DATA_VALID['exif_data'],),
+        (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, EXIF_DATA_NOT_VALID),
+        (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, {},),
+        (OLD_FN_JPEG, OLD_FN_JPG_LOWER, {},),
+    ])
+    def test_get_new_fn_parametrized_exif_data(self, old_fn, expected_new_fn,
+            exif_data):
+        """Test get_new_fn() with various EXIF data."""
+        filemap = FileMap(old_fn, None, exif_data)
+        new_fn = filemap.new_fn
+        assert new_fn == expected_new_fn
 
-    exif_data = EXIF_DATA_NOT_VALID
-    old_fn = OLD_FN_JPG_LOWER
-    filemap = FileMap(old_fn, None, exif_data)
-    new_fn = filemap.new_fn
-    assert old_fn == new_fn
+    # Contrast with parametrized version
+    @pytest.mark.skipif(True, reason="Work in progress")
+    def test_get_new_fn_with_invalid_exif_data():
+        """Test get_new_fn() with invalid EXIF data."""
 
-# Contrast with parametrized version
-@pytest.mark.skipif('True', reason="Work in progress")
-def test_get_new_fn_with_no_exif_data():
-    """Test get_new_fn() with no EXIF data and old_fn with correct file
-    extension."""
-    exif_data = {}
-    old_fn = OLD_FN_JPG_LOWER
-    filemap = FileMap(old_fn, None, exif_data)
-    new_fn = filemap.new_fn
-    assert old_fn == new_fn
+        exif_data = EXIF_DATA_NOT_VALID
+        old_fn = OLD_FN_JPG_LOWER
+        filemap = FileMap(old_fn, None, exif_data)
+        new_fn = filemap.new_fn
+        assert old_fn == new_fn
 
-# Contrast with parametrized version
-@pytest.mark.skipif('True', reason="Work in progress")
-def test_get_new_fn_with_exif_data_and_wrong_ext():
-    """Test get_new_fn() with valid EXIF data and wrong file extension."""
-    exif_data = EXIF_DATA_VALID['exif_data']
-    old_fn = OLD_FN_JPEG
-    filemap = FileMap(old_fn, None, exif_data)
-    new_fn = filemap.new_fn
-    assert new_fn == EXIF_DATA_VALID['expected_new_fn']
+    # Contrast with parametrized version
+    @pytest.mark.skipif(True, reason="Work in progress")
+    def test_get_new_fn_with_no_exif_data():
+        """Test get_new_fn() with no EXIF data and old_fn with correct file
+        extension."""
+        exif_data = {}
+        old_fn = OLD_FN_JPG_LOWER
+        filemap = FileMap(old_fn, None, exif_data)
+        new_fn = filemap.new_fn
+        assert old_fn == new_fn
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+    # Contrast with parametrized version
+    @pytest.mark.skipif(True, reason="Work in progress")
+    def test_get_new_fn_with_exif_data_and_wrong_ext():
+        """Test get_new_fn() with valid EXIF data and wrong file extension."""
+        exif_data = EXIF_DATA_VALID['exif_data']
+        old_fn = OLD_FN_JPEG
+        filemap = FileMap(old_fn, None, exif_data)
+        new_fn = filemap.new_fn
+        assert new_fn == EXIF_DATA_VALID['expected_new_fn']
+
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.TAGS')
 @patch.object(Image, 'open')
 def test_get_exif_data(mock_img, mock_tags):
@@ -91,7 +95,7 @@ def test_get_exif_data(mock_img, mock_tags):
     filemap = FileMap(old_fn)
     assert filemap.exif_data == EXIF_DATA_VALID['exif_data']
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.TAGS')
 @patch.object(Image, 'open')
 def test_get_exif_data_info_none(mock_img, mock_tags):
@@ -112,7 +116,7 @@ def test_get_exif_data_info_none(mock_img, mock_tags):
 
     assert excinfo.value[0] == "{0} has no EXIF data.".format(old_fn)
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.FileMap.make_new_fn_unique')
 @patch('jpeg_rename.os.rename')
 def test_move_orthodox(mock_os, mock_fn_unique):
@@ -125,7 +129,7 @@ def test_move_orthodox(mock_os, mock_fn_unique):
     filemap.move()
     mock_os.assert_called_with(old_fn, new_fn)
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.FileMap.make_new_fn_unique')
 @patch('jpeg_rename.os.rename')
 def test_move_orthodox_rename_raises_exeption(mock_os, mock_fn_unique):
@@ -139,7 +143,7 @@ def test_move_orthodox_rename_raises_exeption(mock_os, mock_fn_unique):
     filemap.move()
     mock_os.assert_called_with(old_fn, new_fn)
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.FileMap.make_new_fn_unique')
 @patch('jpeg_rename.os.rename')
 def test_move_orthodox_fn_unique_raises_exception(mock_os, mock_fn_unique):
@@ -152,7 +156,7 @@ def test_move_orthodox_fn_unique_raises_exception(mock_os, mock_fn_unique):
     with pytest.raises(OSError):
         filemap.move()
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.FileMap.make_new_fn_unique')
 @patch('jpeg_rename.os.path.exists')
 def test_move_collision_detected(mock_exists, mock_fn_unique):
@@ -168,7 +172,7 @@ def test_move_collision_detected(mock_exists, mock_fn_unique):
     filemap.move()
     assert new_fn == old_fn
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.os.path.exists')
 def test_rename_empty_exif_data(mock_exists):
     """Make unique filename with empty EXIF data."""
@@ -180,7 +184,7 @@ def test_rename_empty_exif_data(mock_exists):
     filemap.make_new_fn_unique()
     assert filemap.new_fn == old_fn
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.os.path.exists')
 def test_rename_with_valid_exif_data_and_avoid_collisions(mock_exists):
     """Make unique new filename from valid EXIF data. Avoid collisions."""
@@ -194,7 +198,7 @@ def test_rename_with_valid_exif_data_and_avoid_collisions(mock_exists):
         filemap.make_new_fn_unique()
     assert filemap.new_fn == EXIF_DATA_VALID['expected_new_fn']
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.os.path.exists')
 def test_rename_with_valid_exif_data_and_no_avoid_collisions(mock_exists):
     """Make unique new filename from valid EXIF data. Do not avoid collisions.
@@ -208,7 +212,7 @@ def test_rename_with_valid_exif_data_and_no_avoid_collisions(mock_exists):
     filemap.make_new_fn_unique()
     assert filemap.new_fn == EXIF_DATA_VALID['expected_new_fn']
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.os.path.exists')
 def test_rename_no_collision(mock_exists):
     """Make unique new filename from valid EXIF data. Do not avoid collisions.
@@ -221,7 +225,7 @@ def test_rename_no_collision(mock_exists):
     filemap.make_new_fn_unique()
     assert filemap.new_fn == old_fn
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.FileMap')
 @patch('jpeg_rename.glob')
 def test_init_file_map_orthodox(mock_glob, mock_filemap):
@@ -231,7 +235,7 @@ def test_init_file_map_orthodox(mock_glob, mock_filemap):
     file_map = init_file_map('.')
     assert file_map == [True, True, True]
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.FileMap')
 @patch('jpeg_rename.glob')
 def test_init_file_map_raises_exception(mock_glob, mock_filemap):
@@ -246,7 +250,7 @@ def test_init_file_map_raises_exception(mock_glob, mock_filemap):
 ## process_file_map() tests
 ##
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 def test_process_file_map():
     """Test process_file_map()."""
     def move_func(old_fn, new_fn):
@@ -254,14 +258,14 @@ def test_process_file_map():
 
     assert process_file_map([TestFileMap()], True, move_func) == None
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 def test_process_file_map_raise_exception():
     """Test exception handling in process_file_map()."""
     def move_func(old_fn, new_fn):
         raise Exception("Faux failure")
     assert process_file_map([TestFileMap()], True, move_func) == None
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.FileMap')
 def test_process_file_map_simon_sez_false_fn_eq(mock_fm):
     """Test process_file_map() with simon_sez=False. Tests else branch with
@@ -273,7 +277,7 @@ def test_process_file_map_simon_sez_false_fn_eq(mock_fm):
     process_file_map(file_map)
     assert mock_fm.same_files == True
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.FileMap')
 def test_process_file_map_simon_sez_false_fn_ne(mock_fm):
     """Test process_file_map() with simon_sez=False. Tests else branch with
@@ -285,7 +289,7 @@ def test_process_file_map_simon_sez_false_fn_ne(mock_fm):
     process_file_map(file_map)
     assert mock_fm.same_files == False
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.FileMap.move')
 @patch('jpeg_rename.FileMap')
 def test_process_file_map_simon_sez(mock_fm, mock_fm_move):
@@ -296,7 +300,7 @@ def test_process_file_map_simon_sez(mock_fm, mock_fm_move):
     process_file_map(file_map, simon_sez=True)
     mock_fm.move.assert_called_with()
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.init_file_map')
 @patch('jpeg_rename.os.access')
 @patch('jpeg_rename.os.path.dirname')
@@ -313,7 +317,7 @@ def test_process_all_files_workdir_none(mock_abspath, mock_exists,
     process_all_files()
     mock_init_file_map.assert_called_with(DIRNAME, None)
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.process_file_map')
 @patch('jpeg_rename.init_file_map')
 @patch('jpeg_rename.os.access')
@@ -328,7 +332,7 @@ def test_process_all_files_workdir_not_none(mock_os_access, mock_init_file_map,
     process_all_files('.')
     mock_process_file_map.assert_called_with(file_map, None)
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.process_file_map')
 @patch('jpeg_rename.init_file_map')
 @patch('jpeg_rename.os.path.exists')
@@ -342,7 +346,7 @@ def test_process_all_files_exists_true(mock_os_path, mock_init_file_map,
     process_all_files('.')
     mock_process_file_map.assert_called_with(file_map, None)
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.os.path.exists')
 @patch('jpeg_rename.sys.exit')
 def test_process_all_files_exists_false(mock_sys_exit, mock_os_path):
@@ -353,7 +357,7 @@ def test_process_all_files_exists_false(mock_sys_exit, mock_os_path):
     process_all_files('.')
     mock_sys_exit.assert_called_with(1)
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.process_file_map')
 @patch('jpeg_rename.init_file_map')
 @patch('jpeg_rename.os.access')
@@ -368,7 +372,7 @@ def test_process_all_files_access_true(mock_os_access, mock_init_file_map,
     process_all_files('.')
     mock_process_file_map.assert_called_with(file_map, None)
 
-#@pytest.mark.skipif('True', reason="Work in progress")
+@pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
 @patch('jpeg_rename.os.access')
 @patch('jpeg_rename.sys.exit')
 def test_process_all_files_access_false(mock_sys_exit, mock_os_access):
