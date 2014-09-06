@@ -29,8 +29,7 @@ OLD_FN_JPEG = 'filename.jpeg'
 SKIP_TEST = False
 
 class TestGetNewFn():
-    """
-    """
+    """Tests for method get_new_fn() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
     @pytest.mark.parametrize("old_fn,expected_new_fn,exif_data", [
         (OLD_FN_JPG_LOWER, EXIF_DATA_VALID['expected_new_fn'],
@@ -48,14 +47,13 @@ class TestGetNewFn():
 
 
 class TestGetExifData():
-    """
-    """
+    """Tests for method get_exif_data() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
     @patch('jpeg_rename.TAGS')
     @patch.object(Image, 'open')
     def test_get_exif_data(self, mock_img, mock_tags):
-        """
-        """
+        """Tests read_exif_data() with valid EXIF data. Tests for normal
+        operation. Verify expected EXIF data in instantiated object."""
         class TestImage():
             def _getexif(self):
                 return EXIF_DATA_VALID['exif_data']
@@ -73,8 +71,8 @@ class TestGetExifData():
     @patch('jpeg_rename.TAGS')
     @patch.object(Image, 'open')
     def test_get_exif_data_info_none(self, mock_img, mock_tags):
-        """
-        """
+        """Tests read_exif_data() with no EXIF data available. Tests for
+        raised Exception. Verify expected exception message."""
         class TestImage():
             def _getexif(self):
                 return None
@@ -91,8 +89,7 @@ class TestGetExifData():
 
 
 class TestMove():
-    """
-    """
+    """Tess for method move() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
     @patch('jpeg_rename.FileMap.make_new_fn_unique')
     @patch('jpeg_rename.os.rename')
@@ -153,8 +150,7 @@ class TestMove():
 
 
 class TestRename():
-    """
-    """
+    """Tests for method get_new_fn() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
     @patch('jpeg_rename.os.path.exists')
     def test_rename_empty_exif_data(self, mock_exists):
@@ -212,8 +208,7 @@ class TestRename():
 
 
 class TestInitFileMap():
-    """
-    """
+    """Tests for function init_file_map() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
     @patch('jpeg_rename.FileMap')
     @patch('jpeg_rename.glob')
@@ -238,8 +233,7 @@ class TestInitFileMap():
 
 
 class TestProcessFileMap():
-    """
-    """
+    """Tests for function process_file_map() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
     def test_process_file_map(self):
         """Test process_file_map()."""
@@ -292,8 +286,7 @@ class TestProcessFileMap():
 
 
 class TestProcessAllFiles():
-    """
-    """
+    """Tests for the function process_all_files() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
     @patch('jpeg_rename.init_file_map')
     @patch('jpeg_rename.os.access')
