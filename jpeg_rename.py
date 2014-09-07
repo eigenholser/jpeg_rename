@@ -262,7 +262,8 @@ def process_all_files(workdir=None, simon_sez=None, avoid_collisions=None):
     process_file_map(file_map, simon_sez)
 
 
-if __name__ == '__main__':  # pragma: no cover
+def main():
+    """Parse command-line arguments. Initiate file processing."""
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--simon-sez",
             help="Really, Simon sez rename the files!", action="store_true")
@@ -274,3 +275,5 @@ if __name__ == '__main__':  # pragma: no cover
     process_all_files(workdir=args.directory, simon_sez=args.simon_sez,
             avoid_collisions=args.avoid_collisions)
 
+if __name__ == '__main__':  # pragma: no cover
+    main()
