@@ -201,10 +201,9 @@ class FileMapList():
             self.file_map.append(instance)
 
     def get(self):
-        """TODO: Define a generator function here to return items on the
-        file_map list.
-        """
-        pass
+        """Define a generator function here to return items on the file_map
+        list."""
+        return (x for x in self.file_map)
 
 
 def init_file_map(workdir, avoid_collisions=None):
@@ -258,7 +257,8 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
     if simon_sez is None:
         simon_sez = False
 
-    for fm in file_map.file_map:
+    fm_list = file_map.get()
+    for fm in fm_list:
         try:
             if simon_sez:
                 if move_func is None:
