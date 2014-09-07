@@ -383,7 +383,65 @@ class TestProcessAllFiles():
         mock_sys_exit.assert_called_with(1)
 
 
+class TestFileMapList():
+    """Tests for FileMapList."""
+
+    @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
+    def test_file_map_list_init(self):
+        """Instantiate FileMapList() and test __init__() method. Verify
+        file_map is initialized to empty list."""
+        file_map_list = FileMapList()
+        assert file_map_list.file_map == []
+
+    @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
+    def test_file_map_list_add(self):
+        """Tests FileMapList add() method. Adds multiple FileMap instances
+        and verifies expected ordering of instances based on new_fn attribute.
+        """
+        test_file_map_1 = TestFileMap()
+        test_file_map_2 = TestFileMap()
+        test_file_map_2.new_fn = 'aaa.jpg'
+        file_map_list = FileMapList()
+        file_map_list.add(test_file_map_1)
+        file_map_list.add(test_file_map_2)
+        assert file_map_list.file_map == [test_file_map_2, test_file_map_1]
+
+
+class TestMainFunction():
+    """Tests for main() function."""
+
+    class TestArgumentParser():
+        """Stub class."""
+
+        def add_argument(self, *args, **kwargs):
+            """Stub method."""
+            pass
+
+        def parse_args(self):
+            """Stub method."""
+
+            class Args:
+                """Stub class."""
+                directory = '.'
+                simon_sez = False
+                avoid_collisions = False
+
+            return Args()
+
+    @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
+    @patch('jpeg_rename.argparse.ArgumentParser', TestArgumentParser)
+    @patch('jpeg_rename.process_all_files')
+    def test_main_function(self, mock_process_all_files):
+        """Test main() function. Mock argparse and replace with stubs. Verify
+        process_all_files called with expected arguments."""
+        mock_process_all_files.return_value = 1234
+        retval = main()
+        mock_process_all_files.assert_called_with(workdir='.', simon_sez=False,
+                avoid_collisions=False)
+
+
 class TestFileMap():
+    """Stub to be used in place of FileMap()."""
 
     def __init__(self):
         self.old_fn = 'foo.jpg'
