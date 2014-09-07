@@ -215,10 +215,13 @@ class TestInitFileMap():
     def test_init_file_map_orthodox(self, mock_glob, mock_filemap):
         """Tests init_file_map() list building. Verifies expected return value.
         """
-        mock_filemap.return_value = True
+        test_file_map = TestFileMap()
+        mock_filemap.return_value = test_file_map
         mock_glob.glob.return_value = ['/foo/bar']
         file_map = init_file_map('.')
-        assert file_map == [True, True, True]
+        assert file_map.file_map == [test_file_map,
+                                     test_file_map,
+                                     test_file_map]
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
     @patch('jpeg_rename.FileMap')
@@ -229,7 +232,7 @@ class TestInitFileMap():
         mock_filemap.side_effect = Exception("Just testing.")
         mock_glob.glob.return_value = ['/foo/bar']
         file_map = init_file_map('.')
-        assert file_map == []
+        assert file_map.file_map == []
 
 
 class TestProcessFileMap():
@@ -240,14 +243,18 @@ class TestProcessFileMap():
         def move_func(old_fn, new_fn):
             pass
 
-        assert process_file_map([TestFileMap()], True, move_func) == None
+        file_map_list = FileMapList()
+        file_map_list.add(TestFileMap())
+        assert process_file_map(file_map_list, True, move_func) == None
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
     def test_process_file_map_raise_exception(self):
         """Test exception handling in process_file_map()."""
         def move_func(old_fn, new_fn):
             raise Exception("Faux failure")
-        assert process_file_map([TestFileMap()], True, move_func) == None
+        file_map_list = FileMapList()
+        file_map_list.add(TestFileMap())
+        assert process_file_map(file_map_list, True, move_func) == None
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
     @patch('jpeg_rename.FileMap')
@@ -257,8 +264,9 @@ class TestProcessFileMap():
         mock_fm.same_files = True
         mock_fm.old_fn = OLD_FN_JPG_LOWER
         mock_fm.new_fn = OLD_FN_JPG_LOWER
-        file_map = [mock_fm]
-        process_file_map(file_map)
+        file_map_list = FileMapList()
+        file_map_list.add(mock_fm)
+        process_file_map(file_map_list)
         assert mock_fm.same_files == True
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
@@ -269,8 +277,9 @@ class TestProcessFileMap():
         mock_fm.same_files = False
         mock_fm.old_fn = OLD_FN_JPG_LOWER
         mock_fm.new_fn = ''
-        file_map = [mock_fm]
-        process_file_map(file_map)
+        file_map_list = FileMapList()
+        file_map_list.add(mock_fm)
+        process_file_map(file_map_list)
         assert mock_fm.same_files == False
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
@@ -280,8 +289,9 @@ class TestProcessFileMap():
         """Call process_file_map with simon_sez=True, move_func=None. Tests
         call to move() method of FileMap instance when no test stub present and
         simon_sez True. Verify call to move() made as expected."""
-        file_map = [mock_fm]
-        process_file_map(file_map, simon_sez=True)
+        file_map_list = FileMapList()
+        file_map_list.add(mock_fm)
+        process_file_map(file_map_list, simon_sez=True)
         mock_fm.move.assert_called_with()
 
 

@@ -175,6 +175,38 @@ class FileMap():
         self.new_fn_fq = os.path.join(self.workdir, new_fn)
 
 
+class FileMapList():
+    """Intelligently add FileMap() instances to file_map list based on order
+    of instance.new_fn attributes."""
+
+    def __init__(self):
+        self.file_map = []
+
+    def add(self, instance):
+        """Add, whether insert or append, a FileMap instance to the file_map
+        list in the order of instance.new_fn. If there are duplicate new_fn
+        in the list, they will be resolved in instance.move().
+        """
+        index = 0
+        inserted = False
+        for fm in self.file_map:
+            if instance.new_fn < fm.new_fn:
+                self.file_map.insert(index, instance)
+                inserted = True
+                break
+            index += 1
+
+        # Reached end of list with no insert. Append to list instead.
+        if not inserted:
+            self.file_map.append(instance)
+
+    def get(self):
+        """TODO: Define a generator function here to return items on the
+        file_map list.
+        """
+        pass
+
+
 def init_file_map(workdir, avoid_collisions=None):
     """Read the work directory looking for files with extensions defined in the
     EXTENSIONS constant. Note that this could use a more elaborate magic
@@ -188,14 +220,14 @@ def init_file_map(workdir, avoid_collisions=None):
     """
 
     # List of FileMap objects.
-    file_map = []
+    file_map = FileMapList()
 
     # Initialize file_map list.
     for extension in EXTENSIONS:
         for filename in glob.glob(os.path.join(workdir,
                 '*.{0}'.format(extension))):
             try:
-                file_map.append(FileMap(filename, avoid_collisions))
+                file_map.add(FileMap(filename, avoid_collisions))
             except Exception as e:
                 print("{0}".format(e.message), file=sys.stderr)
 
@@ -216,9 +248,9 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
 
     >>> filemap = FileMap('IMG0332.JPG', avoid_collisions=None, exif_data={'DateTimeOriginal': '2014-08-18 20:23:83'})
     >>> def move_func(old_fn, new_fn): pass
-    ...
-    >>> process_file_map([filemap], True, move_func)
-    >>>
+    >>> file_map_list = FileMapList()
+    >>> file_map_list.add(filemap)
+    >>> process_file_map(file_map_list, True, move_func)
 
     """
 
@@ -226,7 +258,7 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
     if simon_sez is None:
         simon_sez = False
 
-    for fm in file_map:
+    for fm in file_map.file_map:
         try:
             if simon_sez:
                 if move_func is None:
