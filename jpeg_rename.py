@@ -5,6 +5,7 @@ import argparse
 import glob
 import os
 import re
+import stat
 import sys
 import PIL
 from PIL.ExifTags import TAGS
@@ -116,6 +117,15 @@ class FileMap():
 
         self.new_fn = new_fn
         self.new_fn_fq = os.path.join(self.workdir, new_fn)
+
+    def _chmod(self):
+        """Removes execute bit from file permission for USR, GRP, and OTH."""
+        X_ANY = (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        st = os.stat(self.new_fn_fq)
+        if bool(st.st_mode & X_ANY):
+            print( "Changing file mode to -rw-r--r-- on {0}.".format(
+                self.new_fn))
+            os.chmod(self.new_fn_fq, st.st_mode ^ X_ANY)
 
     def move(self):
         """Move old_fn to new_fn."""
