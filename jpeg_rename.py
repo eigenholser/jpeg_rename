@@ -131,15 +131,17 @@ class FileMap():
 
         if self.collision_detected:
             print( "{0} => {1} Destination collision. Aborting.".format(
-                os.path.basename(self.old_fn), os.path.basename(self.new_fn)))
+                self.old_fn, self.new_fn))
+                #os.path.basename(self.old_fn), os.path.basename(self.new_fn)))
             return
 
         try:
             print( "Moving the files: {0} ==> {1}".format(
-                os.path.basename(self.old_fn), os.path.basename(self.new_fn)))
+                self.old_fn, self.new_fn))
             # XXX: Unit tests did not catch this bug.
             # os.rename(self.old_fn, self.new_fn)
             os.rename(self.old_fn_fq, self.new_fn_fq)
+            self._chmod()
         except OSError as e:
             print("Unable to rename file: {0}".format(e.strerror),
                     file=sys.stderr)
