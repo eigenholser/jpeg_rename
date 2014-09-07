@@ -303,9 +303,9 @@ def main():
             help="Rename until filenames do not collide. Danger!", action="store_true")
     parser.add_argument("-d", "--directory",
             help="Read files from this directory.")
-    args = parser.parse_args()
-    process_all_files(workdir=args.directory, simon_sez=args.simon_sez,
-            avoid_collisions=args.avoid_collisions)
+    myargs = parser.parse_args()
+    process_all_files(workdir=myargs.directory, simon_sez=myargs.simon_sez,
+            avoid_collisions=myargs.avoid_collisions)
 
 if __name__ == '__main__':  # pragma: no cover
     main()
