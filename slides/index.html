@@ -14,7 +14,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <link rel="stylesheet" href="css/reveal.min.css">
+    <link rel="stylesheet" href="css/reveal.css">
     <link rel="stylesheet" href="css/theme/blackboard.css" id="theme">
 
     <!-- For syntax highlighting -->
@@ -44,20 +44,202 @@
       <div class="slides">
         <section>
           <h1>Testing in Python</h1>
-          <h3>Ruminations on testing in general and Python specifically</h3>
+          <p>Ruminations on testing in general and Python specifically</p>
           <aside class="notes">
-            Oh hey, these are some notes.
+            <p>Introduction</p>
+            <p>Query audience about testing experience.</p>
+            <p>Talking about general test concepts as well as Python topics.</p>
           </aside>
         </section>
 
         <section>
+          <h1>Why Test?</h1>
+          <ul>
+            <li class="fragment grow">Understand what to build.</li>
+            <li class="fragment grow">Design the units</li>
+            <li class="fragment grow">Document the units</li>
+            <li class="fragment grow">Regression protection.</li>
+          </ul>
+          <aside class="notes">
+            <p>Writing unit tests reveals flaws in our algorithms.</p>
+            <p>Writing unit tests provides feedback when our code needs to be
+            broken into smaller units.</p>
+            <p>Unit tests provide unambiguous documentation of how our code
+            is intended to function.</p>
+            <p>Provides protection from regression bugs.</p>
+            <p>Many look at writing unit tests as a chore. But I think it is
+            a lot of fun to cleverly write a perfectly isolted unit test.</p>
+          </aside>
         </section>
 
         <section>
-          <h2>References</h2>
+          <h2>What is the Scope of Testing?</h2>
           <ul>
-            <li><a href="https://github.com/hakimel/reveal.js">Source code on GitHub</a></li>
+            <li class="fragment grow">Unit testing</li>
+            <li class="fragment grow">Integration testing</li>
+            <li class="fragment grow">Code coverage</li>
+            <li class="fragment grow">Doctests</li>
           </ul>
+          <aside class="notes">
+              <p>Will focus on unit testing and code coverage. But integration
+              testing will be mentioned as well.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Python Tools</h2>
+          <ul>
+            <li class="fragment grow">Unittest</li>
+            <li class="fragment grow">Pytest</li>
+            <li class="fragment grow">Nose</li>
+            <li class="fragment grow">Doctest</li>
+            <li class="fragment grow">Mock</li>
+          </ul>
+          <aside class="notes">
+            <ul>
+              <li>Unittest is part of the Python standard library. Now
+              Unittest2.</li>
+              <li>In Python 3.4, Mock is part of the standard library.</li>
+              <li>Nose and Pytest very full featured test frameworks.</li>
+              <li>Does anyone know if Pytest and Nose are forks?</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Approaches to Testing</h2>
+          <p>Three doors but I think of it as more of a continuum.</p>
+          <ul>
+            <li>Test First</li>
+            <li>Test Last</li>
+            <li>Test Driven Development</li>
+          </ul>
+          <aside class="notes">
+            <p>The best approach is a combination of the above. Writing tests
+            feeds back into the code which inspires more tests.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Unit versus Integration Testing</h1>
+          <aside class="notes">
+            <p>Integration tests have a place but should be used sparingly.</p>
+            <p>Demo the bug that slipped past unit tests. Would have been
+            caught by integration tests.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Demo</h1>
+          <p>A utility that uses EXIF metadata to rename digital photos.</p>
+          <p>Unit tests written using Pytest.</p>
+          <p>Includes some doctests.</p>
+          <aside class="notes">
+            <p>Describe evolution of jpeg_rename from 4-line shell script using
+            exiftags utility.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Structure of a Test</h2>
+          <ul>
+            <li>Arrange</li>
+            <li>Act</li>
+            <li>Assert</li>
+          </ul>
+          <aside class="notes">
+            <p>Test should make all arrangements needed by the test. Call the code
+            under test. Assert a specific condition.</p>
+            <p>Quickly review jpeg_rename tests.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>Unit Test Missed This Bug</h3>
+          <pre><code data-trim contenteditable style="font-size: 22pt; line-height: 24pt;">
+# XXX: Unit tests did not catch this bug.
+# os.rename(self.old_fn, self.new_fn)
+os.rename(self.old_fn_fq, self.new_fn_fq)
+          </code></pre>
+        </section>
+
+        <section>
+          <h1>Coverage</h1>
+          <p>Be careful of arbitrary coverage goals.</p>
+          <p>Don't forget branch coverage.</p>
+          <aside class="notes">
+            <p>Coverage numbers can be misleading. Missing code can also be
+            a source of errors.</p>
+            <p>Demo missing code example. See next slide.</p>
+            <p>Demo branch coverage. Disable tests. Enable one and show
+            incomplete branch coverage.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h3>Missing Code Bug</h3>
+          <pre><code data-trim contenteditable style="font-size: 22pt; line-height: 24pt;">
+# XXX: We already know file exists 'cuz we found it.
+img = Image.open(self.old_fn_fq)
+info = img._getexif()
+          </code></pre>
+        </section>
+
+        <section>
+          <h1>Isolation</h1>
+            <p>Unit tests need to be isolated. With good isolation, changes to
+            other code won't break our tests.</p>
+          <aside class="notes">
+            <p>Turn off all unit tests but one. Demonstrate coverage that shows
+            lack of isolation. Use test test_get_exif_data().</p>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Test Stubs</h1>
+          <pre><code data-trim contenteditable style="font-size: 22pt; line-height: 24pt;">
+>>> filemap = FileMap('IMG0332.JPG', avoid_collisions=None, exif_data={'DateTimeOriginal': '2014-08-18 20:23:83'})
+>>> def move_func(old_fn, new_fn): pass
+>>> file_map_list = FileMapList()
+>>> file_map_list.add(filemap)
+>>> process_file_map(file_map_list, True, move_func)
+          </code></pre>
+          <aside class="notes">
+            <p>Switch to code and look at process_file_map()</p>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Mock</h1>
+          <p>Mock is part of the Python standard library in Python 3.4.</p>
+          <aside class="notes">
+            <p>Talk about Mock. Show various examples in demo code.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Parametrized Tests</h1>
+          <pre><code data-trim contenteditable style="font-size: 14pt; line-height: 18pt;">
+class TestGetNewFn():
+    """Tests for method get_new_fn() are in this class."""
+    @pytest.mark.parametrize("old_fn,expected_new_fn,exif_data", [
+        (OLD_FN_JPG_LOWER, EXIF_DATA_VALID['expected_new_fn'],
+            EXIF_DATA_VALID['exif_data'],),
+        (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, EXIF_DATA_NOT_VALID),
+        (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, {},),
+        (OLD_FN_JPEG, OLD_FN_JPG_LOWER, {},),
+    ])
+    def test_get_new_fn_parametrized_exif_data(self, old_fn, expected_new_fn,
+            exif_data):
+        """Test get_new_fn() with various EXIF data."""
+        filemap = FileMap(old_fn, None, exif_data)
+        new_fn = filemap.new_fn
+        assert new_fn == expected_new_fn
+          </code></pre>
+        </section>
+
+        <section>
+          <img src="images/yin_yang_400.png" style="border: none; background: none; transition: none; box-shadow: none;">
         </section>
 
       </div>
