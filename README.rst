@@ -46,7 +46,8 @@ Get usage help like this::
 
 If only ``--directory`` is specified, ``jpeg_rename.py`` will output what it
 would do if ``--simon-sez`` were also specified. It will indicate ``DRY RUN``
-in the output.
+in the output. ``jpeg_rename.py`` will **only** operate in the directory
+specified.
 
 ``jpeg_rename.py`` will avoid filename collisions by appending ``_#`` to
 filenames as needed. Since this behavior can be troublesome, it will not occur
