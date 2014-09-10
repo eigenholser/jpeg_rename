@@ -9,8 +9,8 @@ renamed using the EXIF data.
 ``jpeg_rename.py`` is useful when combining digital photographs from different
 sources like a mobile phone and a Canon point and shoot camera for instance.
 The photographs from the phone are named ``YYYYMMDD_HHMMSS.jpg`` while the
-Canon camera photographs are name ``IMG_nnnn.JPG`` which is so lame. Other
-variations on this theme have led to the creation of this utility.
+Canon camera photographs are name ``IMG_nnnn.JPG``. Other variations on this
+theme have led to the creation of this utility.
 
 It began as a 4-line shell script using the ``exiftags`` program combined with
 ``sed`` and ``awk``. Trouble was that name collisions were potentially tragic
