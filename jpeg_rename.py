@@ -120,12 +120,14 @@ class FileMap():
 
     def _chmod(self):
         """Removes execute bit from file permission for USR, GRP, and OTH."""
-        X_ANY = (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         st = os.stat(self.new_fn_fq)
-        if bool(st.st_mode & X_ANY):
-            print( "Changing file mode to -rw-r--r-- on {0}.".format(
-                self.new_fn))
-            os.chmod(self.new_fn_fq, st.st_mode ^ X_ANY)
+        print( "Removing execute permissions on {0}.".format(self.new_fn))
+        if bool(st.st_mode & stat.S_IXUSR):
+            os.chmod(self.new_fn_fq, st.st_mode ^ stat.S_IXUSR)
+        if bool(st.st_mode & stat.S_IXGRP):
+            os.chmod(self.new_fn_fq, st.st_mode ^ stat.S_IXGRP)
+        if bool(st.st_mode & stat.S_IXOTH):
+            os.chmod(self.new_fn_fq, st.st_mode ^ stat.S_IXOTH)
 
     def move(self):
         """Move old_fn to new_fn."""
