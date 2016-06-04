@@ -239,10 +239,13 @@ def init_file_map(workdir, avoid_collisions=None):
     for extension in EXTENSIONS:
         for filename in glob.glob(os.path.join(workdir,
                 '*.{0}'.format(extension))):
+<<<<<<< HEAD
 #           if os.path.isdir(filename):
 #               print("Skipping directory {0}".format(filename),
 #                       file=sys.stderr)
 #               continue
+=======
+>>>>>>> c89bd008f74206309e08b3da27b6ddc529c5ad6f
             try:
                 file_map.add(FileMap(filename, avoid_collisions))
             except Exception as e:
