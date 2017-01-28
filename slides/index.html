@@ -134,9 +134,29 @@
           <p>A utility that uses EXIF metadata to rename digital photos.</p>
           <p>Unit tests written using Pytest.</p>
           <p>Includes some doctests.</p>
+          <p><a href="https://github.com/eigenholser/jpeg_rename">https://github.com/eigenholser/jpeg_rename</a></p>
           <aside class="notes">
             <p>Describe evolution of jpeg_rename from 4-line shell script using
             exiftags utility.</p>
+          </aside>
+        </section>
+
+        <section>
+          <h1>Version 1</h1>
+          <pre><code data-trim contenteditable style="font-size: 22pt; line-height: 24pt;">
+#!/bin/sh
+
+for x in IMG*; do
+    prefix=`exiftags $x 2>/dev/null | \
+        grep 'Image Created' | \
+        awk '{print $3,$4}' | \
+        sed -e 's/://g' -e 's/ /_/'`
+    echo "Moving $x --> $prefix.jpg"
+    #mv $x "$prefix.jpg"
+done
+          </code></pre>
+          <aside class="notes">
+            <p>Note the avoid collisions feature--a hash mark.</p>
           </aside>
         </section>
 
