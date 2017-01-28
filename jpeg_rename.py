@@ -106,10 +106,10 @@ class FileMap(object):
         else:
             new_fn = "{0}.jpg".format(new_fn)
 
-        # XXX: One may argue that the next step should be an 'else' clause of the
-        # previous 'if' statement. But the intention here is to clean up just a bit
-        # even if we're not really renaming the file. Windows doesn't like colons
-        # in filenames.
+        # XXX: One may argue that the next step should be an 'else' clause of
+        # the previous 'if' statement. But the intention here is to clean up
+        # just a bit even if we're not really renaming the file. Windows
+        # doesn't like colons in filenames.
 
         # Rename using exif DateTimeOriginal
         new_fn = re.sub(r':', r'', new_fn)
@@ -183,7 +183,8 @@ class FileMap(object):
                     r'\1-{0}.jpg'.format(counter), self.new_fn)
             counter += 1
             if counter > self.MAX_RENAME_ATTEMPTS:
-                raise Exception("Too many rename attempts: {0}".format(self.new_fn))
+                raise Exception(
+                        "Too many rename attempts: {0}".format(self.new_fn))
             self.new_fn_fq = os.path.join(self.workdir, new_fn)
         self.new_fn = new_fn
         self.new_fn_fq = os.path.join(self.workdir, new_fn)
@@ -321,7 +322,8 @@ def main():
     parser.add_argument("-s", "--simon-sez",
             help="Really, Simon sez rename the files!", action="store_true")
     parser.add_argument("-a", "--avoid-collisions",
-            help="Rename until filenames do not collide. Danger!", action="store_true")
+            help="Rename until filenames do not collide. Danger!",
+            action="store_true")
     parser.add_argument("-d", "--directory",
             help="Read files from this directory.")
     myargs = parser.parse_args()
