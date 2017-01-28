@@ -189,7 +189,7 @@ class FileMap(object):
         self.new_fn_fq = os.path.join(self.workdir, new_fn)
 
 
-class FileMapList():
+class FileMapList(object):
     """Intelligently add FileMap() instances to file_map list based on order
     of instance.new_fn attributes."""
 
