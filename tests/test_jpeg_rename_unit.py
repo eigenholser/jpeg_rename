@@ -29,7 +29,7 @@ OLD_FN_JPEG = 'filename.jpeg'
 SKIP_TEST = False
 
 class TestGetNewFn():
-    """Tests for method get_new_fn() are in this class."""
+    """Tests for method build_new_fn() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
     @pytest.mark.parametrize("old_fn,expected_new_fn,exif_data", [
         (OLD_FN_JPG_LOWER, EXIF_DATA_VALID['expected_new_fn'],
@@ -38,9 +38,9 @@ class TestGetNewFn():
         (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, {},),
         (OLD_FN_JPEG, OLD_FN_JPG_LOWER, {},),
     ])
-    def test_get_new_fn_parametrized_exif_data(self, old_fn, expected_new_fn,
+    def test_build_new_fn_parametrized_exif_data(self, old_fn, expected_new_fn,
             exif_data):
-        """Test get_new_fn() with various EXIF data."""
+        """Test build_new_fn() with various EXIF data."""
         filemap = FileMap(old_fn, None, exif_data)
         new_fn = filemap.new_fn
         assert new_fn == expected_new_fn
@@ -150,7 +150,7 @@ class TestMove():
 
 
 class TestRename():
-    """Tests for method get_new_fn() are in this class."""
+    """Tests for method build_new_fn() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
     @patch('jpeg_rename.os.path.exists')
     def test_rename_empty_exif_data(self, mock_exists):

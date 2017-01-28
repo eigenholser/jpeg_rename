@@ -55,7 +55,7 @@ class FileMap(object):
         else:
             self.exif_data = exif_data
 
-        self.get_new_fn()
+        self.build_new_fn()
 
     def read_exif_data(self):
         """Read EXIF data from file. Convert to Python dict."""
@@ -72,7 +72,7 @@ class FileMap(object):
         else:
             raise Exception("{0} has no EXIF data.".format(self.old_fn))
 
-    def get_new_fn(self):
+    def build_new_fn(self):
         """Generate new filename from old_fn EXIF data if possible. Even if not
         possible, lowercase old_fn and normalize file extension.
 
