@@ -17,7 +17,7 @@ EXTENSIONS = ['JPG', 'jpg', 'jpeg']
 MAX_RENAME_ATTEMPTS = 10
 
 
-class FileMap():
+class FileMap(object):
     """FileMap represents a mapping between the old_fn and the new_fn. It's
     methods perform all necessary instance functions for the rename.
 
