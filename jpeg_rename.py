@@ -250,7 +250,7 @@ def init_file_map(workdir, avoid_collisions=None):
             try:
                 file_map.add(FileMap(filename, avoid_collisions))
             except Exception as e:
-                print("{0}".format(e.message), file=sys.stderr)
+                print("{0}".format(e), file=sys.stderr)
 
     return file_map
 
@@ -292,7 +292,7 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
                     print("DRY RUN: {0} ==> {1}".format(fm.old_fn, fm.new_fn))
                     fm.same_files = False   # For unit test only.
         except Exception as e:
-            print("{0}".format(e.message), file=sys.stderr)
+            print("{0}".format(e), file=sys.stderr)
             break
 
 

@@ -85,7 +85,7 @@ class TestGetExifData():
         mock_tags.get = get
         with pytest.raises(Exception) as excinfo:
             filemap = FileMap(old_fn)
-        assert excinfo.value[0] == "{0} has no EXIF data.".format(old_fn)
+        assert str(excinfo.value) == "{0} has no EXIF data.".format(old_fn)
 
 
 class TestMove():
@@ -215,7 +215,7 @@ class TestInitFileMap():
     def test_init_file_map_orthodox(self, mock_glob, mock_filemap):
         """Tests init_file_map() list building. Verifies expected return value.
         """
-        test_file_map = TestFileMap()
+        test_file_map = StubFileMap()
         mock_filemap.return_value = test_file_map
         mock_glob.glob.return_value = ['/foo/bar']
         file_map = init_file_map('.')
@@ -244,7 +244,7 @@ class TestProcessFileMap():
             pass
 
         file_map_list = FileMapList()
-        file_map_list.add(TestFileMap())
+        file_map_list.add(StubFileMap())
         assert process_file_map(file_map_list, True, move_func) == None
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
@@ -253,7 +253,7 @@ class TestProcessFileMap():
         def move_func(old_fn, new_fn):
             raise Exception("Faux failure")
         file_map_list = FileMapList()
-        file_map_list.add(TestFileMap())
+        file_map_list.add(StubFileMap())
         assert process_file_map(file_map_list, True, move_func) == None
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
@@ -323,7 +323,7 @@ class TestProcessAllFiles():
         """Test process_all_files() with workdir set. Tests negative of branch
         testing workdir. Verify process_file_map() called with expected
         arguments."""
-        file_map = [TestFileMap()]
+        file_map = [StubFileMap()]
         mock_init_file_map.return_value = file_map
         mock_os_access.return_value = True
         process_all_files('.')
@@ -338,7 +338,7 @@ class TestProcessAllFiles():
             mock_process_file_map):
         """Test process_all_files() with workdir path exists True. Verify that
         process_file_map() called with correct arguments."""
-        file_map = [TestFileMap()]
+        file_map = [StubFileMap()]
         mock_init_file_map.return_value = file_map
         mock_os_path.return_value = True
         process_all_files('.')
@@ -364,7 +364,7 @@ class TestProcessAllFiles():
         """Test process_all_files() with workdir access True. Tests for
         negative branch of W_OK access test. Verify process_file_map() called
         with expected arguments."""
-        file_map = [TestFileMap()]
+        file_map = [StubFileMap()]
         mock_init_file_map.return_value = file_map
         mock_os_access.return_value = True
         process_all_files('.')
@@ -383,7 +383,7 @@ class TestProcessAllFiles():
         mock_sys_exit.assert_called_with(1)
 
 
-class TestFileMapList():
+class TestFileMapList(object):
     """Tests for FileMapList."""
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
@@ -398,8 +398,8 @@ class TestFileMapList():
         """Tests FileMapList add() method. Adds multiple FileMap instances
         and verifies expected ordering of instances based on new_fn attribute.
         """
-        test_file_map_1 = TestFileMap()
-        test_file_map_2 = TestFileMap()
+        test_file_map_1 = StubFileMap()
+        test_file_map_2 = StubFileMap()
         test_file_map_2.new_fn = 'aaa.jpg'
         file_map_list = FileMapList()
         file_map_list.add(test_file_map_1)
@@ -407,10 +407,10 @@ class TestFileMapList():
         assert file_map_list.file_map == [test_file_map_2, test_file_map_1]
 
 
-class TestMainFunction():
+class TestMainFunction(object):
     """Tests for main() function."""
 
-    class TestArgumentParser():
+    class TestArgumentParser(object):
         """Stub class."""
 
         def add_argument(self, *args, **kwargs):
@@ -440,7 +440,7 @@ class TestMainFunction():
                 avoid_collisions=False)
 
 
-class TestFileMap():
+class StubFileMap(object):
     """Stub to be used in place of FileMap()."""
 
     def __init__(self):
