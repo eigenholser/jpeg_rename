@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
 import argparse
 import glob
 import os
 import re
 import stat
 import sys
-import PIL
-from PIL.ExifTags import TAGS
-from PIL import Image
+import pyexiv2
 
 
 # Need to look for *.JPG, *.jpg, and *.jpeg files for consideration.
@@ -57,7 +54,9 @@ class FileMap(object):
         else:
             self.exif_data = exif_data
 
-        self.build_new_fn()
+        new_fn = self.build_new_fn()
+        self.new_fn = new_fn
+        self.new_fn_fq = os.path.join(self.workdir, new_fn)
 
     def read_exif_data(self):
         """
@@ -65,15 +64,15 @@ class FileMap(object):
         """
 
         # XXX: We already know file exists 'cuz we found it.
-        img = Image.open(self.old_fn_fq)
-        info = img._getexif()
+        img_md = pyexiv2.ImageMetadata(self.old_fn_fq)
+        img_md.read()
 
         self.exif_data ={}
-        if info is not None:
-            for tag, value in info.items():
-                decoded = TAGS.get(tag, tag)
-                self.exif_data[decoded] = value
-        else:
+        for exifkey in img_md.exif_keys:
+            tag = img_md[exifkey].raw_value
+            self.exif_data[exifkey] = tag
+
+        if (len(self.exif_data) == 0):
             raise Exception("{0} has no EXIF data.".format(self.old_fn))
 
     def build_new_fn(self):
@@ -84,7 +83,7 @@ class FileMap(object):
         Arguments:
             dict: EXIF data
 
-        >>> filemap = FileMap('abc123.jpeg', avoid_collisions=None, exif_data={'DateTimeOriginal': '2014:08:16 06:20:30'})
+        >>> filemap = FileMap('abc123.jpeg', avoid_collisions=None, exif_data={'Exif.Image.DateTimeOriginal': '2014:08:16 06:20:30'})
         >>> filemap.new_fn
         '20140816_062030.jpg'
 
@@ -92,7 +91,7 @@ class FileMap(object):
 
         # Start with EXIF DateTimeOriginal
         try:
-            new_fn = self.exif_data['DateTimeOriginal']
+            new_fn = self.exif_data['Exif.Image.DateTimeOriginal']
         except KeyError:
             new_fn = None
 
@@ -283,7 +282,7 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
     Returns:
         None
 
-    >>> filemap = FileMap('IMG0332.JPG', avoid_collisions=None, exif_data={'DateTimeOriginal': '2014-08-18 20:23:83'})
+    >>> filemap = FileMap('IMG0332.JPG', avoid_collisions=None, exif_data={'Exif.Image.DateTimeOriginal': '2014-08-18 20:23:83'})
     >>> def move_func(old_fn, new_fn): pass
     >>> file_map_list = FileMapList()
     >>> file_map_list.add(filemap)

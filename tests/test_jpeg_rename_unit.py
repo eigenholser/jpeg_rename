@@ -10,14 +10,14 @@ from jpeg_rename import *
 # Setup valid EXIF data with expected new filename
 EXIF_DATA_VALID = {
     'exif_data': {
-        'DateTimeOriginal': '2014:08:26 06:20:20'
+        'Exif.Image.DateTimeOriginal': '2014:08:26 06:20:20'
     },
 }
 
-EXIF_DATA_NOT_VALID = {'DateTimeOriginal': '2014:08:26 06:20'}
+EXIF_DATA_NOT_VALID = {'Exif.Image.DateTimeOriginal': '2014:08:26 06:20'}
 
 expected_new_fn = re.sub(r':', r'',
-        EXIF_DATA_VALID['exif_data']['DateTimeOriginal'])
+        EXIF_DATA_VALID['exif_data']['Exif.Image.DateTimeOriginal'])
 expected_new_fn = re.sub(r' ', r'_', expected_new_fn)
 expected_new_fn = '{0}.jpg'.format(expected_new_fn)
 EXIF_DATA_VALID['expected_new_fn'] = expected_new_fn
@@ -46,43 +46,58 @@ class TestGetNewFn():
         assert new_fn == expected_new_fn
 
 
-class TestGetExifData():
-    """Tests for method get_exif_data() are in this class."""
+class TestReadExifData():
+    """Tests for method read_exif_data() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.TAGS')
-    @patch.object(Image, 'open')
-    def test_get_exif_data(self, mock_img, mock_tags):
+    @patch.object(pyexiv2, 'ImageMetadata')
+    def test_read_exif_data(self, mock_img_md):
         """Tests read_exif_data() with valid EXIF data. Tests for normal
         operation. Verify expected EXIF data in instantiated object."""
-        class TestImage():
-            def _getexif(self):
+
+        class StubExifTag(object):
+            raw_value = EXIF_DATA_VALID['exif_data']['Exif.Image.DateTimeOriginal']
+
+        class TestImage(object):
+            """
+            ImageMetadata test stub.
+            """
+            def __getitem__(self, key):
+                return StubExifTag()
+
+            def read(self):
                 return EXIF_DATA_VALID['exif_data']
 
-        def get(arg1, arg2):
-            return 'DateTimeOriginal'
+            @property
+            def exif_keys(self):
+                return ['Exif.Image.DateTimeOriginal']
+
 
         old_fn = OLD_FN_JPG_LOWER
-        mock_img.return_value = TestImage()
-        mock_tags.get = get
+        mock_img_md.return_value = TestImage()
         filemap = FileMap(old_fn)
         assert filemap.exif_data == EXIF_DATA_VALID['exif_data']
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.TAGS')
-    @patch.object(Image, 'open')
-    def test_get_exif_data_info_none(self, mock_img, mock_tags):
-        """Tests read_exif_data() with no EXIF data available. Tests for
-        raised Exception. Verify expected exception message."""
-        class TestImage():
-            def _getexif(self):
+    @patch.object(pyexiv2, 'ImageMetadata')
+    def test_read_exif_data_info_none(self, mock_img_md):
+        """
+        Tests read_exif_data() with no EXIF data available. Tests for raised
+        Exception. Verify expected exception message.
+        """
+
+        class TestImage(object):
+            """
+            ImageMetadata test stub.
+            """
+            def read(self):
                 return None
 
-        def get(arg1, arg2):
-            return 'DateTimeOriginal'
+            @property
+            def exif_keys(self):
+                return []
 
         old_fn = OLD_FN_JPG_LOWER
-        mock_img.return_value = TestImage()
-        mock_tags.get = get
+        mock_img_md.return_value = TestImage()
         with pytest.raises(Exception) as excinfo:
             filemap = FileMap(old_fn)
         assert str(excinfo.value) == "{0} has no EXIF data.".format(old_fn)
