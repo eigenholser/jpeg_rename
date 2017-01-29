@@ -2,6 +2,7 @@
 
 import argparse
 import glob
+import logging
 import os
 import re
 import stat
@@ -12,8 +13,19 @@ import pyexiv2
 # Need to look for *.JPG, *.jpg, and *.jpeg files for consideration.
 EXTENSIONS = ['JPG', 'jpg', 'jpeg']
 MAX_RENAME_ATTEMPTS = 10
+logger = logging.getLogger(__name__)
 
 
+def logged_class(cls):
+    """
+    Class Decorator to add a class level logger to the class with module and
+    name.
+    """
+    cls.logger = logging.getLogger("{0}.{1}".format(cls.__module__, cls.__name__))
+    return cls
+
+
+@logged_class
 class FileMap(object):
     """
     FileMap represents a mapping between the old_fn and the new_fn. It's
@@ -57,6 +69,7 @@ class FileMap(object):
         new_fn = self.build_new_fn()
         self.new_fn = new_fn
         self.new_fn_fq = os.path.join(self.workdir, new_fn)
+        self.logger.info("Initializing file mapper object for filename {}".format(self.new_fn))
 
     def read_exif_data(self):
         """
@@ -71,6 +84,7 @@ class FileMap(object):
         for exifkey in img_md.exif_keys:
             tag = img_md[exifkey].raw_value
             self.exif_data[exifkey] = tag
+            self.logger.debug("{}: {}".format(exifkey, tag))
 
         if (len(self.exif_data) == 0):
             raise Exception("{0} has no EXIF data.".format(self.old_fn))
@@ -83,15 +97,15 @@ class FileMap(object):
         Arguments:
             dict: EXIF data
 
-        >>> filemap = FileMap('abc123.jpeg', avoid_collisions=None, exif_data={'Exif.Image.DateTimeOriginal': '2014:08:16 06:20:30'})
+        >>> filemap = FileMap('abc123.jpeg', avoid_collisions=None, exif_data={'Exif.Image.DateTime': '2014:08:16 06:20:30'})
         >>> filemap.new_fn
         '20140816_062030.jpg'
 
         """
 
-        # Start with EXIF DateTimeOriginal
+        # Start with EXIF DateTime
         try:
-            new_fn = self.exif_data['Exif.Image.DateTimeOriginal']
+            new_fn = self.exif_data['Exif.Image.DateTime']
         except KeyError:
             new_fn = None
 
@@ -115,7 +129,7 @@ class FileMap(object):
         # just a bit even if we're not really renaming the file. Windows
         # doesn't like colons in filenames.
 
-        # Rename using exif DateTimeOriginal
+        # Rename using exif DateTime
         new_fn = re.sub(r':', r'', new_fn)
         new_fn = re.sub(r' ', r'_', new_fn)
 
@@ -126,7 +140,7 @@ class FileMap(object):
         Removes execute bit from file permission for USR, GRP, and OTH.
         """
         st = os.stat(self.new_fn_fq)
-        print( "Removing execute permissions on {0}.".format(self.new_fn))
+        self.logger.info( "Removing execute permissions on {0}.".format(self.new_fn))
         if bool(st.st_mode & stat.S_IXUSR):
             os.chmod(self.new_fn_fq, st.st_mode ^ stat.S_IXUSR)
         if bool(st.st_mode & stat.S_IXGRP):
@@ -149,21 +163,20 @@ class FileMap(object):
             raise e
 
         if self.collision_detected:
-            print( "{0} => {1} Destination collision. Aborting.".format(
+            self.logger.warn( "{0} => {1} Destination collision. Aborting.".format(
                 self.old_fn, self.new_fn))
                 #os.path.basename(self.old_fn), os.path.basename(self.new_fn)))
             return
 
         try:
-            print( "Moving the files: {0} ==> {1}".format(
+            self.logger.info( "Moving the files: {0} ==> {1}".format(
                 self.old_fn, self.new_fn))
             # XXX: Unit tests did not catch this bug.
             # os.rename(self.old_fn, self.new_fn)
             os.rename(self.old_fn_fq, self.new_fn_fq)
             self._chmod()
         except OSError as e:
-            print("Unable to rename file: {0}".format(e.strerror),
-                    file=sys.stderr)
+            self.logger.warn("Unable to rename file: {0}".format(e.strerror))
 
     def make_new_fn_unique(self):
         """
@@ -198,10 +211,11 @@ class FileMap(object):
         self.new_fn_fq = os.path.join(self.workdir, new_fn)
 
 
+@logged_class
 class FileMapList(object):
     """
-    Intelligently add FileMap() instances to file_map list based on order
-    of instance.new_fn attributes.
+    Intelligently add FileMap() instances to file_map list based on order of
+    instance.new_fn attributes.
     """
 
     def __init__(self):
@@ -209,9 +223,9 @@ class FileMapList(object):
 
     def add(self, instance):
         """
-        Add, whether insert or append, a FileMap instance to the file_map
-        list in the order of instance.new_fn. If there are duplicate new_fn
-        in the list, they will be resolved in instance.move().
+        Add, whether insert or append, a FileMap instance to the file_map list
+        in the order of instance.new_fn. If there are duplicate new_fn in the
+        list, they will be resolved in instance.move().
         """
         index = 0
         inserted = False
@@ -258,13 +272,12 @@ def init_file_map(workdir, avoid_collisions=None):
             # the directory check. Dunno. Keep an eye on it in case it pops up
             # again in the future.
             if os.path.isdir(filename):
-                print("Skipping directory {0}".format(filename),
-                        file=sys.stderr)
+                logger.warn("Skipping directory {0}".format(filename))
                 continue
             try:
                 file_map.add(FileMap(filename, avoid_collisions))
             except Exception as e:
-                print("{0}".format(e), file=sys.stderr)
+                logger.warn("{0}".format(e))
 
     return file_map
 
@@ -282,7 +295,7 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
     Returns:
         None
 
-    >>> filemap = FileMap('IMG0332.JPG', avoid_collisions=None, exif_data={'Exif.Image.DateTimeOriginal': '2014-08-18 20:23:83'})
+    >>> filemap = FileMap('IMG0332.JPG', avoid_collisions=None, exif_data={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
     >>> def move_func(old_fn, new_fn): pass
     >>> file_map_list = FileMapList()
     >>> file_map_list.add(filemap)
@@ -304,10 +317,10 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
                     move_func(fm.old_fn, fm.new_fn)
             else:
                 if fm.old_fn != fm.new_fn:
-                    print("DRY RUN: {0} ==> {1}".format(fm.old_fn, fm.new_fn))
+                    logging.info("DRY RUN: {0} ==> {1}".format(fm.old_fn, fm.new_fn))
                     fm.same_files = False   # For unit test only.
         except Exception as e:
-            print("{0}".format(e), file=sys.stderr)
+            logging.info("{0}".format(e))
             break
 
 
@@ -320,13 +333,11 @@ def process_all_files(workdir=None, simon_sez=None, avoid_collisions=None):
         workdir = os.path.dirname(os.path.abspath(__file__))
 
     if not os.path.exists(workdir):
-        print("Directory {0} does not exist. Exiting.",format(workdir),
-                file=sys.stderr)
+        logging.error("Directory {0} does not exist. Exiting.".format(workdir))
         sys.exit(1)
 
     if not os.access(workdir, os.W_OK):
-        print("Directory {0} is not writable. Exiting.".format(workdir),
-                file=sys.stderr)
+        logging.error("Directory {0} is not writable. Exiting.".format(workdir))
         sys.exit(1)
 
     file_map = init_file_map(workdir, avoid_collisions)
@@ -345,7 +356,14 @@ def main():
             action="store_true")
     parser.add_argument("-d", "--directory",
             help="Read files from this directory.")
+    parser.add_argument("-v", "--verbose", help="Log level to DEBUG.", action="store_true")
     myargs = parser.parse_args()
+
+    if (myargs.verbose):
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
     process_all_files(workdir=myargs.directory, simon_sez=myargs.simon_sez,
             avoid_collisions=myargs.avoid_collisions)
 
