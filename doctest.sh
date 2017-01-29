@@ -1,1 +1,1 @@
-python -m doctest -v jpeg_rename.py
+python -m doctest -v photo_rename.py

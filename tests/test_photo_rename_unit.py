@@ -5,7 +5,7 @@ from mock import Mock, patch
 app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
-from jpeg_rename import *
+from photo_rename import *
 
 # Setup valid EXIF data with expected new filename
 EXIF_DATA_VALID = {
@@ -106,8 +106,8 @@ class TestReadExifData():
 class TestMove():
     """Tess for method move() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.FileMap.make_new_fn_unique')
-    @patch('jpeg_rename.os.rename')
+    @patch('photo_rename.FileMap.make_new_fn_unique')
+    @patch('photo_rename.os.rename')
     def test_move_orthodox(self, mock_os, mock_fn_unique):
         """Rename file with mocked os.rename. Verify called with args."""
         mock_fn_unique.return_value = None
@@ -119,8 +119,8 @@ class TestMove():
         mock_os.assert_called_with(old_fn, new_fn)
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.FileMap.make_new_fn_unique')
-    @patch('jpeg_rename.os.rename')
+    @patch('photo_rename.FileMap.make_new_fn_unique')
+    @patch('photo_rename.os.rename')
     def test_move_orthodox_rename_raises_exeption(self, mock_os,
             mock_fn_unique):
         """Rename file with mocked os.rename. Verify called with args."""
@@ -134,8 +134,8 @@ class TestMove():
         mock_os.assert_called_with(old_fn, new_fn)
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.FileMap.make_new_fn_unique')
-    @patch('jpeg_rename.os.rename')
+    @patch('photo_rename.FileMap.make_new_fn_unique')
+    @patch('photo_rename.os.rename')
     def test_move_orthodox_fn_unique_raises_exception(self, mock_os,
             mock_fn_unique):
         """Rename file with mocked os.rename. Verify called with args."""
@@ -148,8 +148,8 @@ class TestMove():
             filemap.move()
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.FileMap.make_new_fn_unique')
-    @patch('jpeg_rename.os.path.exists')
+    @patch('photo_rename.FileMap.make_new_fn_unique')
+    @patch('photo_rename.os.path.exists')
     def test_move_collision_detected(self, mock_exists, mock_fn_unique):
         """Move file with collision_detected simulating avoid_collisions=False.
         """
@@ -167,7 +167,7 @@ class TestMove():
 class TestRename():
     """Tests for method build_new_fn() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.os.path.exists')
+    @patch('photo_rename.os.path.exists')
     def test_rename_empty_exif_data(self, mock_exists):
         """Make unique filename with empty EXIF data."""
         mock_exists.return_value = True
@@ -179,7 +179,7 @@ class TestRename():
         assert filemap.new_fn == old_fn
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.os.path.exists')
+    @patch('photo_rename.os.path.exists')
     def test_rename_with_valid_exif_data_and_avoid_collisions(self,
             mock_exists):
         """Make unique new filename from valid EXIF data. Avoid collisions."""
@@ -194,7 +194,7 @@ class TestRename():
         assert filemap.new_fn == EXIF_DATA_VALID['expected_new_fn']
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.os.path.exists')
+    @patch('photo_rename.os.path.exists')
     def test_rename_with_valid_exif_data_and_no_avoid_collisions(self,
             mock_exists):
         """Make unique new filename from valid EXIF data. Do not avoid
@@ -209,7 +209,7 @@ class TestRename():
         assert filemap.new_fn == EXIF_DATA_VALID['expected_new_fn']
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.os.path.exists')
+    @patch('photo_rename.os.path.exists')
     def test_rename_no_collision(self, mock_exists):
         """Make unique new filename from valid EXIF data. Do not avoid
         collisions."""
@@ -225,8 +225,8 @@ class TestRename():
 class TestInitFileMap():
     """Tests for function init_file_map() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.FileMap')
-    @patch('jpeg_rename.glob')
+    @patch('photo_rename.FileMap')
+    @patch('photo_rename.glob')
     def test_init_file_map_orthodox(self, mock_glob, mock_filemap):
         """Tests init_file_map() list building. Verifies expected return value.
         """
@@ -239,8 +239,8 @@ class TestInitFileMap():
                                      test_file_map]
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.FileMap')
-    @patch('jpeg_rename.glob')
+    @patch('photo_rename.FileMap')
+    @patch('photo_rename.glob')
     def test_init_file_map_raises_exception(self, mock_glob, mock_filemap):
         """Tests init_file_map() with exception handling. Test exception raised
         when append to file_map list. Verify expected file_map returned."""
@@ -272,7 +272,7 @@ class TestProcessFileMap():
         assert process_file_map(file_map_list, True, move_func) == None
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.FileMap')
+    @patch('photo_rename.FileMap')
     def test_process_file_map_simon_sez_false_fn_eq(self, mock_fm):
         """Test process_file_map() with simon_sez=False. Tests else branch with
         old_fn == new_fn. Verify same_files attribute value is True."""
@@ -285,7 +285,7 @@ class TestProcessFileMap():
         assert mock_fm.same_files == True
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.FileMap')
+    @patch('photo_rename.FileMap')
     def test_process_file_map_simon_sez_false_fn_ne(self, mock_fm):
         """Test process_file_map() with simon_sez=False. Tests else branch with
         old_fn != new_fn. Verify same_files attribute value is False."""
@@ -298,8 +298,8 @@ class TestProcessFileMap():
         assert mock_fm.same_files == False
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.FileMap.move')
-    @patch('jpeg_rename.FileMap')
+    @patch('photo_rename.FileMap.move')
+    @patch('photo_rename.FileMap')
     def test_process_file_map_simon_sez(self, mock_fm, mock_fm_move):
         """Call process_file_map with simon_sez=True, move_func=None. Tests
         call to move() method of FileMap instance when no test stub present and
@@ -313,11 +313,11 @@ class TestProcessFileMap():
 class TestProcessAllFiles():
     """Tests for the function process_all_files() are in this class."""
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.init_file_map')
-    @patch('jpeg_rename.os.access')
-    @patch('jpeg_rename.os.path.dirname')
-    @patch('jpeg_rename.os.path.exists')
-    @patch('jpeg_rename.os.path.abspath')
+    @patch('photo_rename.init_file_map')
+    @patch('photo_rename.os.access')
+    @patch('photo_rename.os.path.dirname')
+    @patch('photo_rename.os.path.exists')
+    @patch('photo_rename.os.path.abspath')
     def test_process_all_files_workdir_none(self, mock_abspath, mock_exists,
             mock_dirname, mock_os_access, mock_init_file_map):
         """Test process_all_files() with workdir=None, avoid_collisions=None.
@@ -330,9 +330,9 @@ class TestProcessAllFiles():
         mock_init_file_map.assert_called_with(DIRNAME, None)
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.process_file_map')
-    @patch('jpeg_rename.init_file_map')
-    @patch('jpeg_rename.os.access')
+    @patch('photo_rename.process_file_map')
+    @patch('photo_rename.init_file_map')
+    @patch('photo_rename.os.access')
     def test_process_all_files_workdir_not_none(self, mock_os_access,
             mock_init_file_map, mock_process_file_map):
         """Test process_all_files() with workdir set. Tests negative of branch
@@ -345,9 +345,9 @@ class TestProcessAllFiles():
         mock_process_file_map.assert_called_with(file_map, None)
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.process_file_map')
-    @patch('jpeg_rename.init_file_map')
-    @patch('jpeg_rename.os.path.exists')
+    @patch('photo_rename.process_file_map')
+    @patch('photo_rename.init_file_map')
+    @patch('photo_rename.os.path.exists')
     def test_process_all_files_exists_true(self, mock_os_path,
             mock_init_file_map,
             mock_process_file_map):
@@ -360,8 +360,8 @@ class TestProcessAllFiles():
         mock_process_file_map.assert_called_with(file_map, None)
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.os.path.exists')
-    @patch('jpeg_rename.sys.exit')
+    @patch('photo_rename.os.path.exists')
+    @patch('photo_rename.sys.exit')
     def test_process_all_files_exists_false(self, mock_sys_exit, mock_os_path):
         """Test process_all_files() with workdir path exists False. Tests
         positive branch of workdir not exists test. Verify that sys.exit() is
@@ -371,9 +371,9 @@ class TestProcessAllFiles():
         mock_sys_exit.assert_called_with(1)
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.process_file_map')
-    @patch('jpeg_rename.init_file_map')
-    @patch('jpeg_rename.os.access')
+    @patch('photo_rename.process_file_map')
+    @patch('photo_rename.init_file_map')
+    @patch('photo_rename.os.access')
     def test_process_all_files_access_true(self, mock_os_access,
             mock_init_file_map, mock_process_file_map):
         """Test process_all_files() with workdir access True. Tests for
@@ -386,8 +386,8 @@ class TestProcessAllFiles():
         mock_process_file_map.assert_called_with(file_map, None)
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.os.access')
-    @patch('jpeg_rename.sys.exit')
+    @patch('photo_rename.os.access')
+    @patch('photo_rename.sys.exit')
     def test_process_all_files_access_false(self, mock_sys_exit,
             mock_os_access):
         """Test process_all_files() with workdir access False. Tests for
@@ -444,8 +444,8 @@ class TestMainFunction(object):
             return Args()
 
     @pytest.mark.skipif(SKIP_TEST, reason="Work in progress")
-    @patch('jpeg_rename.argparse.ArgumentParser', TestArgumentParser)
-    @patch('jpeg_rename.process_all_files')
+    @patch('photo_rename.argparse.ArgumentParser', TestArgumentParser)
+    @patch('photo_rename.process_all_files')
     def test_main_function(self, mock_process_all_files):
         """Test main() function. Mock argparse and replace with stubs. Verify
         process_all_files called with expected arguments."""
