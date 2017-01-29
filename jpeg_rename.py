@@ -18,7 +18,8 @@ MAX_RENAME_ATTEMPTS = 10
 
 
 class FileMap(object):
-    """FileMap represents a mapping between the old_fn and the new_fn. It's
+    """
+    FileMap represents a mapping between the old_fn and the new_fn. It's
     methods perform all necessary instance functions for the rename.
 
     Arguments:
@@ -27,7 +28,8 @@ class FileMap(object):
     """
 
     def __init__(self, old_fn, avoid_collisions=None, exif_data=None):
-        """Initialize FileMap instance.
+        """
+        Initialize FileMap instance.
 
         >>> filemap = FileMap('abc123.jpeg', None, {})
         >>> filemap.old_fn
@@ -58,7 +60,9 @@ class FileMap(object):
         self.build_new_fn()
 
     def read_exif_data(self):
-        """Read EXIF data from file. Convert to Python dict."""
+        """
+        Read EXIF data from file. Convert to Python dict.
+        """
 
         # XXX: We already know file exists 'cuz we found it.
         img = Image.open(self.old_fn_fq)
@@ -73,7 +77,8 @@ class FileMap(object):
             raise Exception("{0} has no EXIF data.".format(self.old_fn))
 
     def build_new_fn(self):
-        """Generate new filename from old_fn EXIF data if possible. Even if not
+        """
+        Generate new filename from old_fn EXIF data if possible. Even if not
         possible, lowercase old_fn and normalize file extension.
 
         Arguments:
@@ -115,11 +120,12 @@ class FileMap(object):
         new_fn = re.sub(r':', r'', new_fn)
         new_fn = re.sub(r' ', r'_', new_fn)
 
-        self.new_fn = new_fn
-        self.new_fn_fq = os.path.join(self.workdir, new_fn)
+        return new_fn
 
     def _chmod(self):
-        """Removes execute bit from file permission for USR, GRP, and OTH."""
+        """
+        Removes execute bit from file permission for USR, GRP, and OTH.
+        """
         st = os.stat(self.new_fn_fq)
         print( "Removing execute permissions on {0}.".format(self.new_fn))
         if bool(st.st_mode & stat.S_IXUSR):
@@ -130,7 +136,9 @@ class FileMap(object):
             os.chmod(self.new_fn_fq, st.st_mode ^ stat.S_IXOTH)
 
     def move(self):
-        """Move old_fn to new_fn."""
+        """
+        Move old_fn to new_fn.
+        """
 
         # XXX: This call deliberately placed here instead of __init__(). All
         # initialization is performed before any files are moved. The file move
@@ -159,7 +167,8 @@ class FileMap(object):
                     file=sys.stderr)
 
     def make_new_fn_unique(self):
-        """Check new_fn for uniqueness in 'workdir'. Rename, adding a numerical
+        """
+        Check new_fn for uniqueness in 'workdir'. Rename, adding a numerical
         suffix until it is unique.
         """
 
@@ -191,14 +200,17 @@ class FileMap(object):
 
 
 class FileMapList(object):
-    """Intelligently add FileMap() instances to file_map list based on order
-    of instance.new_fn attributes."""
+    """
+    Intelligently add FileMap() instances to file_map list based on order
+    of instance.new_fn attributes.
+    """
 
     def __init__(self):
         self.file_map = []
 
     def add(self, instance):
-        """Add, whether insert or append, a FileMap instance to the file_map
+        """
+        Add, whether insert or append, a FileMap instance to the file_map
         list in the order of instance.new_fn. If there are duplicate new_fn
         in the list, they will be resolved in instance.move().
         """
@@ -216,13 +228,16 @@ class FileMapList(object):
             self.file_map.append(instance)
 
     def get(self):
-        """Define a generator function here to return items on the file_map
-        list."""
+        """
+        Define a generator function here to return items on the file_map
+        list.
+        """
         return (x for x in self.file_map)
 
 
 def init_file_map(workdir, avoid_collisions=None):
-    """Read the work directory looking for files with extensions defined in the
+    """
+    Read the work directory looking for files with extensions defined in the
     EXTENSIONS constant. Note that this could use a more elaborate magic
     number mechanism that would be cool.
 
@@ -256,7 +271,8 @@ def init_file_map(workdir, avoid_collisions=None):
 
 
 def process_file_map(file_map, simon_sez=None, move_func=None):
-    """Iterate through the Python list of FileMap objects. Move the file if
+    """
+    Iterate through the Python list of FileMap objects. Move the file if
     Simon sez.
 
     Arguments:
@@ -297,7 +313,9 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
 
 
 def process_all_files(workdir=None, simon_sez=None, avoid_collisions=None):
-    """Manage the entire process of gathering data and renaming files."""
+    """
+    Manage the entire process of gathering data and renaming files.
+    """
 
     if workdir is None:
         workdir = os.path.dirname(os.path.abspath(__file__))
@@ -317,7 +335,9 @@ def process_all_files(workdir=None, simon_sez=None, avoid_collisions=None):
 
 
 def main():
-    """Parse command-line arguments. Initiate file processing."""
+    """
+    Parse command-line arguments. Initiate file processing.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--simon-sez",
             help="Really, Simon sez rename the files!", action="store_true")
