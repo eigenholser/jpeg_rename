@@ -26,6 +26,9 @@ OLD_FN_JPG_LOWER = 'filename.jpg'
 OLD_FN_JPG_UPPER = 'filename.JPG'
 OLD_FN_JPEG = 'filename.jpeg'
 
+IMAGE_TYPE_JPEG='jpg'
+IMAGE_TYPE_PNG='png'
+
 SKIP_TEST = True
 RUN_TEST = False
 
@@ -42,7 +45,7 @@ class TestGetNewFn():
     def test_build_new_fn_parametrized_exif_data(self, old_fn, expected_new_fn,
             exif_data):
         """Test build_new_fn() with various EXIF data."""
-        filemap = FileMap(old_fn, None, exif_data)
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG, None, exif_data)
         new_fn = filemap.new_fn
         assert new_fn == expected_new_fn
 
@@ -75,8 +78,8 @@ class TestReadExifData():
 
         old_fn = OLD_FN_JPG_LOWER
         mock_img_md.return_value = TestImage()
-        filemap = FileMap(old_fn)
-        assert filemap.exif_data == EXIF_DATA_VALID['exif_data']
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG)
+        assert filemap.metadata == EXIF_DATA_VALID['exif_data']
 
     @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
     @patch.object(pyexiv2, 'ImageMetadata')
@@ -100,7 +103,7 @@ class TestReadExifData():
         old_fn = OLD_FN_JPG_LOWER
         mock_img_md.return_value = TestImage()
         with pytest.raises(Exception) as excinfo:
-            filemap = FileMap(old_fn)
+            filemap = FileMap(old_fn, IMAGE_TYPE_JPEG)
         assert str(excinfo.value) == "{0} has no EXIF data.".format(old_fn)
 
 
@@ -116,7 +119,8 @@ class TestMove():
         mock_fn_unique.return_value = None
         old_fn = OLD_FN_JPG_LOWER
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = FileMap(old_fn, avoid_collisions=None, exif_data=exif_data)
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
+                avoid_collisions=None, metadata=exif_data)
         new_fn = filemap.new_fn
         filemap.move()
         mock_os.assert_called_with(old_fn, new_fn)
@@ -133,7 +137,8 @@ class TestMove():
         mock_os.side_effect = OSError((1, "Just testing.",))
         old_fn = OLD_FN_JPG_LOWER
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = FileMap(old_fn, avoid_collisions=None, exif_data=exif_data)
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
+                avoid_collisions=None, metadata=exif_data)
         new_fn = filemap.new_fn
         filemap.move()
         mock_os.assert_called_with(old_fn, new_fn)
@@ -149,7 +154,8 @@ class TestMove():
         mock_fn_unique.side_effect = OSError((1, "Just testing.",))
         old_fn = OLD_FN_JPG_LOWER
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = FileMap(old_fn, avoid_collisions=None, exif_data=exif_data)
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
+                avoid_collisions=None, metadata=exif_data)
         new_fn = filemap.new_fn
         with pytest.raises(OSError):
             filemap.move()
@@ -164,7 +170,8 @@ class TestMove():
         mock_exists.return_value = True
         old_fn = OLD_FN_JPG_LOWER
         exif_data = {}
-        filemap = FileMap(old_fn, avoid_collisions=None, exif_data=exif_data)
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
+                avoid_collisions=None, metadata=exif_data)
         filemap.collision_detected = True
         new_fn = filemap.new_fn
         filemap.move()
@@ -180,7 +187,8 @@ class TestRename():
         mock_exists.return_value = True
         old_fn = OLD_FN_JPG_LOWER
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = FileMap(old_fn, avoid_collisions=True, exif_data=exif_data)
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
+                avoid_collisions=True, metadata=exif_data)
         new_fn = filemap.new_fn
         filemap.make_new_fn_unique()
         assert filemap.new_fn == old_fn
@@ -193,7 +201,8 @@ class TestRename():
         mock_exists.return_value = True
         old_fn = OLD_FN_JPG_LOWER
         exif_data = EXIF_DATA_VALID['exif_data']
-        filemap = FileMap(old_fn, avoid_collisions=True, exif_data=exif_data)
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
+                avoid_collisions=True, metadata=exif_data)
         new_fn = filemap.new_fn
         filemap.MAX_RENAME_ATTEMPTS = 2
         with pytest.raises(Exception):
@@ -209,7 +218,8 @@ class TestRename():
         mock_exists.return_value = True
         old_fn = OLD_FN_JPG_LOWER
         exif_data = EXIF_DATA_VALID['exif_data']
-        filemap = FileMap(old_fn, avoid_collisions=False, exif_data=exif_data)
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
+                avoid_collisions=False, metadata=exif_data)
         new_fn = filemap.new_fn
         filemap.MAX_RENAME_ATTEMPTS = 2
         filemap.make_new_fn_unique()
@@ -223,27 +233,31 @@ class TestRename():
         mock_exists.return_value = False
         old_fn = OLD_FN_JPG_LOWER
         exif_data = {}
-        filemap = FileMap(old_fn, avoid_collisions=False, exif_data=exif_data)
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
+                avoid_collisions=False, metadata=exif_data)
         new_fn = filemap.new_fn
         filemap.make_new_fn_unique()
         assert filemap.new_fn == old_fn
 
 
 class TestInitFileMap():
-    """Tests for function init_file_map() are in this class."""
+    """
+    Tests for function init_file_map() are in this class.
+    """
+
     @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
     @patch('photo_rename.FileMap')
     @patch('photo_rename.glob')
     def test_init_file_map_orthodox(self, mock_glob, mock_filemap):
-        """Tests init_file_map() list building. Verifies expected return value.
+        """
+        Tests init_file_map() list building. Verifies expected return value.
         """
         test_file_map = StubFileMap()
         mock_filemap.return_value = test_file_map
         mock_glob.glob.return_value = ['/foo/bar']
         file_map = init_file_map('.')
-        assert file_map.file_map == [test_file_map,
-                                     test_file_map,
-                                     test_file_map]
+        assert file_map.file_map == [
+                test_file_map, test_file_map, test_file_map, test_file_map, test_file_map]
 
     @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
     @patch('photo_rename.FileMap')
@@ -321,7 +335,7 @@ class TestProcessFileMap():
 
 class TestProcessAllFiles():
     """Tests for the function process_all_files() are in this class."""
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(True, reason="Obsolete. Code moved to main(). Relocate test.")
     @patch('photo_rename.init_file_map')
     @patch('photo_rename.os.access')
     @patch('photo_rename.os.path.dirname')
@@ -329,8 +343,10 @@ class TestProcessAllFiles():
     @patch('photo_rename.os.path.abspath')
     def test_process_all_files_workdir_none(self, mock_abspath, mock_exists,
             mock_dirname, mock_os_access, mock_init_file_map):
-        """Test process_all_files() with workdir=None, avoid_collisions=None.
-        Verify that init_file_map() is called with (DIRNAME, None)."""
+        """
+        Test process_all_files() with workdir=None, avoid_collisions=None.
+        Verify that init_file_map() is called with (DIRNAME, None).
+        """
         DIRNAME = '/foo/bar'
         mock_abspath.return_value = DIRNAME
         mock_exists.return_value = True
@@ -431,42 +447,10 @@ class TestFileMapList(object):
         assert file_map_list.file_map == [test_file_map_2, test_file_map_1]
 
 
-class TestMainFunction(object):
-    """Tests for main() function."""
-
-    class TestArgumentParser(object):
-        """Stub class."""
-
-        def add_argument(self, *args, **kwargs):
-            """Stub method."""
-            pass
-
-        def parse_args(self):
-            """Stub method."""
-
-            class Args:
-                """Stub class."""
-                directory = '.'
-                simon_sez = False
-                avoid_collisions = False
-                verbose = True
-
-            return Args()
-
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
-    @patch('photo_rename.argparse.ArgumentParser', TestArgumentParser)
-    @patch('photo_rename.process_all_files')
-    def test_main_function(self, mock_process_all_files):
-        """Test main() function. Mock argparse and replace with stubs. Verify
-        process_all_files called with expected arguments."""
-        mock_process_all_files.return_value = 1234
-        retval = main()
-        mock_process_all_files.assert_called_with(workdir='.', simon_sez=False,
-                avoid_collisions=False)
-
-
 class StubFileMap(object):
-    """Stub to be used in place of FileMap()."""
+    """
+    Stub to be used in place of FileMap().
+    """
 
     def __init__(self):
         self.old_fn = 'foo.jpg'

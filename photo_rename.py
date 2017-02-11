@@ -10,10 +10,13 @@ import sys
 import pyexiv2
 
 
-# Need to look for *.JPG, *.jpg, and *.jpeg files for consideration.
-EXTENSIONS = ['JPG', 'jpg', 'jpeg', 'png', 'PNG']
-JPEG_FILE_TYPE = 'jpg'
-PNG_FILE_TYPE = 'png'
+# Need to look for *.JPG, *.jpg, *.jpeg, *.png, and *.PNG files for
+# consideration.
+IMAGE_EXTENSIONS_PNG = ['png', 'PNG']
+IMAGE_EXTENSIONS_JPEG = ['JPG', 'jpg', 'jpeg']
+EXTENSIONS = IMAGE_EXTENSIONS_PNG + IMAGE_EXTENSIONS_JPEG
+IMAGE_TYPE_JPEG = 'jpg'
+IMAGE_TYPE_PNG = 'png'
 MAX_RENAME_ATTEMPTS = 10
 logger = logging.getLogger(__name__)
 
@@ -38,11 +41,11 @@ class FileMap(object):
         dict: metadata - For testing only. Dict with sample EXIF data.
     """
 
-    def __init__(self, old_fn, filetype, avoid_collisions=None, metadata=None):
+    def __init__(self, old_fn, image_type, avoid_collisions=None, metadata=None):
         """
         Initialize FileMap instance.
 
-        >>> filemap = FileMap('abc123.jpeg', JPEG_FILE_TYPE, None, {})
+        >>> filemap = FileMap('abc123.jpeg', IMAGE_TYPE_JPEG, None, {})
         >>> filemap.old_fn
         'abc123.jpeg'
         >>> filemap.new_fn
@@ -53,7 +56,7 @@ class FileMap(object):
         self.old_fn_fq = old_fn
         self.workdir = os.path.dirname(old_fn)
         self.old_fn = os.path.basename(old_fn)
-        self.filetype = filetype
+        self.image_type = image_type
 
         # Avoid filename collisions (dangerous) or log a message if there
         # would be one, and fail the move.
@@ -85,7 +88,7 @@ class FileMap(object):
 
         self.metadata ={}
 
-        if (self.filetype == PNG_FILE_TYPE):
+        if (self.image_type == IMAGE_TYPE_PNG):
             metadata = [md_key for md_key in img_md.xmp_keys]
         else:
             metadata = [md_key for md_key in img_md.exif_keys]
@@ -103,7 +106,7 @@ class FileMap(object):
         Generate new filename from old_fn EXIF or XMP data if possible. Even if
         not possible, lowercase old_fn and normalize file extension.
 
-        >>> filemap = FileMap('abc123.jpeg', JPEG_FILE_TYPE, avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014:08:16 06:20:30'})
+        >>> filemap = FileMap('abc123.jpeg', IMAGE_TYPE_JPEG, avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014:08:16 06:20:30'})
         >>> filemap.new_fn
         '20140816_062030.jpg'
 
@@ -111,7 +114,7 @@ class FileMap(object):
 
         # Start with EXIF DateTime
         try:
-            if (self.filetype == PNG_FILE_TYPE):
+            if (self.image_type == IMAGE_TYPE_PNG):
                 new_fn = self.metadata['Xmp.xmp.CreateDate']
             else:
                 new_fn = self.metadata['Exif.Image.DateTime']
@@ -133,7 +136,7 @@ class FileMap(object):
             new_fn = re.sub(r'.jpeg$', r'.jpg', new_fn)
             new_fn = re.sub(r'.PNG$', r'.png', new_fn)
         else:
-            new_fn = "{0}.{1}".format(new_fn, self.filetype)
+            new_fn = "{0}.{1}".format(new_fn, self.image_type)
 
         # XXX: One may argue that the next step should be an 'else' clause of
         # the previous 'if' statement. But the intention here is to clean up
@@ -288,11 +291,11 @@ def init_file_map(workdir, avoid_collisions=None):
                 logger.warn("Skipping directory {0}".format(filename))
                 continue
             try:
-                if (extension in ('png', 'PNG')):
-                    filetype = PNG_FILE_TYPE
+                if (extension in IMAGE_EXTENSIONS_PNG):
+                    image_type = IMAGE_TYPE_PNG
                 else:
-                    filetype = JPEG_FILE_TYPE
-                file_map.add(FileMap(filename, filetype, avoid_collisions))
+                    image_type = IMAGE_TYPE_JPEG
+                file_map.add(FileMap(filename, image_type, avoid_collisions))
             except Exception as e:
                 logger.warn("{0}".format(e))
 
@@ -341,14 +344,11 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
             break
 
 
-def process_all_files(workdir=None, simon_sez=None, avoid_collisions=None):
+def process_all_files(workdir=None, simon_sez=None, avoid_collisions=None,
+        mapfile=None):
     """
     Manage the entire process of gathering data and renaming files.
     """
-
-    if workdir is None:
-        workdir = os.path.dirname(os.path.abspath(__file__))
-
     if not os.path.exists(workdir):
         logging.error("Directory {0} does not exist. Exiting.".format(workdir))
         sys.exit(1)
@@ -357,6 +357,7 @@ def process_all_files(workdir=None, simon_sez=None, avoid_collisions=None):
         logging.error("Directory {0} is not writable. Exiting.".format(workdir))
         sys.exit(1)
 
+    #import pdb; pdb.set_trace()
     file_map = init_file_map(workdir, avoid_collisions)
     process_file_map(file_map, simon_sez)
 
@@ -369,20 +370,46 @@ def main():
     parser.add_argument("-s", "--simon-sez",
             help="Really, Simon sez rename the files!", action="store_true")
     parser.add_argument("-a", "--avoid-collisions",
-            help="Rename until filenames do not collide. Danger!",
+            help="Append suffix until filenames do not collide. 10x max.",
             action="store_true")
     parser.add_argument("-d", "--directory",
             help="Read files from this directory.")
-    parser.add_argument("-v", "--verbose", help="Log level to DEBUG.", action="store_true")
+    parser.add_argument("-m", "--mapfile",
+            help="Use this map to rename files. Do not use metadata.")
+    parser.add_argument("-v", "--verbose", help="Log level to DEBUG.",
+            action="store_true")
     myargs = parser.parse_args()
+
+    # Use current directory if --directory not specified.
+    workdir = myargs.directory
+    if workdir is None:
+        workdir = os.path.dirname(os.path.abspath(__file__))
+
+    # Validate --map
+    mapfile = myargs.mapfile
+    if mapfile:
+        # --map is not compatible with --avoid-collisions.
+        error = False
+        if myargs.avoid_collisions:
+            logging.error("May not specify --avoid-collisions with --map.")
+            error = True
+        if not os.path.exists(mapfile):
+            logging.error("Map {} does not exist.".format(mapfile))
+            error = True
+        if not os.access(mapfile, os.R_OK):
+            logging.error("Map {} is not readable.".format(mapfile))
+            error = True
+        if error:
+            logging.error("Exiting due to errors.")
+            sys.exit(1)
 
     if (myargs.verbose):
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
 
-    process_all_files(workdir=myargs.directory, simon_sez=myargs.simon_sez,
-            avoid_collisions=myargs.avoid_collisions)
+    process_all_files(workdir=workdir, simon_sez=myargs.simon_sez,
+            avoid_collisions=myargs.avoid_collisions, mapfile=mapfile)
 
 if __name__ == '__main__':  # pragma: no cover
     main()
