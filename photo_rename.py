@@ -11,7 +11,9 @@ import pyexiv2
 
 
 # Need to look for *.JPG, *.jpg, and *.jpeg files for consideration.
-EXTENSIONS = ['JPG', 'jpg', 'jpeg']
+EXTENSIONS = ['JPG', 'jpg', 'jpeg', 'png', 'PNG']
+JPEG_FILE_TYPE = 'jpg'
+PNG_FILE_TYPE = 'png'
 MAX_RENAME_ATTEMPTS = 10
 logger = logging.getLogger(__name__)
 
@@ -33,14 +35,14 @@ class FileMap(object):
 
     Arguments:
         str: old_fn - Old Filename
-        dict: exif_data - For testing only. Dict with sample EXIF data.
+        dict: metadata - For testing only. Dict with sample EXIF data.
     """
 
-    def __init__(self, old_fn, avoid_collisions=None, exif_data=None):
+    def __init__(self, old_fn, filetype, avoid_collisions=None, metadata=None):
         """
         Initialize FileMap instance.
 
-        >>> filemap = FileMap('abc123.jpeg', None, {})
+        >>> filemap = FileMap('abc123.jpeg', JPEG_FILE_TYPE, None, {})
         >>> filemap.old_fn
         'abc123.jpeg'
         >>> filemap.new_fn
@@ -51,6 +53,7 @@ class FileMap(object):
         self.old_fn_fq = old_fn
         self.workdir = os.path.dirname(old_fn)
         self.old_fn = os.path.basename(old_fn)
+        self.filetype = filetype
 
         # Avoid filename collisions (dangerous) or log a message if there
         # would be one, and fail the move.
@@ -60,44 +63,47 @@ class FileMap(object):
         else:
             self.avoid_collisions = avoid_collisions
 
-        # Read EXIF data from old filename
-        if exif_data is None:
-            self.read_exif_data()
+        # Read EXIF or XMP metadata from old filename
+        if metadata is None:
+            self.read_metadata()
         else:
-            self.exif_data = exif_data
+            self.metadata = metadata
 
         new_fn = self.build_new_fn()
         self.new_fn = new_fn
         self.new_fn_fq = os.path.join(self.workdir, new_fn)
         self.logger.info("Initializing file mapper object for filename {}".format(self.new_fn))
 
-    def read_exif_data(self):
+    def read_metadata(self):
         """
-        Read EXIF data from file. Convert to Python dict.
+        Read EXIF or XMP data from file. Convert to Python dict.
         """
-
+        # Xmp.xmp.CreateDate
         # XXX: We already know file exists 'cuz we found it.
         img_md = pyexiv2.ImageMetadata(self.old_fn_fq)
         img_md.read()
 
-        self.exif_data ={}
-        for exifkey in img_md.exif_keys:
+        self.metadata ={}
+
+        if (self.filetype == PNG_FILE_TYPE):
+            metadata = [md_key for md_key in img_md.xmp_keys]
+        else:
+            metadata = [md_key for md_key in img_md.exif_keys]
+
+        for exifkey in metadata:
             tag = img_md[exifkey].raw_value
-            self.exif_data[exifkey] = tag
+            self.metadata[exifkey] = tag
             self.logger.debug("{}: {}".format(exifkey, tag))
 
-        if (len(self.exif_data) == 0):
+        if (len(self.metadata) == 0):
             raise Exception("{0} has no EXIF data.".format(self.old_fn))
 
     def build_new_fn(self):
         """
-        Generate new filename from old_fn EXIF data if possible. Even if not
-        possible, lowercase old_fn and normalize file extension.
+        Generate new filename from old_fn EXIF or XMP data if possible. Even if
+        not possible, lowercase old_fn and normalize file extension.
 
-        Arguments:
-            dict: EXIF data
-
-        >>> filemap = FileMap('abc123.jpeg', avoid_collisions=None, exif_data={'Exif.Image.DateTime': '2014:08:16 06:20:30'})
+        >>> filemap = FileMap('abc123.jpeg', JPEG_FILE_TYPE, avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014:08:16 06:20:30'})
         >>> filemap.new_fn
         '20140816_062030.jpg'
 
@@ -105,14 +111,17 @@ class FileMap(object):
 
         # Start with EXIF DateTime
         try:
-            new_fn = self.exif_data['Exif.Image.DateTime']
+            if (self.filetype == PNG_FILE_TYPE):
+                new_fn = self.metadata['Xmp.xmp.CreateDate']
+            else:
+                new_fn = self.metadata['Exif.Image.DateTime']
         except KeyError:
             new_fn = None
 
         # If this pattern does not strictly match then keep original name.
-        # YYYY:MM:DD HH:MM:SS
+        # YYYY:MM:DD HH:MM:SS (EXIF) or YYYY-MM-DDTHH:MM:SS (XMP)
         if (new_fn and not
-                re.match(r'^\d{4}:\d\d:\d\d \d\d:\d\d:\d\d$', new_fn)):
+                re.match(r'^\d{4}\W\d\d\W\d\d.\d\d\W\d\d\W\d\d$', new_fn)):
             # Setup for next step.
             new_fn = None
 
@@ -120,18 +129,22 @@ class FileMap(object):
         # Lowercase filename base and extension
         if new_fn is None:
             new_fn = self.old_fn.lower()
+            # XXX: Is this sloppy?
             new_fn = re.sub(r'.jpeg$', r'.jpg', new_fn)
+            new_fn = re.sub(r'.PNG$', r'.png', new_fn)
         else:
-            new_fn = "{0}.jpg".format(new_fn)
+            new_fn = "{0}.{1}".format(new_fn, self.filetype)
 
         # XXX: One may argue that the next step should be an 'else' clause of
         # the previous 'if' statement. But the intention here is to clean up
         # just a bit even if we're not really renaming the file. Windows
         # doesn't like colons in filenames.
 
-        # Rename using exif DateTime
+        # Rename using Exif.Image.DateTime or Xmp.xmp.CreateDate
         new_fn = re.sub(r':', r'', new_fn)
+        new_fn = re.sub(r'-', r'', new_fn)
         new_fn = re.sub(r' ', r'_', new_fn)
+        new_fn = re.sub(r'T', r'_', new_fn)
 
         return new_fn
 
@@ -275,7 +288,11 @@ def init_file_map(workdir, avoid_collisions=None):
                 logger.warn("Skipping directory {0}".format(filename))
                 continue
             try:
-                file_map.add(FileMap(filename, avoid_collisions))
+                if (extension in ('png', 'PNG')):
+                    filetype = PNG_FILE_TYPE
+                else:
+                    filetype = JPEG_FILE_TYPE
+                file_map.add(FileMap(filename, filetype, avoid_collisions))
             except Exception as e:
                 logger.warn("{0}".format(e))
 
@@ -295,7 +312,7 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
     Returns:
         None
 
-    >>> filemap = FileMap('IMG0332.JPG', avoid_collisions=None, exif_data={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
+    >>> filemap = FileMap('IMG0332.JPG', 'jpg', avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
     >>> def move_func(old_fn, new_fn): pass
     >>> file_map_list = FileMapList()
     >>> file_map_list.add(filemap)
