@@ -6,9 +6,8 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
+from stubs import *
 
-SKIP_TEST = True
-RUN_TEST = False
 
 class TestMainFunction(object):
     """Tests for main() function."""
