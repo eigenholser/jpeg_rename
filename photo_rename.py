@@ -30,7 +30,8 @@ def logged_class(cls):
     Class Decorator to add a class level logger to the class with module and
     name.
     """
-    cls.logger = logging.getLogger("{0}.{1}".format(cls.__module__, cls.__name__))
+    cls.logger = logging.getLogger(
+            "{0}.{1}".format(cls.__module__, cls.__name__))
     return cls
 
 
@@ -39,10 +40,6 @@ class FileMap(object):
     """
     FileMap represents a mapping between the old_fn and the new_fn. It's
     methods perform all necessary instance functions for the rename.
-
-    Arguments:
-        str: old_fn - Old Filename
-        dict: metadata - For testing only. Dict with sample EXIF data.
     """
 
     def __init__(self, old_fn, image_type, avoid_collisions=None, metadata=None):
@@ -63,7 +60,8 @@ class FileMap(object):
         self.image_type = image_type
 
         # Avoid filename collisions (dangerous) or log a message if there
-        # would be one, and fail the move.
+        # would be one, and fail the move. When set to False, rename attempt
+        # will be aborted for safety.
         self.collision_detected = False
         if avoid_collisions is None:
             self.avoid_collisions = False
@@ -79,7 +77,9 @@ class FileMap(object):
         new_fn = self.build_new_fn()
         self.new_fn = new_fn
         self.new_fn_fq = os.path.join(self.workdir, new_fn)
-        self.logger.info("Initializing file mapper object for filename {}".format(self.new_fn))
+        self.logger.debug(
+                "Initializing file mapper object for filename {}".format(
+                    self.new_fn))
 
     def read_metadata(self):
         """
@@ -160,7 +160,8 @@ class FileMap(object):
         Removes execute bit from file permission for USR, GRP, and OTH.
         """
         st = os.stat(self.new_fn_fq)
-        self.logger.info( "Removing execute permissions on {0}.".format(self.new_fn))
+        self.logger.info(
+                "Removing execute permissions on {0}.".format(self.new_fn))
         if bool(st.st_mode & stat.S_IXUSR):
             os.chmod(self.new_fn_fq, st.st_mode ^ stat.S_IXUSR)
         if bool(st.st_mode & stat.S_IXGRP):
@@ -172,18 +173,18 @@ class FileMap(object):
         """
         Move old_fn to new_fn.
         """
-
         # XXX: This call deliberately placed here instead of __init__(). All
-        # initialization is performed before any files are moved. The file move
-        # will change state and may introduce a collision. Doing the uniqueness
-        # check here will check current state.
+        # initialization is performed before any files are moved. The file
+        # move will change state and may introduce a collision. Doing the
+        # uniqueness check here will check current state.
         try:
             self.make_new_fn_unique()
         except Exception as e:
             raise e
 
         if self.collision_detected:
-            self.logger.warn( "{0} => {1} Destination collision. Aborting.".format(
+            self.logger.warn(
+                "{0} => {1} Destination collision. Aborting.".format(
                 self.old_fn, self.new_fn))
                 #os.path.basename(self.old_fn), os.path.basename(self.new_fn)))
             return
@@ -201,7 +202,7 @@ class FileMap(object):
     def make_new_fn_unique(self):
         """
         Check new_fn for uniqueness in 'workdir'. Rename, adding a numerical
-        suffix until it is unique.
+        suffix until it is unique. Impose limits to avoid long loop.
         """
 
         # Rename file by appending number if we have collision.
@@ -215,7 +216,7 @@ class FileMap(object):
                 # Same file, faux collision.
                 break
             if (not self.avoid_collisions):
-                # Do not attempt to rename.
+                # Abort - do not attempt to rename.
                 self.collision_detected = True
                 break
             new_fn = re.sub(r'^(\d+_\d+)-\d+\.jpg',
@@ -273,12 +274,6 @@ def init_file_map(workdir, mapfile=None, avoid_collisions=None):
     Read the work directory looking for files with extensions defined in the
     EXTENSIONS constant. Note that this could use a more elaborate magic
     number mechanism that would be cool.
-
-    Arguments:
-        str: workdir - The directory in which all activity will occur.
-
-    Returns:
-        list: file_map - List of FileMap instances.
     """
 
     # List of FileMap objects.
@@ -356,7 +351,8 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
                     move_func(fm.old_fn, fm.new_fn)
             else:
                 if fm.old_fn != fm.new_fn:
-                    logging.info("DRY RUN: {0} ==> {1}".format(fm.old_fn, fm.new_fn))
+                    logging.info("DRY RUN: Moving {0} ==> {1}".format(
+                        fm.old_fn, fm.new_fn))
                     fm.same_files = False   # For unit test only.
         except Exception as e:
             logging.info("{0}".format(e))
@@ -369,11 +365,13 @@ def process_all_files(workdir=None, simon_sez=None, avoid_collisions=None,
     Manage the entire process of gathering data and renaming files.
     """
     if not os.path.exists(workdir):
-        logging.error("Directory {0} does not exist. Exiting.".format(workdir))
+        logging.error(
+                "Directory {0} does not exist. Exiting.".format(workdir))
         sys.exit(1)
 
     if not os.access(workdir, os.W_OK):
-        logging.error("Directory {0} is not writable. Exiting.".format(workdir))
+        logging.error(
+                "Directory {0} is not writable. Exiting.".format(workdir))
         sys.exit(1)
 
     #import pdb; pdb.set_trace()
