@@ -42,7 +42,8 @@ class FileMap(object):
     methods perform all necessary instance functions for the rename.
     """
 
-    def __init__(self, old_fn, image_type, avoid_collisions=None, metadata=None):
+    def __init__(self, old_fn, image_type, avoid_collisions=None,
+            metadata=None, new_fn=None):
         """
         Initialize FileMap instance.
 
@@ -53,11 +54,13 @@ class FileMap(object):
         'abc123.jpg'
         >>>
         """
+        self.logger.debug("Old filename: {}".format(old_fn))
         self.MAX_RENAME_ATTEMPTS = MAX_RENAME_ATTEMPTS
         self.old_fn_fq = old_fn
         self.workdir = os.path.dirname(old_fn)
         self.old_fn = os.path.basename(old_fn)
         self.image_type = image_type
+        self.metadata = metadata
 
         # Avoid filename collisions (dangerous) or log a message if there
         # would be one, and fail the move. When set to False, rename attempt
@@ -68,13 +71,15 @@ class FileMap(object):
         else:
             self.avoid_collisions = avoid_collisions
 
-        # Read EXIF or XMP metadata from old filename
-        if metadata is None:
-            self.read_metadata()
-        else:
-            self.metadata = metadata
+        if not new_fn:
+            # Read EXIF or XMP metadata from old filename
+            if metadata is None:
+                self.metadata = self.read_metadata()
+            else:
+                self.metadata = metadata
+            new_fn = self.build_new_fn()
 
-        new_fn = self.build_new_fn()
+        self.logger.debug("Using new_fn: {}".format(new_fn))
         self.new_fn = new_fn
         self.new_fn_fq = os.path.join(self.workdir, new_fn)
         self.logger.debug(
@@ -87,23 +92,26 @@ class FileMap(object):
         """
         # Xmp.xmp.CreateDate
         # XXX: We already know file exists 'cuz we found it.
-        img_md = pyexiv2.ImageMetadata(self.old_fn_fq)
+        img_md = pyexiv2.ImageMetadata("{}".format(self.old_fn_fq))
         img_md.read()
 
-        self.metadata ={}
+        metadata = {}
 
         if (self.image_type == IMAGE_TYPE_PNG):
-            metadata = [md_key for md_key in img_md.xmp_keys]
+            metadata_keys = [md_key for md_key in img_md.xmp_keys]
         else:
-            metadata = [md_key for md_key in img_md.exif_keys]
+            metadata_keys = [md_key for md_key in img_md.exif_keys]
 
-        for exifkey in metadata:
+        for exifkey in metadata_keys:
             tag = img_md[exifkey].raw_value
-            self.metadata[exifkey] = tag
+            self.logger.debug(exifkey)
             self.logger.debug("{}: {}".format(exifkey, tag))
+            metadata[exifkey] = tag
 
-        if (len(self.metadata) == 0):
+        if (len(metadata) == 0):
             raise Exception("{0} has no EXIF data.".format(self.old_fn))
+
+        return metadata
 
     def build_new_fn(self):
         """
@@ -190,11 +198,12 @@ class FileMap(object):
             return
 
         try:
-            self.logger.info( "Moving the files: {0} ==> {1}".format(
-                self.old_fn, self.new_fn))
             # XXX: Unit tests did not catch this bug.
             # os.rename(self.old_fn, self.new_fn)
-            os.rename(self.old_fn_fq, self.new_fn_fq)
+            if self.old_fn != self.new_fn:
+                self.logger.info("Moving the files: {0} ==> {1}".format(
+                    self.old_fn, self.new_fn))
+                os.rename(self.old_fn_fq, self.new_fn_fq)
             self._chmod()
         except OSError as e:
             self.logger.warn("Unable to rename file: {0}".format(e.strerror))
@@ -209,7 +218,6 @@ class FileMap(object):
         # TODO: I wish I didn't specify \d+_\d+ for the first part. perhaps not
         # -\d\ before .jpg would be better for the second
         # match.
-        new_fn = self.new_fn
         counter = 1
         while(os.path.exists(self.new_fn_fq)):
             if (self.old_fn == self.new_fn):
@@ -219,17 +227,22 @@ class FileMap(object):
                 # Abort - do not attempt to rename.
                 self.collision_detected = True
                 break
-            new_fn = re.sub(r'^(\d+_\d+)-\d+\.jpg',
-                    r'\1-{0}.jpg'.format(counter), self.new_fn)
-            new_fn = re.sub(r'^(\d+_\d+)\.jpg',
-                    r'\1-{0}.jpg'.format(counter), self.new_fn)
+
+            # Since we're renaming files that may have already been renamed
+            # with a `-#' suffix, we need to catch that pattern first.
+            new_fn_regex_s1 = r"^(\d+_\d+)-\d+\.{}".format(self.image_type)
+            new_fn_regex_s2 = r"^(\d+_\d+)\.{}".format(self.image_type)
+            new_fn_regex_r = r"\1-{0}.{1}".format(counter, self.image_type)
+            new_fn = re.sub(new_fn_regex_s1, new_fn_regex_r, self.new_fn)
+            new_fn = re.sub(new_fn_regex_s2, new_fn_regex_r, new_fn)
+
+            self.new_fn = new_fn
+            self.new_fn_fq = os.path.join(self.workdir, new_fn)
+
             counter += 1
             if counter > self.MAX_RENAME_ATTEMPTS:
                 raise Exception(
-                        "Too many rename attempts: {0}".format(self.new_fn))
-            self.new_fn_fq = os.path.join(self.workdir, new_fn)
-        self.new_fn = new_fn
-        self.new_fn_fq = os.path.join(self.workdir, new_fn)
+                    "Too many rename attempts: {0}".format(self.new_fn))
 
 
 @logged_class
@@ -311,9 +324,25 @@ def init_file_map(workdir, mapfile=None, avoid_collisions=None):
                     file_map_list.add(FileMap(
                         filename_fq, image_type, avoid_collisions))
             except Exception as e:
-                logger.warn("{0}".format(e))
+                logger.warn("FileMap Error: {0}".format(e))
+    return file_map_list
 
-    return file_map
+
+def read_alt_file_map(mapfile, delimiter='\t'):
+    """
+    Read a filename map for the purpose of transforming the filenames as an
+    alternative to using EXIF/XMP metadata DateTime information. Only require
+    map file as an absolute path.
+    """
+    with open(mapfile, 'r') as f:
+        lines = f.readlines()
+
+    # XXX: This is soooo cool! List of lists flattened all on one nested
+    # comprehension.
+    # [[k1, v1], [k2, v2], ..., [kn, vn]] --> {k1: v1, k2: v2, ..., kn: vn}
+    return dict(zip(*[iter([x for sublist in [
+        str.split(line.rstrip('\n'), delimiter) for line in lines]
+        for x in sublist])] * 2))
 
 
 def process_file_map(file_map, simon_sez=None, move_func=None):
@@ -359,8 +388,8 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
             break
 
 
-def process_all_files(workdir=None, simon_sez=None, avoid_collisions=None,
-        mapfile=None):
+def process_all_files(
+        workdir=None, simon_sez=None, avoid_collisions=None, mapfile=None):
     """
     Manage the entire process of gathering data and renaming files.
     """
@@ -375,7 +404,7 @@ def process_all_files(workdir=None, simon_sez=None, avoid_collisions=None,
         sys.exit(1)
 
     #import pdb; pdb.set_trace()
-    file_map = init_file_map(workdir, avoid_collisions)
+    file_map = init_file_map(workdir, mapfile, avoid_collisions)
     process_file_map(file_map, simon_sez)
 
 
