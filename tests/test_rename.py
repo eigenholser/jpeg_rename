@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import pytest
 from mock import Mock, patch
@@ -40,11 +41,14 @@ class TestRename():
         exif_data = EXIF_DATA_VALID['exif_data']
         filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
                 avoid_collisions=True, metadata=exif_data)
+        counter = 2
         new_fn = filemap.new_fn
-        filemap.MAX_RENAME_ATTEMPTS = 2
+        renamed_fn = re.sub(
+                r"^(\d+_\d+)\.jpg", r"\1-{}.jpg".format(counter), new_fn)
+        filemap.MAX_RENAME_ATTEMPTS = counter
         with pytest.raises(Exception):
             filemap.make_new_fn_unique()
-        assert filemap.new_fn == EXIF_DATA_VALID['expected_new_fn']
+        assert filemap.new_fn == renamed_fn
 
     @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
     @patch('photo_rename.os.path.exists')

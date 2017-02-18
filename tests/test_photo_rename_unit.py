@@ -9,18 +9,22 @@ from photo_rename import *
 from stubs import *
 
 class TestGetNewFn():
-    """Tests for method build_new_fn() are in this class."""
+    """
+    Tests for method build_new_fn() are in this class.
+    """
     @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
-    @pytest.mark.parametrize("old_fn,expected_new_fn,exif_data", [
+    @pytest.mark.parametrize("old_fn, expected_new_fn, exif_data", [
         (OLD_FN_JPG_LOWER, EXIF_DATA_VALID['expected_new_fn'],
             EXIF_DATA_VALID['exif_data'],),
         (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, EXIF_DATA_NOT_VALID),
         (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, {},),
         (OLD_FN_JPEG, OLD_FN_JPG_LOWER, {},),
     ])
-    def test_build_new_fn_parametrized_exif_data(self, old_fn, expected_new_fn,
-            exif_data):
-        """Test build_new_fn() with various EXIF data."""
+    def test_build_new_fn_parametrized_exif_data(
+            self, old_fn, expected_new_fn, exif_data):
+        """
+        Test build_new_fn() with various EXIF data.
+        """
         filemap = FileMap(old_fn, IMAGE_TYPE_JPEG, None, exif_data)
         new_fn = filemap.new_fn
         assert new_fn == expected_new_fn
@@ -93,7 +97,7 @@ class TestMove():
         Rename file with mocked os.rename. Verify called with args.
         """
         mock_fn_unique.return_value = None
-        old_fn = OLD_FN_JPG_LOWER
+        old_fn = OLD_FN_JPG_UPPER
         exif_data = EXIF_DATA_NOT_VALID
         filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
                 avoid_collisions=None, metadata=exif_data)
@@ -111,7 +115,7 @@ class TestMove():
         """
         mock_fn_unique.return_value = None
         mock_os.side_effect = OSError((1, "Just testing.",))
-        old_fn = OLD_FN_JPG_LOWER
+        old_fn = OLD_FN_JPG_UPPER
         exif_data = EXIF_DATA_NOT_VALID
         filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
                 avoid_collisions=None, metadata=exif_data)
@@ -152,66 +156,4 @@ class TestMove():
         new_fn = filemap.new_fn
         filemap.move()
         assert new_fn == old_fn
-
-
-class TestRename():
-    """Tests for method build_new_fn() are in this class."""
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
-    @patch('photo_rename.os.path.exists')
-    def test_rename_empty_exif_data(self, mock_exists):
-        """Make unique filename with empty EXIF data."""
-        mock_exists.return_value = True
-        old_fn = OLD_FN_JPG_LOWER
-        exif_data = EXIF_DATA_NOT_VALID
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
-                avoid_collisions=True, metadata=exif_data)
-        new_fn = filemap.new_fn
-        filemap.make_new_fn_unique()
-        assert filemap.new_fn == old_fn
-
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
-    @patch('photo_rename.os.path.exists')
-    def test_rename_with_valid_exif_data_and_avoid_collisions(self,
-            mock_exists):
-        """Make unique new filename from valid EXIF data. Avoid collisions."""
-        mock_exists.return_value = True
-        old_fn = OLD_FN_JPG_LOWER
-        exif_data = EXIF_DATA_VALID['exif_data']
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
-                avoid_collisions=True, metadata=exif_data)
-        new_fn = filemap.new_fn
-        filemap.MAX_RENAME_ATTEMPTS = 2
-        with pytest.raises(Exception):
-            filemap.make_new_fn_unique()
-        assert filemap.new_fn == EXIF_DATA_VALID['expected_new_fn']
-
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
-    @patch('photo_rename.os.path.exists')
-    def test_rename_with_valid_exif_data_and_no_avoid_collisions(self,
-            mock_exists):
-        """Make unique new filename from valid EXIF data. Do not avoid
-        collisions."""
-        mock_exists.return_value = True
-        old_fn = OLD_FN_JPG_LOWER
-        exif_data = EXIF_DATA_VALID['exif_data']
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
-                avoid_collisions=False, metadata=exif_data)
-        new_fn = filemap.new_fn
-        filemap.MAX_RENAME_ATTEMPTS = 2
-        filemap.make_new_fn_unique()
-        assert filemap.new_fn == EXIF_DATA_VALID['expected_new_fn']
-
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
-    @patch('photo_rename.os.path.exists')
-    def test_rename_no_collision(self, mock_exists):
-        """Make unique new filename from valid EXIF data. Do not avoid
-        collisions."""
-        mock_exists.return_value = False
-        old_fn = OLD_FN_JPG_LOWER
-        exif_data = {}
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
-                avoid_collisions=False, metadata=exif_data)
-        new_fn = filemap.new_fn
-        filemap.make_new_fn_unique()
-        assert filemap.new_fn == old_fn
 
