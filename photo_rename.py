@@ -9,13 +9,18 @@ import sys
 import pyexiv2
 
 
-# Need to look for *.JPG, *.jpg, *.jpeg, *.png, and *.PNG files for
-# consideration.
-IMAGE_EXTENSIONS_PNG = ['png', 'PNG']
-IMAGE_EXTENSIONS_JPEG = ['JPG', 'jpg', 'jpeg']
-EXTENSIONS = IMAGE_EXTENSIONS_PNG + IMAGE_EXTENSIONS_JPEG
+# Need to look for JPEG, PNG, and TIFF images. Will perform  case insensitive
+# search.
 IMAGE_TYPE_JPEG = 'jpg'
 IMAGE_TYPE_PNG = 'png'
+IMAGE_TYPE_TIFF = 'tiff'
+EXTENSIONS = {
+    'png': IMAGE_TYPE_PNG,
+    'jpg': IMAGE_TYPE_JPEG,
+    'jpeg': IMAGE_TYPE_JPEG,
+    'tif': IMAGE_TYPE_TIFF,
+    'tiff': IMAGE_TYPE_TIFF,
+}
 MAX_RENAME_ATTEMPTS = 10
 logger = logging.getLogger(__name__)
 
