@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-import glob
 import logging
 import os
 import re
@@ -264,7 +263,7 @@ class FileMapList(object):
         return (x for x in self.file_map)
 
 
-def init_file_map(workdir, avoid_collisions=None):
+def init_file_map(workdir, mapfile=None, avoid_collisions=None):
     """
     Read the work directory looking for files with extensions defined in the
     EXTENSIONS constant. Note that this could use a more elaborate magic
@@ -278,24 +277,39 @@ def init_file_map(workdir, avoid_collisions=None):
     """
 
     # List of FileMap objects.
-    file_map = FileMapList()
+    file_map_list = FileMapList()
 
     # Initialize file_map list.
-    for extension in EXTENSIONS:
-        for filename in glob.glob(os.path.join(workdir,
-                '*.{0}'.format(extension))):
-            # XXX: There once was some trouble here that caused me to comment
+    for extension in EXTENSIONS.keys():
+        image_regex = r"\." + re.escape(extension) + r"$"
+
+        if mapfile:
+            all_files_list = read_alt_file_map(mapfile)
+        else:
+            all_files_list = os.listdir(workdir)
+
+        matching_files = [filename for filename in all_files_list
+                if re.search(image_regex, filename, re.IGNORECASE)]
+        logger.debug(matching_files)
+        for filename in (matching_files):
+            filename_fq = os.path.join(workdir, filename)
+            # TODO: There once was some trouble here that caused me to comment
             # the directory check. Dunno. Keep an eye on it in case it pops up
             # again in the future.
-            if os.path.isdir(filename):
-                logger.warn("Skipping directory {0}".format(filename))
+            if os.path.isdir(filename_fq):
+                logger.warn("Skipping directory {0}".format(filename_fq))
                 continue
             try:
-                if (extension in IMAGE_EXTENSIONS_PNG):
-                    image_type = IMAGE_TYPE_PNG
+                image_type = EXTENSIONS[extension]
+                if mapfile:
+                    new_fn = "{}.{}".format(all_files_list[filename],
+                        image_type)
+                    file_map_list.add(
+                        FileMap(filename_fq, image_type, avoid_collisions, {},
+                            new_fn))
                 else:
-                    image_type = IMAGE_TYPE_JPEG
-                file_map.add(FileMap(filename, image_type, avoid_collisions))
+                    file_map_list.add(FileMap(
+                        filename_fq, image_type, avoid_collisions))
             except Exception as e:
                 logger.warn("{0}".format(e))
 
