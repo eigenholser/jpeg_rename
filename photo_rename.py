@@ -9,18 +9,28 @@ import sys
 import pyexiv2
 
 
-# Need to look for JPEG, PNG, and TIFF images. Will perform  case insensitive
-# search.
-IMAGE_TYPE_JPEG = 'jpg'
-IMAGE_TYPE_PNG = 'png'
-IMAGE_TYPE_TIFF = 'tiff'
-EXTENSIONS = {
-    'png': IMAGE_TYPE_PNG,
-    'jpg': IMAGE_TYPE_JPEG,
-    'jpeg': IMAGE_TYPE_JPEG,
-    'tif': IMAGE_TYPE_TIFF,
-    'tiff': IMAGE_TYPE_TIFF,
+# Configure built-in support for various image types.
+IMAGE_TYPE_ARW = 1
+IMAGE_TYPE_JPEG = 2
+IMAGE_TYPE_PNG = 3
+IMAGE_TYPE_TIFF = 4
+IMAGE_TYPES = {
+    IMAGE_TYPE_ARW  : ['arw'],
+    IMAGE_TYPE_JPEG : ['jpg', 'jpeg'],
+    IMAGE_TYPE_PNG  : ['png'],
+    IMAGE_TYPE_TIFF : ['tif', 'tiff'],
 }
+EXTENSIONS_PREFERRED = {
+    IMAGE_TYPE_ARW  : 'arw',
+    IMAGE_TYPE_JPEG : 'jpg',
+    IMAGE_TYPE_PNG  : 'png',
+    IMAGE_TYPE_TIFF : 'tif',
+}
+EXTENSIONS = [
+    ext for sublist in [v for k, v in IMAGE_TYPES.items()] for ext in sublist]
+EXTENSION_TO_IMAGE_TYPE = dict([
+    (ext, it) for it, sublist in [(k, v) for k, v in IMAGE_TYPES.items()]
+    for ext in sublist])
 MAX_RENAME_ATTEMPTS = 10
 logger = logging.getLogger(__name__)
 
@@ -62,6 +72,11 @@ class FileMap(object):
         self.image_type = image_type
         self.metadata = metadata
 
+        self.old_fn_base = self.get_base(self.old_fn)
+        self.old_fn_base_lower = self.get_base(self.old_fn).lower()
+        self.old_fn_ext = self.get_extension(self.old_fn)
+        self.old_fn_ext_lower = self.get_extension(self.old_fn).lower()
+
         # Avoid filename collisions (dangerous) or log a message if there
         # would be one, and fail the move. When set to False, rename attempt
         # will be aborted for safety.
@@ -85,6 +100,24 @@ class FileMap(object):
         self.logger.debug(
                 "Initializing file mapper object for filename {}".format(
                     self.new_fn))
+
+    def get_base(self, filename):
+        """
+        Return the filename base--i.e. without extension.
+        """
+        res = re.search(r"^(.+)\..+$", filename)
+        if res:
+            return res.group(1)
+        return None
+
+    def get_extension(self, filename):
+        """
+        Return the file extension of the old filename.
+        """
+        res = re.search(r"^.+\.(.+)$", filename)
+        if res:
+            return res.group(1)
+        return None
 
     def read_metadata(self):
         """
@@ -141,14 +174,13 @@ class FileMap(object):
             new_fn = None
 
         # Don't assume exif tag exists. If it does not, keep original filename.
-        # Lowercase filename base and extension
+        # Lowercase extension.
         if new_fn is None:
-            new_fn = self.old_fn.lower()
-            # XXX: Is this sloppy?
-            new_fn = re.sub(r'.jpeg$', r'.jpg', new_fn)
-            new_fn = re.sub(r'.PNG$', r'.png', new_fn)
+            new_fn = "{base}.{ext}".format(
+                    base=self.old_fn_base, ext=self.old_fn_ext_lower)
         else:
-            new_fn = "{0}.{1}".format(new_fn, self.image_type)
+            new_fn = "{0}.{1}".format(
+                    new_fn, EXTENSIONS_PREFERRED[self.image_type])
 
         # XXX: One may argue that the next step should be an 'else' clause of
         # the previous 'if' statement. But the intention here is to clean up
@@ -213,11 +245,9 @@ class FileMap(object):
         Check new_fn for uniqueness in 'workdir'. Rename, adding a numerical
         suffix until it is unique. Impose limits to avoid long loop.
         """
-
         # Rename file by appending number if we have collision.
-        # TODO: I wish I didn't specify \d+_\d+ for the first part. perhaps not
-        # -\d\ before .jpg would be better for the second
-        # match.
+        # TODO: I wish I didn't specify \d+_\d+ for the first part. perhaps
+        # not -\d\ before .jpg would be better for the second match.
         counter = 1
         while(os.path.exists(self.new_fn_fq)):
             if (self.old_fn == self.new_fn):
@@ -230,9 +260,12 @@ class FileMap(object):
 
             # Since we're renaming files that may have already been renamed
             # with a `-#' suffix, we need to catch that pattern first.
-            new_fn_regex_s1 = r"^(\d+_\d+)-\d+\.{}".format(self.image_type)
-            new_fn_regex_s2 = r"^(\d+_\d+)\.{}".format(self.image_type)
-            new_fn_regex_r = r"\1-{0}.{1}".format(counter, self.image_type)
+            new_fn_regex_s1 = r"^(\d+_\d+)-\d+\.{}".format(
+                    EXTENSIONS_PREFERRED[self.image_type])
+            new_fn_regex_s2 = r"^(\d+_\d+)\.{}".format(
+                    EXTENSIONS_PREFERRED[self.image_type])
+            new_fn_regex_r = r"\1-{0}.{1}".format(counter,
+                    EXTENSIONS_PREFERRED[self.image_type])
             new_fn = re.sub(new_fn_regex_s1, new_fn_regex_r, self.new_fn)
             new_fn = re.sub(new_fn_regex_s2, new_fn_regex_r, new_fn)
 
@@ -292,15 +325,29 @@ def init_file_map(workdir, mapfile=None, avoid_collisions=None):
     # List of FileMap objects.
     file_map_list = FileMapList()
 
+    list_workdir = os.listdir(workdir)
+    if mapfile:
+        # Extract files in work dir that match against our alternate file map.
+        #
+        # alt_file_map.keys() = ['abc', 'def', 'ghi', 'jkl', 'mno']
+        # list_workdir = ['abc.jpg', 'ghi.jpg', 'pqr.jpg']
+        # results in...
+        # all_files_list = ['abc.jpg', 'ghi.jpg']
+
+        alt_file_map = read_alt_file_map(mapfile)
+        all_files_list = []
+        filename_prefix_map = {}
+        for file_prefix in alt_file_map.keys():
+            for filename in list_workdir:
+                if re.search(r"^{}\..+$".format(file_prefix), filename):
+                    all_files_list.append(filename)
+                    filename_prefix_map[filename] = file_prefix
+    else:
+        all_files_list = list_workdir
+
     # Initialize file_map list.
-    for extension in EXTENSIONS.keys():
+    for extension in EXTENSIONS:
         image_regex = r"\." + re.escape(extension) + r"$"
-
-        if mapfile:
-            all_files_list = read_alt_file_map(mapfile)
-        else:
-            all_files_list = os.listdir(workdir)
-
         matching_files = [filename for filename in all_files_list
                 if re.search(image_regex, filename, re.IGNORECASE)]
         logger.debug(matching_files)
@@ -313,10 +360,11 @@ def init_file_map(workdir, mapfile=None, avoid_collisions=None):
                 logger.warn("Skipping directory {0}".format(filename_fq))
                 continue
             try:
-                image_type = EXTENSIONS[extension]
+                image_type = EXTENSION_TO_IMAGE_TYPE[extension]
                 if mapfile:
-                    new_fn = "{}.{}".format(all_files_list[filename],
-                        image_type)
+                    filename_prefix = filename_prefix_map[filename]
+                    new_fn = "{}.{}".format(
+                            alt_file_map[filename_prefix], extension)
                     file_map_list.add(
                         FileMap(filename_fq, image_type, avoid_collisions, {},
                             new_fn))

@@ -41,7 +41,7 @@ class TestRename():
         exif_data = EXIF_DATA_VALID['exif_data']
         filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
                 avoid_collisions=True, metadata=exif_data)
-        counter = 2
+        counter = 4
         new_fn = filemap.new_fn
         renamed_fn = re.sub(
                 r"^(\d+_\d+)\.jpg", r"\1-{}.jpg".format(counter), new_fn)

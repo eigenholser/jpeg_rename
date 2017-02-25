@@ -30,7 +30,7 @@ class TestInitFileMap():
         file_map = init_file_map('.')
         assert file_map.file_map == [
                 test_file_map, test_file_map, test_file_map, test_file_map,
-                test_file_map]
+                test_file_map, test_file_map]
 
     @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
     @patch('photo_rename.FileMap')
