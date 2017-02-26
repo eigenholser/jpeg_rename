@@ -484,14 +484,20 @@ def main():
     if mapfile:
         # --map is not compatible with --avoid-collisions.
         error = False
+        if myargs.directory:
+            logging.error("May not specify --directory with --mapfile.")
+            error = True
+        else:
+            workdir = os.path.dirname(os.path.abspath(mapfile))
         if myargs.avoid_collisions:
-            logging.error("May not specify --avoid-collisions with --map.")
+            logging.error(
+                    "May not specify --avoid-collisions with --mapfile.")
             error = True
         if not os.path.exists(mapfile):
-            logging.error("Map {} does not exist.".format(mapfile))
+            logging.error("Map file {} does not exist.".format(mapfile))
             error = True
         if not os.access(mapfile, os.R_OK):
-            logging.error("Map {} is not readable.".format(mapfile))
+            logging.error("Map file {} is not readable.".format(mapfile))
             error = True
         if error:
             logging.error("Exiting due to errors.")
