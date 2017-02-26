@@ -8,27 +8,6 @@ sys.path.insert(0, app_path + '/../')
 from photo_rename import *
 from stubs import *
 
-class TestGetNewFn():
-    """
-    Tests for method build_new_fn() are in this class.
-    """
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
-    @pytest.mark.parametrize("old_fn, expected_new_fn, exif_data", [
-        (OLD_FN_JPG_LOWER, EXIF_DATA_VALID['expected_new_fn'],
-            EXIF_DATA_VALID['exif_data'],),
-        (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, EXIF_DATA_NOT_VALID),
-        (OLD_FN_JPG_LOWER, OLD_FN_JPG_LOWER, {},),
-        (OLD_FN_JPEG, OLD_FN_JPG_LOWER, {},),
-    ])
-    def test_build_new_fn_parametrized_exif_data(
-            self, old_fn, expected_new_fn, exif_data):
-        """
-        Test build_new_fn() with various EXIF data.
-        """
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG, None, exif_data)
-        new_fn = filemap.new_fn
-        assert new_fn == expected_new_fn
-
 
 class TestReadExifData():
     """Tests for method read_exif_data() are in this class."""
@@ -88,22 +67,28 @@ class TestReadExifData():
 
 
 class TestMove():
-    """Tess for method move() are in this class."""
+    """
+    Test for method move() are in this class.
+    """
     @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.parametrize("old_fn", [
+        OLD_FN_JPG_LOWER, OLD_FN_JPG_UPPER])
     @patch('photo_rename.FileMap.make_new_fn_unique')
     @patch('photo_rename.os.rename')
-    def test_move_orthodox(self, mock_os, mock_fn_unique):
+    def test_move_orthodox(self, mock_os, mock_fn_unique, old_fn):
         """
         Rename file with mocked os.rename. Verify called with args.
         """
         mock_fn_unique.return_value = None
-        old_fn = OLD_FN_JPG_UPPER
         exif_data = EXIF_DATA_NOT_VALID
         filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
                 avoid_collisions=None, metadata=exif_data)
         new_fn = filemap.new_fn
         filemap.move()
-        mock_os.assert_called_with(old_fn, new_fn)
+        if old_fn == new_fn:
+            mock_os.assert_not_called()
+        else:
+            mock_os.assert_called_with(old_fn, new_fn)
 
     @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
     @patch('photo_rename.FileMap.make_new_fn_unique')
