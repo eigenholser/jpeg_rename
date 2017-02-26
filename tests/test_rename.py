@@ -37,9 +37,8 @@ class TestRename():
         Make unique new filename from valid EXIF data. Avoid collisions.
         """
         mock_exists.return_value = True
-        old_fn = OLD_FN_JPG_LOWER
         exif_data = EXIF_DATA_VALID['exif_data']
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
+        filemap = FileMap(OLD_FN_JPG_LOWER, IMAGE_TYPE_JPEG,
                 avoid_collisions=True, metadata=exif_data)
         counter = 2
         new_fn = filemap.new_fn
