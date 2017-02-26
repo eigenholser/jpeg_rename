@@ -10,7 +10,7 @@ from photo_rename import *
 from stubs import *
 
 
-class TestRename():
+class TestRename(object):
     """
     Tests for method build_new_fn() are in this class.
     """
