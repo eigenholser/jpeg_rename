@@ -2,16 +2,16 @@ JPEG Rename Utility
 ===================
 Demo code written for SLC Python.
 
-``photo_rename.py`` will find all JPEG or PNG files in ``DIRECTORY``. It
-will then read the ``DateTimeOriginal`` EXIF tag if JPEG, or ``CreateDate``
+``photo_rename.py`` will find all supported files in ``DIRECTORY``. Currently
+the list of supported file types is ARW, JPEG, PNG, and TIFF. It will read
+the ``DateTimeOriginal`` EXIF tag if JPEG, TIFF, ARW, or ``CreateDate`` XMP
 tag if PNG. Each found file will be renamed using the metadata. Alternatively,
 a map file may be specified which will be used for renaming.
 
 ``photo_rename.py`` is useful when combining digital photographs from different
-sources like a mobile phone and a Canon point and shoot camera for instance.
-The photographs from the phone are named ``YYYYMMDD_HHMMSS.jpg`` while the
-Canon camera photographs are name ``IMG_nnnn.JPG``. Other variations on this
-theme have led to the creation of this utility.
+sources like a mobile phone and a Canon point and shoot camera. It creates a
+canonical name using date, time, and possibly a sequence number for
+filename collisions.
 
 It began as a 4-line shell script using the ``exiftool`` program combined with
 ``sed`` and ``awk``. Trouble was that name collisions were potentially tragic
@@ -53,6 +53,11 @@ would do if ``--simon-sez`` were also specified. It will indicate ``DRY RUN``
 in the output. ``photo_rename.py`` will **only** operate in the directory
 specified.
 
+If ``--mapfile`` is specified, work will be performed in the directory
+containing the map file. Option ``--directory`` is not used or permitted when
+``--mapfile`` is specified. Option ``--avoid-collisions`` is also not
+permitted with ``--mapfile`` since filenames are known in advance.
+
 ``photo_rename.py`` will avoid filename collisions by appending ``_#`` to
 filenames as needed. Since this behavior can be troublesome, it will not occur
 unless explicitly requested with ``--avoid-collisions`` on the command line.
@@ -67,6 +72,7 @@ Map File
 The map file contains a tab delimited current filename to new filename mapping
 on each row. Create any filename you like. It must live with the photos to be
 renamed. If ``--mapfile`` is specified, image metadata will not be used.
+Filename extensions must not be used in the mapfile.
 
 
 Run Tests
