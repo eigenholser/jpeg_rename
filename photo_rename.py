@@ -333,7 +333,6 @@ def init_file_map(workdir, mapfile=None, avoid_collisions=None):
         # list_workdir = ['abc.jpg', 'ghi.jpg', 'pqr.jpg']
         # results in...
         # all_files_list = ['abc.jpg', 'ghi.jpg']
-
         alt_file_map = read_alt_file_map(mapfile)
         all_files_list = []
         filename_prefix_map = {}
@@ -350,7 +349,8 @@ def init_file_map(workdir, mapfile=None, avoid_collisions=None):
         image_regex = r"\." + re.escape(extension) + r"$"
         matching_files = [filename for filename in all_files_list
                 if re.search(image_regex, filename, re.IGNORECASE)]
-        logger.debug(matching_files)
+        logger.debug("Files matching extension {ext}: {files}".format(
+            ext=extension, files=matching_files))
         for filename in (matching_files):
             filename_fq = os.path.join(workdir, filename)
             # TODO: There once was some trouble here that caused me to comment
