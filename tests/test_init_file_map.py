@@ -9,7 +9,7 @@ from photo_rename import *
 from stubs import *
 
 
-class TestInitFileMap():
+class TestInitFileMapMetadata():
     """
     Tests for function init_file_map() are in this class.
     """
@@ -63,3 +63,48 @@ class TestInitFileMap():
         mock_re.search.return_value = True
         file_map = init_file_map('.')
         assert file_map.file_map == []
+
+
+class Stub2FileMap(object):
+
+    def __init__(self, old_fn, image_type, avoid_collisions=None,
+            metadata=None, new_fn=None):
+        self.old_fn_fq = old_fn
+        self.old_fn = os.path.basename(old_fn)
+        self.image_type = image_type
+
+        if avoid_collisions is None:
+            self.avoid_collisions = False
+        else:
+            self.avoid_collisions = avoid_collisions
+
+        if not new_fn:
+            if metadata is None:
+                self.metadata = {}
+            else:
+                self.metadata = metadata
+            new_fn = "filename.jpg"
+
+        self.new_fn = new_fn
+
+
+class TestInitFileMapAlt(object):
+    """
+    Tests using alternate file map.
+    """
+
+    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @patch('photo_rename.FileMap', Stub2FileMap)
+    @patch('photo_rename.read_alt_file_map')
+    @patch('photo_rename.os.listdir')
+    def test_basic_alt_map(self, m_listdir, m_readfm):
+        """
+        """
+        expected = ["abc.jpg", "ghi.png"]
+        m_readfm.return_value = {"abc": "123", "def": "456", "ghi": "789"}
+        m_listdir.return_value = ["abc.jpg", "ghi.png", "jkl.tif"]
+        file_map = init_file_map('.', mapfile="mapfile.txt")
+        assert len([x for x in file_map.get()]) == len(expected)
+        assert file_map.file_map[0].old_fn in expected
+        assert file_map.file_map[1].old_fn in expected
+
