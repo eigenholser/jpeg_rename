@@ -10,25 +10,9 @@ from stubs import *
 
 
 class TestProcessAllFiles():
-    """Tests for the function process_all_files() are in this class."""
-    @pytest.mark.skipif(True, reason="Obsolete. Code moved to main(). Relocate test.")
-    @patch('photo_rename.init_file_map')
-    @patch('photo_rename.os.access')
-    @patch('photo_rename.os.path.dirname')
-    @patch('photo_rename.os.path.exists')
-    @patch('photo_rename.os.path.abspath')
-    def test_process_all_files_workdir_none(self, mock_abspath, mock_exists,
-            mock_dirname, mock_os_access, mock_init_file_map):
-        """
-        Test process_all_files() with workdir=None, avoid_collisions=None.
-        Verify that init_file_map() is called with (DIRNAME, None).
-        """
-        DIRNAME = '/foo/bar'
-        mock_abspath.return_value = DIRNAME
-        mock_exists.return_value = True
-        mock_dirname.return_value = DIRNAME
-        process_all_files()
-        mock_init_file_map.assert_called_with(DIRNAME, None)
+    """
+    Tests for the function process_all_files() are in this class.
+    """
 
     @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
     @patch('photo_rename.process_file_map')
