@@ -430,6 +430,7 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
                 if fm.old_fn != fm.new_fn:
                     logging.info("DRY RUN: Moving {0} ==> {1}".format(
                         fm.old_fn, fm.new_fn))
+                    # TODO: Hmm, see about not doing this.
                     fm.same_files = False   # For unit test only.
         except Exception as e:
             logging.info("{0}".format(e))
