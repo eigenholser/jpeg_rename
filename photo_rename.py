@@ -61,7 +61,7 @@ class FileMap(object):
         >>> filemap.old_fn
         'abc123.jpeg'
         >>> filemap.new_fn
-        'abc123.jpg'
+        'abc123.jpeg'
         >>>
         """
         self.logger.debug("Old filename: {}".format(old_fn))
@@ -406,7 +406,7 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
     Returns:
         None
 
-    >>> filemap = FileMap('IMG0332.JPG', 'jpg', avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
+    >>> filemap = FileMap('IMG0332.JPG', IMAGE_TYPE_JPEG, avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
     >>> def move_func(old_fn, new_fn): pass
     >>> file_map_list = FileMapList()
     >>> file_map_list.add(filemap)
