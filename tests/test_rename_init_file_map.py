@@ -6,6 +6,7 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
+from rename import *
 from .stubs import *
 from . import TEST_RENAME_INIT_FILEMAP_METADATA, TEST_RENAME_INIT_FILEMAP_ALT
 
@@ -17,14 +18,15 @@ class TestRenameInitFileMapMetadata():
     skiptests = not TEST_RENAME_INIT_FILEMAP_METADATA
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.FileMap')
-    @patch('photo_rename.re')
-    @patch('photo_rename.os.listdir')
+    @patch('rename.FileMap')
+    @patch('rename.re')
+    @patch('rename.os.listdir')
     def test_init_file_map_orthodox(
             self, mock_listdir, mock_re, mock_filemap):
         """
         Tests init_file_map() list building. Verifies expected return value.
         """
+        import pdb; pdb.set_trace()
         test_file_map = StubFileMap()
         mock_filemap.return_value = test_file_map
         mock_listdir.return_value = ['/foo/bar']
@@ -36,8 +38,8 @@ class TestRenameInitFileMapMetadata():
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap')
-    @patch('photo_rename.re')
-    @patch('photo_rename.os')
+    @patch('rename.re')
+    @patch('rename.os')
     def test_init_file_map_with_directories(
             self, mock_os, mock_re, mock_filemap):
         """
@@ -52,8 +54,8 @@ class TestRenameInitFileMapMetadata():
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap')
-    @patch('photo_rename.re')
-    @patch('photo_rename.os.listdir')
+    @patch('rename.re')
+    @patch('rename.os.listdir')
     def test_init_file_map_raises_exception(
             self, mock_listdir, mock_re, mock_filemap):
         """
@@ -98,8 +100,8 @@ class TestRenameInitFileMapAlt(object):
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap', Stub2FileMap)
-    @patch('photo_rename.read_alt_file_map')
-    @patch('photo_rename.os.listdir')
+    @patch('rename.read_alt_file_map')
+    @patch('rename.os.listdir')
     def test_basic_alt_map(self, m_listdir, m_readfm):
         """
         """
