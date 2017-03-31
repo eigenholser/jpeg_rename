@@ -41,7 +41,7 @@ class TestFilemapReadMetadata(object):
     skiptests = not TEST_FILEMAP_READ_METADATA
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.pyexiv2.ImageMetadata')
+    @patch('photo_rename.filemap.pyexiv2.ImageMetadata')
     def test_read_metadata(self, mock_pyexiv2):
         """
         Mock with valid metadata. Confirm metadata returned as expected.
@@ -60,7 +60,7 @@ class TestFilemapReadExifData(object):
     skiptests = not TEST_FILEMAP_READ_EXIFDATA
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.pyexiv2.ImageMetadata')
+    @patch('photo_rename.filemap.pyexiv2.ImageMetadata')
     def test_read_exif_data(self, mock_img_md):
         """Tests read_exif_data() with valid EXIF data. Tests for normal
         operation. Verify expected EXIF data in instantiated object."""
@@ -89,7 +89,7 @@ class TestFilemapReadExifData(object):
         assert filemap.metadata == EXIF_DATA_VALID['exif_data']
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.pyexiv2.ImageMetadata')
+    @patch('photo_rename.filemap.pyexiv2.ImageMetadata')
     def test_read_exif_data_info_none(self, mock_img_md):
         """
         Tests read_exif_data() with no EXIF data available. Tests for raised
