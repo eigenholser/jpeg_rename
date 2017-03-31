@@ -33,8 +33,8 @@ class TestFilemapChmod(object):
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @pytest.mark.parametrize("st_mode", [33124, 33068, 33061])
-    @patch('photo_rename.os.stat')
-    @patch('photo_rename.os.chmod')
+    @patch('photo_rename.filemap.os.stat')
+    @patch('photo_rename.filemap.os.chmod')
     def test_chmod_on_to_off(self, mock_chmod, mock_stat, st_mode):
         """
         Turn execute bits off one by one. Confirm that chmod called once.
