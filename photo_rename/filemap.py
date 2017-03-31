@@ -70,10 +70,10 @@ class FileMap(object):
         self.image_type = image_type
         self.metadata = metadata
 
-        self.old_fn_base = self.get_base(self.old_fn)
-        self.old_fn_base_lower = self.get_base(self.old_fn).lower()
-        self.old_fn_ext = self.get_extension(self.old_fn)
-        self.old_fn_ext_lower = self.get_extension(self.old_fn).lower()
+        self.old_fn_base = os.path.splitext(self.old_fn)[0]
+        self.old_fn_base_lower = os.path.splitext(self.old_fn)[0].lower()
+        self.old_fn_ext = os.path.splitext(self.old_fn)[1][1:]
+        self.old_fn_ext_lower = os.path.splitext(self.old_fn)[1][1:].lower()
 
         # Avoid filename collisions (dangerous) or log a message if there
         # would be one, and fail the move. When set to False, rename attempt
@@ -98,24 +98,6 @@ class FileMap(object):
         self.logger.debug(
                 "Initializing file mapper object for filename {}".format(
                     self.new_fn))
-
-    def get_base(self, filename):
-        """
-        Return the filename base--i.e. without extension.
-        """
-        res = re.search(r"^(.+)\..+$", filename)
-        if res:
-            return res.group(1)
-        return None
-
-    def get_extension(self, filename):
-        """
-        Return the file extension of the old filename.
-        """
-        res = re.search(r"^.+\.(.+)$", filename)
-        if res:
-            return res.group(1)
-        return None
 
     def read_metadata(self):
         """
