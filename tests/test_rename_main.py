@@ -6,6 +6,7 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
+from rename import *
 from .stubs import *
 from . import TEST_RENAME_MAIN
 
@@ -47,8 +48,8 @@ class TestRenameMain(object):
     skiptests = not TEST_RENAME_MAIN
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.argparse.ArgumentParser')
-    @patch('photo_rename.process_all_files')
+    @patch('rename.argparse.ArgumentParser')
+    @patch('rename.process_all_files')
     def test_main_function(self, mock_process_all_files, mock_argparser):
         """
         Test main() function. Mock argparse and replace with stubs. Verify
@@ -61,11 +62,11 @@ class TestRenameMain(object):
                 avoid_collisions=False, mapfile=None)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.argparse.ArgumentParser')
-    @patch('photo_rename.os.path.dirname')
-    @patch('photo_rename.os.path.exists')
-    @patch('photo_rename.os.access')
-    @patch('photo_rename.process_all_files')
+    @patch('rename.argparse.ArgumentParser')
+    @patch('rename.os.path.dirname')
+    @patch('rename.os.path.exists')
+    @patch('rename.os.access')
+    @patch('rename.process_all_files')
     def test_workdir_is_none(self, mock_process_all_files, mock_access,
             mock_exists, mock_dirname, mock_argparse):
         """
@@ -90,12 +91,12 @@ class TestRenameMain(object):
             (None, True, True, True),
             ("foo", False, False, False),
         ])
-    @patch('photo_rename.argparse.ArgumentParser')
-    @patch('photo_rename.os.path.dirname')
-    @patch('photo_rename.os.path.exists')
-    @patch('photo_rename.os.access')
-    @patch('photo_rename.sys.exit')
-    @patch('photo_rename.process_all_files')
+    @patch('rename.argparse.ArgumentParser')
+    @patch('rename.os.path.dirname')
+    @patch('rename.os.path.exists')
+    @patch('rename.os.access')
+    @patch('rename.sys.exit')
+    @patch('rename.process_all_files')
     def test_workdir_is_not_none(self, mock_process_all_files, mock_exit,
             mock_access, mock_exists, mock_dirname, mock_argparse,
             directory, simon_sez, verbose, avoid_collisions):
@@ -128,12 +129,12 @@ class TestRenameMain(object):
             (True, False,),
             (True, True),
         ])
-    @patch('photo_rename.argparse.ArgumentParser')
-    @patch('photo_rename.os.path.dirname')
-    @patch('photo_rename.os.path.exists')
-    @patch('photo_rename.os.access')
-    @patch('photo_rename.sys.exit')
-    @patch('photo_rename.process_all_files')
+    @patch('rename.argparse.ArgumentParser')
+    @patch('rename.os.path.dirname')
+    @patch('rename.os.path.exists')
+    @patch('rename.os.access')
+    @patch('rename.sys.exit')
+    @patch('rename.process_all_files')
     def test_mapfile_errors(self, mock_process_all_files, mock_exit,
             mock_access, mock_exists, mock_dirname, mock_argparse,
             path_exists, os_access):
