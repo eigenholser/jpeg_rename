@@ -18,7 +18,7 @@ class TestFilemapRename(object):
     skiptests = not TEST_FILEMAP_RENAME
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.os.path.exists')
+    @patch('photo_rename.filemap.os.path.exists')
     def test_rename_empty_exif_data(self, mock_exists):
         """
         Make unique filename with empty EXIF data.
@@ -33,7 +33,7 @@ class TestFilemapRename(object):
         assert filemap.new_fn == old_fn
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.os.path.exists')
+    @patch('photo_rename.filemap.os.path.exists')
     def test_rename_with_valid_exif_data_and_avoid_collisions(self,
             mock_exists):
         """
@@ -53,7 +53,7 @@ class TestFilemapRename(object):
         assert filemap.new_fn == renamed_fn
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.os.path.exists')
+    @patch('photo_rename.filemap.os.path.exists')
     def test_rename_with_valid_exif_data_and_no_avoid_collisions(self,
             mock_exists):
         """
@@ -71,7 +71,7 @@ class TestFilemapRename(object):
         assert filemap.new_fn == EXIF_DATA_VALID['expected_new_fn']
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.os.path.exists')
+    @patch('photo_rename.filemap.os.path.exists')
     def test_rename_no_collision(self, mock_exists):
         """
         Make unique new filename from valid EXIF data. Do not avoid
@@ -85,3 +85,4 @@ class TestFilemapRename(object):
         new_fn = filemap.new_fn
         filemap.make_new_fn_unique()
         assert filemap.new_fn == old_fn
+
