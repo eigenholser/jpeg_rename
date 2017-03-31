@@ -20,7 +20,7 @@ class TestFilemapMove(object):
     @pytest.mark.parametrize("old_fn", [
         OLD_FN_JPG_LOWER, OLD_FN_JPG_UPPER])
     @patch('photo_rename.FileMap.make_new_fn_unique')
-    @patch('photo_rename.os.rename')
+    @patch('photo_rename.filemap.os.rename')
     def test_move_orthodox(self, mock_os, mock_fn_unique, old_fn):
         """
         Rename file with mocked os.rename. Verify called with args.
@@ -38,7 +38,7 @@ class TestFilemapMove(object):
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap.make_new_fn_unique')
-    @patch('photo_rename.os.rename')
+    @patch('photo_rename.filemap.os.rename')
     def test_move_orthodox_rename_raises_exeption(self, mock_os,
             mock_fn_unique):
         """
@@ -56,7 +56,7 @@ class TestFilemapMove(object):
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap.make_new_fn_unique')
-    @patch('photo_rename.os.rename')
+    @patch('photo_rename.filemap.os.rename')
     def test_move_orthodox_fn_unique_raises_exception(self, mock_os,
             mock_fn_unique):
         """
@@ -73,7 +73,7 @@ class TestFilemapMove(object):
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap.make_new_fn_unique')
-    @patch('photo_rename.os.path.exists')
+    @patch('photo_rename.filemap.os.path.exists')
     def test_move_collision_detected(self, mock_exists, mock_fn_unique):
         """Move file with collision_detected simulating avoid_collisions=False.
         """
