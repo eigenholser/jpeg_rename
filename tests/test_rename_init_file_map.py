@@ -26,7 +26,6 @@ class TestRenameInitFileMapMetadata():
         """
         Tests init_file_map() list building. Verifies expected return value.
         """
-        import pdb; pdb.set_trace()
         test_file_map = StubFileMap()
         mock_filemap.return_value = test_file_map
         mock_listdir.return_value = ['/foo/bar']
