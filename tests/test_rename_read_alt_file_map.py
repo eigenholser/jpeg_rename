@@ -6,7 +6,7 @@ from mock import Mock, mock_open, patch
 app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
-from photo_rename import *
+from rename import *
 from .stubs import *
 from . import (
         TEST_FILEMAP_READ_ALT_FILE_MAP,
@@ -91,8 +91,8 @@ class TestFilemapReadAltFileMap(object):
     skiptests = not TEST_FILEMAP_READ_ALT_FILE_MAP
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.get_line_term')
-    @patch('photo_rename.scan_for_dupe_files')
+    @patch('rename.get_line_term')
+    @patch('rename.scan_for_dupe_files')
     def test_read_alt_file_map(self, m_scan_for_dupe_files, m_get_line_term,
             alt_file_map_tab, alt_file_map_dict):
         """
@@ -107,7 +107,7 @@ class TestFilemapReadAltFileMap(object):
             assert afmd == alt_file_map_dict
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.scan_for_dupe_files')
+    @patch('rename.scan_for_dupe_files')
     def test_read_alt_file_map_crlf(self, m_scan_for_dupe_files,
             alt_file_map_term_crlf, alt_file_map_dict):
         """
@@ -121,7 +121,7 @@ class TestFilemapReadAltFileMap(object):
             assert afmd == alt_file_map_dict
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.scan_for_dupe_files')
+    @patch('rename.scan_for_dupe_files')
     def test_read_alt_file_map_duplicate_source(self, m_scan_for_dupe_files,
             alt_file_map_duplicate_source, alt_file_map_dict):
         """
@@ -135,8 +135,8 @@ class TestFilemapReadAltFileMap(object):
             assert afmd == {'abc 123': 'MY NEW FILE 2'}
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.get_line_term')
-    @patch('photo_rename.scan_for_dupe_files')
+    @patch('rename.get_line_term')
+    @patch('rename.scan_for_dupe_files')
     def test_read_alt_file_map_duplicate_dest(self, m_scan_for_dupe_files,
             get_line_term, alt_file_map_duplicate_dest, alt_file_map_dict):
         """
@@ -150,7 +150,7 @@ class TestFilemapReadAltFileMap(object):
                 afmd = read_alt_file_map("foo", lineterm='\n')
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.scan_for_dupe_files')
+    @patch('rename.scan_for_dupe_files')
     def test_read_alt_file_map(self, m_scan_for_dupe_files, alt_file_map_xxx,
             alt_file_map_dict):
         """
