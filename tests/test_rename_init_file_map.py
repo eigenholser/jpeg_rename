@@ -6,15 +6,17 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import TEST_RENAME_INIT_FILEMAP_METADATA, TEST_RENAME_INIT_FILEMAP_ALT
 
 
-class TestInitFileMapMetadata():
+class TestRenameInitFileMapMetadata():
     """
     Tests for function init_file_map() are in this class.
     """
+    skiptests = not TEST_RENAME_INIT_FILEMAP_METADATA
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap')
     @patch('photo_rename.re')
     @patch('photo_rename.os.listdir')
@@ -32,7 +34,7 @@ class TestInitFileMapMetadata():
                 test_file_map, test_file_map, test_file_map, test_file_map,
                 test_file_map, test_file_map]
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap')
     @patch('photo_rename.re')
     @patch('photo_rename.os')
@@ -48,7 +50,7 @@ class TestInitFileMapMetadata():
         file_map = init_file_map('.')
         assert file_map.file_map == []
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap')
     @patch('photo_rename.re')
     @patch('photo_rename.os.listdir')
@@ -88,12 +90,13 @@ class Stub2FileMap(object):
         self.new_fn = new_fn
 
 
-class TestInitFileMapAlt(object):
+class TestRenameInitFileMapAlt(object):
     """
     Tests using alternate file map.
     """
+    skiptests = not TEST_RENAME_INIT_FILEMAP_ALT
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap', Stub2FileMap)
     @patch('photo_rename.read_alt_file_map')
     @patch('photo_rename.os.listdir')

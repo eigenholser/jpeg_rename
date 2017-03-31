@@ -6,20 +6,22 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import TEST_FILEMAP_LIST
 
 
-class TestFileMapList(object):
+class TestFilemapList(object):
     """Tests for FileMapList."""
+    skiptests = not TEST_FILEMAP_LIST
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_file_map_list_init(self):
         """Instantiate FileMapList() and test __init__() method. Verify
         file_map is initialized to empty list."""
         file_map_list = FileMapList()
         assert file_map_list.file_map == []
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_file_map_list_add(self):
         """Tests FileMapList add() method. Adds multiple FileMap instances
         and verifies expected ordering of instances based on new_fn attribute.

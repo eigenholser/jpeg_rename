@@ -7,14 +7,17 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import TEST_FILEMAP_GET_BASE, TEST_FILEMAP_GET_EXTENSION
 
 
-class TestGetBase():
+class TestFilemapGetBase(object):
     """
     Tests for method get_base() are in this class.
     """
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    skiptests = not TEST_FILEMAP_GET_BASE
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_get_base_none(self):
         """
         Test case where no base is matched.
@@ -25,11 +28,13 @@ class TestGetBase():
         res = filemap.get_base("")
         assert res == None
 
-class TestGetExtension():
+class TestFilemapGetExtension(object):
     """
     Tests for method get_extension() are in this class.
     """
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    skiptests = not TEST_FILEMAP_GET_EXTENSION
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_get_base_none(self):
         """
         Test case where no extension is matched.

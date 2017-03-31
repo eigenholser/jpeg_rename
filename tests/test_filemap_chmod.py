@@ -8,7 +8,8 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import TEST_FILEMAP_CHMOD
 
 
 class StubStat(object):
@@ -24,11 +25,13 @@ class StubStat(object):
         return self.mode
 
 
-class TestChmod(object):
+class TestFilemapChmod(object):
     """
     Tests for FileMap method _chmod() are in this class.
     """
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    skiptests = not TEST_FILEMAP_CHMOD
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @pytest.mark.parametrize("st_mode", [33124, 33068, 33061])
     @patch('photo_rename.os.stat')
     @patch('photo_rename.os.chmod')

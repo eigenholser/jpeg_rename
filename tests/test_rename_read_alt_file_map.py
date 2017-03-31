@@ -7,7 +7,12 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import (
+        TEST_FILEMAP_READ_ALT_FILE_MAP,
+        TEST_FILEMAP_GET_LINE_TERM,
+        TEST_FILEMAP_SCAN_FOR_DUPE_FILES,
+    )
 
 
 @pytest.fixture
@@ -79,12 +84,13 @@ def alt_file_map_dict():
     return {"abc 123": "MY NEW FILE 1", "xyz 999": "MY NEW FILE 2"}
 
 
-class TestFilemapReadAltFilemap(object):
+class TestFilemapReadAltFileMap(object):
     """
     Tests reading alternate file map.
     """
+    skiptests = not TEST_FILEMAP_READ_ALT_FILE_MAP
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.get_line_term')
     @patch('photo_rename.scan_for_dupe_files')
     def test_read_alt_file_map(self, m_scan_for_dupe_files, m_get_line_term,
@@ -100,7 +106,7 @@ class TestFilemapReadAltFilemap(object):
             afmd = read_alt_file_map("foo")
             assert afmd == alt_file_map_dict
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.scan_for_dupe_files')
     def test_read_alt_file_map_crlf(self, m_scan_for_dupe_files,
             alt_file_map_term_crlf, alt_file_map_dict):
@@ -114,7 +120,7 @@ class TestFilemapReadAltFilemap(object):
             afmd = read_alt_file_map("foo", lineterm='\r\n')
             assert afmd == alt_file_map_dict
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.scan_for_dupe_files')
     def test_read_alt_file_map_duplicate_source(self, m_scan_for_dupe_files,
             alt_file_map_duplicate_source, alt_file_map_dict):
@@ -128,7 +134,7 @@ class TestFilemapReadAltFilemap(object):
             afmd = read_alt_file_map("foo", lineterm='\n')
             assert afmd == {'abc 123': 'MY NEW FILE 2'}
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.get_line_term')
     @patch('photo_rename.scan_for_dupe_files')
     def test_read_alt_file_map_duplicate_dest(self, m_scan_for_dupe_files,
@@ -143,7 +149,7 @@ class TestFilemapReadAltFilemap(object):
             with pytest.raises(Exception):
                 afmd = read_alt_file_map("foo", lineterm='\n')
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.scan_for_dupe_files')
     def test_read_alt_file_map(self, m_scan_for_dupe_files, alt_file_map_xxx,
             alt_file_map_dict):
@@ -157,12 +163,13 @@ class TestFilemapReadAltFilemap(object):
             assert afmd == alt_file_map_dict
 
 
-class TestFileMapGetLineTerm(object):
+class TestFilemapGetLineTerm(object):
     """
     Tests for function get_line_term().
     """
+    skiptests = not TEST_FILEMAP_GET_LINE_TERM
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_get_line_term_lf(self, alt_file_map_tab):
         """
         Read filemap with LF terminated lines.
@@ -175,7 +182,7 @@ class TestFileMapGetLineTerm(object):
         lineterm = get_line_term(lines)
         assert lineterm == '\n'
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_get_line_term_mixed(self, alt_file_map_term_mixed):
         """
         Raises Exception with mixed line terminations.
@@ -189,12 +196,13 @@ class TestFileMapGetLineTerm(object):
             lineterm = get_line_term(lines)
 
 
-class TestFileMapScanForDupeFiles(object):
+class TestFilemapScanForDupeFiles(object):
     """
     Tests for function scan_for_dupe_files().
     """
+    skiptests = not TEST_FILEMAP_SCAN_FOR_DUPE_FILES
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_scan_for_dupe_files_unique(self):
         """
         Test with unique filenames. Confirm False result.
@@ -202,7 +210,7 @@ class TestFileMapScanForDupeFiles(object):
         files = ['abc', 'def']
         assert scan_for_dupe_files(files) == False
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_scan_for_dupe_files_duplicate(self):
         """
         Test with duplicate filenames. Confirm True result.

@@ -6,14 +6,17 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import TEST_FILEMAP_MOVE
 
 
-class TestMove():
+class TestFilemapMove(object):
     """
     Test for method move() are in this class.
     """
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    skiptests = not TEST_FILEMAP_MOVE
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @pytest.mark.parametrize("old_fn", [
         OLD_FN_JPG_LOWER, OLD_FN_JPG_UPPER])
     @patch('photo_rename.FileMap.make_new_fn_unique')
@@ -33,7 +36,7 @@ class TestMove():
         else:
             mock_os.assert_called_with(old_fn, new_fn)
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap.make_new_fn_unique')
     @patch('photo_rename.os.rename')
     def test_move_orthodox_rename_raises_exeption(self, mock_os,
@@ -51,7 +54,7 @@ class TestMove():
         filemap.move()
         mock_os.assert_called_with(old_fn, new_fn)
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap.make_new_fn_unique')
     @patch('photo_rename.os.rename')
     def test_move_orthodox_fn_unique_raises_exception(self, mock_os,
@@ -68,7 +71,7 @@ class TestMove():
         with pytest.raises(OSError):
             filemap.move()
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap.make_new_fn_unique')
     @patch('photo_rename.os.path.exists')
     def test_move_collision_detected(self, mock_exists, mock_fn_unique):

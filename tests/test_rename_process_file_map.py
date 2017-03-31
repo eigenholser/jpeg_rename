@@ -6,12 +6,17 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import TEST_RENAME_PROCESS_FILEMAP
 
 
-class TestProcessFileMap():
-    """Tests for function process_file_map() are in this class."""
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+class TestRenameProcessFilemap(object):
+    """
+    Tests for function process_file_map() are in this class.
+    """
+    skiptests = not TEST_RENAME_PROCESS_FILEMAP
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_process_file_map(self):
         """Test process_file_map()."""
         def move_func(old_fn, new_fn):
@@ -21,7 +26,7 @@ class TestProcessFileMap():
         file_map_list.add(StubFileMap())
         assert process_file_map(file_map_list, True, move_func) == None
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_process_file_map_raise_exception(self):
         """Test exception handling in process_file_map()."""
         def move_func(old_fn, new_fn):
@@ -30,7 +35,7 @@ class TestProcessFileMap():
         file_map_list.add(StubFileMap())
         assert process_file_map(file_map_list, True, move_func) == None
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap')
     def test_process_file_map_simon_sez_false_fn_eq(self, mock_fm):
         """Test process_file_map() with simon_sez=False. Tests else branch with
@@ -43,7 +48,7 @@ class TestProcessFileMap():
         process_file_map(file_map_list)
         assert mock_fm.same_files == True
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap')
     def test_process_file_map_simon_sez_false_fn_ne(self, mock_fm):
         """Test process_file_map() with simon_sez=False. Tests else branch with
@@ -56,7 +61,7 @@ class TestProcessFileMap():
         process_file_map(file_map_list)
         assert mock_fm.same_files == False
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap.move')
     @patch('photo_rename.FileMap')
     def test_process_file_map_simon_sez(self, mock_fm, mock_fm_move):

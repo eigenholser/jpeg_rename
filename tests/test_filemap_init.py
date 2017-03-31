@@ -7,14 +7,17 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import TEST_FILEMAP_INIT
 
 
-class TestFileMapInit():
+class TestFilemapInit(object):
     """
     Tests for FileMap constructor.
     """
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    skiptests = not TEST_FILEMAP_INIT
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap.build_new_fn')
     def test_filemap_init_with_no_new_fn(self, mock_build_new_fn):
         """

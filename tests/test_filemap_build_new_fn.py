@@ -6,15 +6,19 @@ from mock import Mock, patch
 app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
+from photo_rename import FileMap
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import TEST_FILEMAP_BUILD_NEW_FN
 
 
-class TestBuildNewFn():
+class TestFilemapBuildNewFn(object):
     """
     Tests for method build_new_fn() are in this class.
     """
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    skiptests = not TEST_FILEMAP_BUILD_NEW_FN
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @pytest.mark.parametrize(
         "old_fn, image_type, expected_new_fn, exif_data", [
         (OLD_FN_JPG_LOWER, IMAGE_TYPE_JPEG,

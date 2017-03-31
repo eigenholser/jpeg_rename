@@ -7,14 +7,17 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import TEST_FILEMAP_RENAME
 
 
-class TestRename(object):
+class TestFilemapRename(object):
     """
     Tests for method build_new_fn() are in this class.
     """
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    skiptests = not TEST_FILEMAP_RENAME
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.os.path.exists')
     def test_rename_empty_exif_data(self, mock_exists):
         """
@@ -29,7 +32,7 @@ class TestRename(object):
         filemap.make_new_fn_unique()
         assert filemap.new_fn == old_fn
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.os.path.exists')
     def test_rename_with_valid_exif_data_and_avoid_collisions(self,
             mock_exists):
@@ -49,7 +52,7 @@ class TestRename(object):
             filemap.make_new_fn_unique()
         assert filemap.new_fn == renamed_fn
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.os.path.exists')
     def test_rename_with_valid_exif_data_and_no_avoid_collisions(self,
             mock_exists):
@@ -67,7 +70,7 @@ class TestRename(object):
         filemap.make_new_fn_unique()
         assert filemap.new_fn == EXIF_DATA_VALID['expected_new_fn']
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.os.path.exists')
     def test_rename_no_collision(self, mock_exists):
         """

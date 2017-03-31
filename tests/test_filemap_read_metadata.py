@@ -7,7 +7,8 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import TEST_FILEMAP_READ_METADATA, TEST_FILEMAP_READ_EXIFDATA
 
 
 class StubTag(object):
@@ -33,11 +34,13 @@ class StubImageMetadata(object):
         return EXIF_DATA_VALID["exif_data"].keys()
 
 
-class TestReadMetadata():
+class TestFilemapReadMetadata(object):
     """
     Tests for FileMap method read_metadata() are in this class.
     """
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    skiptests = not TEST_FILEMAP_READ_METADATA
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.pyexiv2.ImageMetadata')
     def test_read_metadata(self, mock_pyexiv2):
         """
@@ -52,10 +55,12 @@ class TestReadMetadata():
         assert filemap.read_metadata() == metadata
 
 
-class TestReadExifData():
+class TestFilemapReadExifData(object):
     """Tests for method read_exif_data() are in this class."""
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
-    @patch.object(pyexiv2, 'ImageMetadata')
+    skiptests = not TEST_FILEMAP_READ_EXIFDATA
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.pyexiv2.ImageMetadata')
     def test_read_exif_data(self, mock_img_md):
         """Tests read_exif_data() with valid EXIF data. Tests for normal
         operation. Verify expected EXIF data in instantiated object."""
@@ -83,8 +88,8 @@ class TestReadExifData():
         filemap = FileMap(old_fn, IMAGE_TYPE_JPEG)
         assert filemap.metadata == EXIF_DATA_VALID['exif_data']
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
-    @patch.object(pyexiv2, 'ImageMetadata')
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.pyexiv2.ImageMetadata')
     def test_read_exif_data_info_none(self, mock_img_md):
         """
         Tests read_exif_data() with no EXIF data available. Tests for raised

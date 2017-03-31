@@ -6,7 +6,8 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import TEST_RENAME_MAIN
 
 
 class StubArgs(object):
@@ -39,12 +40,13 @@ class StubArgumentParser(object):
         return self.myargs
 
 
-class TestMainFunction(object):
+class TestRenameMain(object):
     """
     Tests for main() function.
     """
+    skiptests = not TEST_RENAME_MAIN
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.argparse.ArgumentParser')
     @patch('photo_rename.process_all_files')
     def test_main_function(self, mock_process_all_files, mock_argparser):
@@ -58,7 +60,7 @@ class TestMainFunction(object):
         mock_process_all_files.assert_called_with(workdir='.', simon_sez=False,
                 avoid_collisions=False, mapfile=None)
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.argparse.ArgumentParser')
     @patch('photo_rename.os.path.dirname')
     @patch('photo_rename.os.path.exists')
@@ -81,7 +83,7 @@ class TestMainFunction(object):
         mock_process_all_files.assert_called_with(workdir=workdir,
                 simon_sez=False, avoid_collisions=False, mapfile=mapfile)
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @pytest.mark.parametrize(
             "directory, simon_sez, verbose, avoid_collisions", [
             (None, False, False, False),
@@ -119,7 +121,7 @@ class TestMainFunction(object):
                 mapfile=mapfile)
 
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @pytest.mark.parametrize(
             "path_exists, os_access", [
             (False, True,),

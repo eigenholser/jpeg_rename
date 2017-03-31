@@ -6,15 +6,17 @@ app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
 from photo_rename import *
-from stubs import *
+from .stubs import *
+from . import TEST_RENAME_PROCESS_ALL_FILES
 
 
-class TestProcessAllFiles():
+class TestRenameProcessAllFiles(object):
     """
     Tests for the function process_all_files() are in this class.
     """
+    skiptests = not TEST_RENAME_PROCESS_ALL_FILES
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.process_file_map')
     @patch('photo_rename.init_file_map')
     @patch('photo_rename.os.access')
@@ -29,7 +31,7 @@ class TestProcessAllFiles():
         process_all_files('.')
         mock_process_file_map.assert_called_with(file_map, None)
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.process_file_map')
     @patch('photo_rename.init_file_map')
     @patch('photo_rename.os.path.exists')
@@ -44,7 +46,7 @@ class TestProcessAllFiles():
         process_all_files('.')
         mock_process_file_map.assert_called_with(file_map, None)
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.os.path.exists')
     @patch('photo_rename.sys.exit')
     def test_process_all_files_exists_false(self, mock_sys_exit, mock_os_path):
@@ -55,7 +57,7 @@ class TestProcessAllFiles():
         process_all_files('.')
         mock_sys_exit.assert_called_with(1)
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.process_file_map')
     @patch('photo_rename.init_file_map')
     @patch('photo_rename.os.access')
@@ -70,7 +72,7 @@ class TestProcessAllFiles():
         process_all_files('.')
         mock_process_file_map.assert_called_with(file_map, None)
 
-    @pytest.mark.skipif(RUN_TEST, reason="Work in progress")
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.os.access')
     @patch('photo_rename.sys.exit')
     def test_process_all_files_access_false(self, mock_sys_exit,
