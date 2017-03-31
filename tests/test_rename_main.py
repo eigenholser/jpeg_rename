@@ -5,7 +5,6 @@ from mock import Mock, patch
 app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
-from photo_rename import *
 from rename import *
 from .stubs import *
 from . import TEST_RENAME_MAIN

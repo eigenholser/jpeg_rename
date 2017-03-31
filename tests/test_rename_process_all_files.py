@@ -5,7 +5,7 @@ from mock import Mock, patch
 app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
-from photo_rename import *
+from rename import *
 from .stubs import *
 from . import TEST_RENAME_PROCESS_ALL_FILES
 
@@ -17,9 +17,9 @@ class TestRenameProcessAllFiles(object):
     skiptests = not TEST_RENAME_PROCESS_ALL_FILES
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.process_file_map')
-    @patch('photo_rename.init_file_map')
-    @patch('photo_rename.os.access')
+    @patch('rename.process_file_map')
+    @patch('rename.init_file_map')
+    @patch('rename.os.access')
     def test_process_all_files_workdir_not_none(self, mock_os_access,
             mock_init_file_map, mock_process_file_map):
         """Test process_all_files() with workdir set. Tests negative of branch
@@ -32,9 +32,9 @@ class TestRenameProcessAllFiles(object):
         mock_process_file_map.assert_called_with(file_map, None)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.process_file_map')
-    @patch('photo_rename.init_file_map')
-    @patch('photo_rename.os.path.exists')
+    @patch('rename.process_file_map')
+    @patch('rename.init_file_map')
+    @patch('rename.os.path.exists')
     def test_process_all_files_exists_true(self, mock_os_path,
             mock_init_file_map,
             mock_process_file_map):
@@ -47,8 +47,8 @@ class TestRenameProcessAllFiles(object):
         mock_process_file_map.assert_called_with(file_map, None)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.os.path.exists')
-    @patch('photo_rename.sys.exit')
+    @patch('rename.os.path.exists')
+    @patch('rename.sys.exit')
     def test_process_all_files_exists_false(self, mock_sys_exit, mock_os_path):
         """Test process_all_files() with workdir path exists False. Tests
         positive branch of workdir not exists test. Verify that sys.exit() is
@@ -58,9 +58,9 @@ class TestRenameProcessAllFiles(object):
         mock_sys_exit.assert_called_with(1)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.process_file_map')
-    @patch('photo_rename.init_file_map')
-    @patch('photo_rename.os.access')
+    @patch('rename.process_file_map')
+    @patch('rename.init_file_map')
+    @patch('rename.os.access')
     def test_process_all_files_access_true(self, mock_os_access,
             mock_init_file_map, mock_process_file_map):
         """Test process_all_files() with workdir access True. Tests for
@@ -73,8 +73,8 @@ class TestRenameProcessAllFiles(object):
         mock_process_file_map.assert_called_with(file_map, None)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.os.access')
-    @patch('photo_rename.sys.exit')
+    @patch('rename.os.access')
+    @patch('rename.sys.exit')
     def test_process_all_files_access_false(self, mock_sys_exit,
             mock_os_access):
         """Test process_all_files() with workdir access False. Tests for
