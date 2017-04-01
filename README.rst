@@ -1,14 +1,15 @@
-JPEG Rename Utility
-===================
+Photo Rename Utility
+====================
+
 Demo code written for SLC Python.
 
-``photo_rename.py`` will find all supported files in ``DIRECTORY``. Currently
+``zrename.py`` will find all supported files in ``DIRECTORY``. Currently
 the list of supported file types is ARW, JPEG, PNG, and TIFF. It will read
 the ``DateTimeOriginal`` EXIF tag if JPEG, TIFF, ARW, or ``CreateDate`` XMP
 tag if PNG. Each found file will be renamed using the metadata. Alternatively,
 a map file may be specified which will be used for renaming.
 
-``photo_rename.py`` is useful when combining digital photographs from different
+``zrename.py`` is useful when combining digital photographs from different
 sources like a mobile phone and a Canon point and shoot camera. It creates a
 canonical name using date, time, and possibly a sequence number for
 filename collisions.
@@ -28,14 +29,18 @@ Create a virtual environment. These instructions assume ``virtualenvwrapper``::
     setvirtualenvproject
     pip install -r requirements.txt
 
+Or::
+
+    python setup.py develop
+
 
 Usage
 =====
 
 Get usage help like this::
 
-    ./photo_rename.py --help
-    usage: photo_rename.py [-h] [-s] [-a] [-d DIRECTORY]
+    ./zrename.py --help
+    usage: zrename.py [-h] [-s] [-a] [-d DIRECTORY]
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -48,9 +53,9 @@ Get usage help like this::
                         Use this map to rename files. Do not use metadata.
       -v, --verbose         Log level to DEBUG.
 
-If only ``--directory`` is specified, ``photo_rename.py`` will output what it
+If only ``--directory`` is specified, ``zrename.py`` will output what it
 would do if ``--simon-sez`` were also specified. It will indicate ``DRY RUN``
-in the output. ``photo_rename.py`` will **only** operate in the directory
+in the output. ``zrename.py`` will **only** operate in the directory
 specified.
 
 If ``--mapfile`` is specified, work will be performed in the directory
@@ -58,11 +63,11 @@ containing the map file. Option ``--directory`` is not used or permitted when
 ``--mapfile`` is specified. Option ``--avoid-collisions`` is also not
 permitted with ``--mapfile`` since filenames are known in advance.
 
-``photo_rename.py`` will avoid filename collisions by appending ``_#`` to
+``zrename.py`` will avoid filename collisions by appending ``_#`` to
 filenames as needed. Since this behavior can be troublesome, it will not occur
 unless explicitly requested with ``--avoid-collisions`` on the command line.
-If not requested, ``photo_rename.py`` will warn of collisions only. In this
-case, ``photo_rename.py`` may be safely re-run with ``--avoid-collisions`` to
+If not requested, ``zrename.py`` will warn of collisions only. In this
+case, ``zrename.py`` may be safely re-run with ``--avoid-collisions`` to
 rename the leftovers.
 
 
