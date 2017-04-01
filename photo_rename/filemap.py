@@ -5,31 +5,9 @@ import re
 import stat
 import sys
 import pyexiv2
+import photo_rename
 
 
-# Configure built-in support for various image types.
-IMAGE_TYPE_ARW = 1
-IMAGE_TYPE_JPEG = 2
-IMAGE_TYPE_PNG = 3
-IMAGE_TYPE_TIFF = 4
-IMAGE_TYPES = {
-    IMAGE_TYPE_ARW  : ['arw'],
-    IMAGE_TYPE_JPEG : ['jpg', 'jpeg'],
-    IMAGE_TYPE_PNG  : ['png'],
-    IMAGE_TYPE_TIFF : ['tif', 'tiff'],
-}
-EXTENSIONS_PREFERRED = {
-    IMAGE_TYPE_ARW  : 'arw',
-    IMAGE_TYPE_JPEG : 'jpg',
-    IMAGE_TYPE_PNG  : 'png',
-    IMAGE_TYPE_TIFF : 'tif',
-}
-EXTENSIONS = [
-    ext for sublist in [v for k, v in IMAGE_TYPES.items()] for ext in sublist]
-EXTENSION_TO_IMAGE_TYPE = dict([
-    (ext, it) for it, sublist in [(k, v) for k, v in IMAGE_TYPES.items()]
-    for ext in sublist])
-MAX_RENAME_ATTEMPTS = 10
 logger = logging.getLogger(__name__)
 
 
@@ -55,7 +33,7 @@ class FileMap(object):
         """
         Initialize FileMap instance.
 
-        >>> filemap = FileMap('abc123.jpeg', IMAGE_TYPE_JPEG, None, {})
+        >>> filemap = FileMap('abc123.jpeg', photo_rename.IMAGE_TYPE_JPEG, None, {})
         >>> filemap.old_fn
         'abc123.jpeg'
         >>> filemap.new_fn
@@ -63,7 +41,7 @@ class FileMap(object):
         >>>
         """
         self.logger.debug("Old filename: {}".format(old_fn))
-        self.MAX_RENAME_ATTEMPTS = MAX_RENAME_ATTEMPTS
+        self.MAX_RENAME_ATTEMPTS = photo_rename.MAX_RENAME_ATTEMPTS
         self.old_fn_fq = old_fn
         self.workdir = os.path.dirname(old_fn)
         self.old_fn = os.path.basename(old_fn)
@@ -110,7 +88,7 @@ class FileMap(object):
 
         metadata = {}
 
-        if (self.image_type == IMAGE_TYPE_PNG):
+        if (self.image_type == photo_rename.IMAGE_TYPE_PNG):
             metadata_keys = [md_key for md_key in img_md.xmp_keys]
         else:
             metadata_keys = [md_key for md_key in img_md.exif_keys]
@@ -131,7 +109,7 @@ class FileMap(object):
         Generate new filename from old_fn EXIF or XMP data if possible. Even if
         not possible, lowercase old_fn and normalize file extension.
 
-        >>> filemap = FileMap('abc123.jpeg', IMAGE_TYPE_JPEG, avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014:08:16 06:20:30'})
+        >>> filemap = FileMap('abc123.jpeg', photo_rename.IMAGE_TYPE_JPEG, avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014:08:16 06:20:30'})
         >>> filemap.new_fn
         '20140816_062030.jpg'
 
@@ -139,7 +117,7 @@ class FileMap(object):
 
         # Start with EXIF DateTime
         try:
-            if (self.image_type == IMAGE_TYPE_PNG):
+            if (self.image_type == photo_rename.IMAGE_TYPE_PNG):
                 new_fn = self.metadata['Xmp.xmp.CreateDate']
             else:
                 new_fn = self.metadata['Exif.Image.DateTime']
@@ -160,7 +138,7 @@ class FileMap(object):
                     base=self.old_fn_base, ext=self.old_fn_ext_lower)
         else:
             new_fn = "{0}.{1}".format(
-                    new_fn, EXTENSIONS_PREFERRED[self.image_type])
+                new_fn, photo_rename.EXTENSIONS_PREFERRED[self.image_type])
 
         # XXX: One may argue that the next step should be an 'else' clause of
         # the previous 'if' statement. But the intention here is to clean up
@@ -243,11 +221,11 @@ class FileMap(object):
             # Since we're renaming files that may have already been renamed
             # with a `-#' suffix, we need to catch that pattern first.
             new_fn_regex_s1 = r"^(\d+_\d+)-\d+\.{}".format(
-                    EXTENSIONS_PREFERRED[self.image_type])
+                    photo_rename.EXTENSIONS_PREFERRED[self.image_type])
             new_fn_regex_s2 = r"^(\d+_\d+)\.{}".format(
-                    EXTENSIONS_PREFERRED[self.image_type])
+                    photo_rename.EXTENSIONS_PREFERRED[self.image_type])
             new_fn_regex_r = r"\1-{0}.{1}".format(counter,
-                    EXTENSIONS_PREFERRED[self.image_type])
+                    photo_rename.EXTENSIONS_PREFERRED[self.image_type])
             new_fn = re.sub(new_fn_regex_s1, new_fn_regex_r, self.new_fn)
             new_fn = re.sub(new_fn_regex_s2, new_fn_regex_r, new_fn)
 

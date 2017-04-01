@@ -5,32 +5,10 @@ import re
 import stat
 import sys
 import pyexiv2
-from photo_rename.filemap import FileMap
+import photo_rename
+from photo_rename import FileMap
 
 
-# Configure built-in support for various image types.
-IMAGE_TYPE_ARW = 1
-IMAGE_TYPE_JPEG = 2
-IMAGE_TYPE_PNG = 3
-IMAGE_TYPE_TIFF = 4
-IMAGE_TYPES = {
-    IMAGE_TYPE_ARW  : ['arw'],
-    IMAGE_TYPE_JPEG : ['jpg', 'jpeg'],
-    IMAGE_TYPE_PNG  : ['png'],
-    IMAGE_TYPE_TIFF : ['tif', 'tiff'],
-}
-EXTENSIONS_PREFERRED = {
-    IMAGE_TYPE_ARW  : 'arw',
-    IMAGE_TYPE_JPEG : 'jpg',
-    IMAGE_TYPE_PNG  : 'png',
-    IMAGE_TYPE_TIFF : 'tif',
-}
-EXTENSIONS = [
-    ext for sublist in [v for k, v in IMAGE_TYPES.items()] for ext in sublist]
-EXTENSION_TO_IMAGE_TYPE = dict([
-    (ext, it) for it, sublist in [(k, v) for k, v in IMAGE_TYPES.items()]
-    for ext in sublist])
-MAX_RENAME_ATTEMPTS = 10
 logger = logging.getLogger(__name__)
 
 
@@ -111,7 +89,7 @@ def init_file_map(workdir, mapfile=None, avoid_collisions=None):
         all_files_list = list_workdir
 
     # Initialize file_map list.
-    for extension in EXTENSIONS:
+    for extension in photo_rename.EXTENSIONS:
         image_regex = r"\." + re.escape(extension) + r"$"
         matching_files = [filename for filename in all_files_list
                 if re.search(image_regex, filename, re.IGNORECASE)]
@@ -126,7 +104,7 @@ def init_file_map(workdir, mapfile=None, avoid_collisions=None):
                 logger.warn("Skipping directory {0}".format(filename_fq))
                 continue
             try:
-                image_type = EXTENSION_TO_IMAGE_TYPE[extension]
+                image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[extension]
                 if mapfile:
                     filename_prefix = filename_prefix_map[filename]
                     new_fn = "{}.{}".format(
@@ -215,7 +193,7 @@ def process_file_map(file_map, simon_sez=None, move_func=None):
     Returns:
         None
 
-    >>> filemap = FileMap('IMG0332.JPG', IMAGE_TYPE_JPEG, avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
+    >>> filemap = FileMap('IMG0332.JPG', photo_rename.IMAGE_TYPE_JPEG, avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
     >>> def move_func(old_fn, new_fn): pass
     >>> file_map_list = FileMapList()
     >>> file_map_list.add(filemap)
