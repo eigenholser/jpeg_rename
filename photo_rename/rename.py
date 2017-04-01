@@ -197,7 +197,7 @@ def process_all_files(
     process_file_map(file_map, simon_sez)
 
 
-def main():
+def rename_photo_files():
     """
     Parse command-line arguments. Initiate file processing.
     """
@@ -254,6 +254,3 @@ def main():
     process_all_files(workdir=workdir, simon_sez=myargs.simon_sez,
             avoid_collisions=myargs.avoid_collisions, mapfile=mapfile)
 
-
-if __name__ == '__main__':  # pragma: no cover
-    main()
