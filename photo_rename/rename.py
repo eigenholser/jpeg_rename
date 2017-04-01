@@ -287,7 +287,9 @@ def main():
     # Use current directory if --directory not specified.
     workdir = myargs.directory
     if workdir is None:
-        workdir = os.path.dirname(os.path.abspath(__file__))
+        workdir = os.getcwd()
+        logging.info(
+                "--directory not given. Using workdir={}".format(workdir))
 
     # Validate --map
     mapfile = myargs.mapfile
