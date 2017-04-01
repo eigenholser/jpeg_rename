@@ -11,17 +11,7 @@ import photo_rename
 logger = logging.getLogger(__name__)
 
 
-def logged_class(cls):
-    """
-    Class Decorator to add a class level logger to the class with module and
-    name.
-    """
-    cls.logger = logging.getLogger(
-            "{0}.{1}".format(cls.__module__, cls.__name__))
-    return cls
-
-
-@logged_class
+@photo_rename.logged_class
 class FileMap(object):
     """
     FileMap represents a mapping between the old_fn and the new_fn. It's

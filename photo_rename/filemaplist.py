@@ -1,4 +1,7 @@
+import photo_rename
 
+
+@photo_rename.logged_class
 class FileMapList(object):
     """
     Intelligently add FileMap() instances to file_map list based on order of
