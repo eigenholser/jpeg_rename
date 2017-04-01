@@ -1,8 +1,6 @@
-from .utils import logged_class
+__version__ = "0.5"
 from .filemap import FileMap
 from .filemaplist import FileMapList
-
-__version__ = "0.5"
 
 # Configure built-in support for various image types.
 IMAGE_TYPE_ARW = 1

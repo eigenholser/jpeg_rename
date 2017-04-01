@@ -12,6 +12,16 @@ from photo_rename import FileMap, FileMapList
 logger = logging.getLogger(__name__)
 
 
+def logged_class(cls):
+    """
+    Class Decorator to add a class level logger to the class with module and
+    name.
+    """
+    cls.logger = logging.getLogger(
+            "{0}.{1}".format(cls.__module__, cls.__name__))
+    return cls
+
+
 def init_file_map(workdir, mapfile=None, avoid_collisions=None):
     """
     Read the work directory looking for files with extensions defined in the
