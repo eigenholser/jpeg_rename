@@ -106,7 +106,7 @@ setup(
     package_data=get_package_data(package_directories),
     entry_points={
         'console_scripts': [
-            'zrename = photo_rename.rename:rename_photo_files'
+            'zrename = photo_rename.rename:main'
         ]
     },
     install_requires=install_requires_list,
