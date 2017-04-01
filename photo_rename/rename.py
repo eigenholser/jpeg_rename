@@ -284,6 +284,11 @@ def main():
             action="store_true")
     myargs = parser.parse_args()
 
+    if (myargs.verbose):
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
     # Use current directory if --directory not specified.
     workdir = myargs.directory
     if workdir is None:
@@ -315,13 +320,9 @@ def main():
             logging.error("Exiting due to errors.")
             sys.exit(1)
 
-    if (myargs.verbose):
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
-
     process_all_files(workdir=workdir, simon_sez=myargs.simon_sez,
             avoid_collisions=myargs.avoid_collisions, mapfile=mapfile)
+
 
 if __name__ == '__main__':  # pragma: no cover
     main()
