@@ -6,7 +6,7 @@ import stat
 import sys
 import pyexiv2
 import photo_rename
-from photo_rename import FileMap, FileMapList
+from photo_rename import FileMap, FileMapList, Harvester
 
 
 logger = logging.getLogger(__name__)
@@ -133,50 +133,6 @@ def scan_for_dupe_files(files):
     return False
 
 
-def process_file_map(file_map, simon_sez=None, move_func=None):
-    """
-    Iterate through the Python list of FileMap objects. Move the file if
-    Simon sez.
-
-    Arguments:
-        str: workdir - Working directory.
-        dict: file_map - old_fn to new_fn mapping.
-        boolean: simon_sez - Dry run or real thing.
-        func: move_func - Move function to use for testing or default.
-    Returns:
-        None
-
-    >>> filemap = FileMap('IMG0332.JPG', photo_rename.IMAGE_TYPE_JPEG, avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
-    >>> def move_func(old_fn, new_fn): pass
-    >>> file_map_list = FileMapList()
-    >>> file_map_list.add(filemap)
-    >>> process_file_map(file_map_list, True, move_func)
-
-    """
-
-    # XXX: Of marginal utility
-    if simon_sez is None:
-        simon_sez = False
-
-    fm_list = file_map.get()
-    for fm in fm_list:
-        try:
-            if simon_sez:
-                if move_func is None:
-                    fm.move()
-                else:
-                    move_func(fm.old_fn, fm.new_fn)
-            else:
-                if fm.old_fn != fm.new_fn:
-                    logging.info("DRY RUN: Moving {0} ==> {1}".format(
-                        fm.old_fn, fm.new_fn))
-                    # TODO: Hmm, see about not doing this.
-                    fm.same_files = False   # For unit test only.
-        except Exception as e:
-            logging.info("{0}".format(e))
-            break
-
-
 def process_all_files(
         workdir=None, simon_sez=None, avoid_collisions=None, mapfile=None):
     """
@@ -192,9 +148,9 @@ def process_all_files(
                 "Directory {0} is not writable. Exiting.".format(workdir))
         sys.exit(1)
 
-    #import pdb; pdb.set_trace()
-    file_map = init_file_map(workdir, mapfile, avoid_collisions)
-    process_file_map(file_map, simon_sez)
+    harvester = Harvester()
+    file_map = harvester.init_file_map(workdir, mapfile, avoid_collisions)
+    harvester.process_file_map(file_map, simon_sez)
 
 
 def main():

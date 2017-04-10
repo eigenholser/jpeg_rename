@@ -17,23 +17,25 @@ class TestRenameProcessAllFiles(object):
     skiptests = not TEST_RENAME_PROCESS_ALL_FILES
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.process_file_map')
-    @patch('photo_rename.rename.init_file_map')
+    @patch('photo_rename.rename.Harvester.process_file_map')
+    @patch('photo_rename.rename.Harvester.init_file_map')
     @patch('photo_rename.rename.os.access')
     def test_process_all_files_workdir_not_none(self, mock_os_access,
-            mock_init_file_map, mock_process_file_map):
-        """Test process_all_files() with workdir set. Tests negative of branch
+            m_init_file_map, m_process_file_map):
+        """
+        Test process_all_files() with workdir set. Tests negative of branch
         testing workdir. Verify process_file_map() called with expected
-        arguments."""
+        arguments.
+        """
         file_map = [StubFileMap()]
-        mock_init_file_map.return_value = file_map
+        m_init_file_map.return_value = file_map
         mock_os_access.return_value = True
         process_all_files('.')
-        mock_process_file_map.assert_called_with(file_map, None)
+        m_process_file_map.assert_called_with(file_map, None)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.process_file_map')
-    @patch('photo_rename.rename.init_file_map')
+    @patch('photo_rename.rename.Harvester.process_file_map')
+    @patch('photo_rename.rename.Harvester.init_file_map')
     @patch('photo_rename.rename.os.path.exists')
     def test_process_all_files_exists_true(self, mock_os_path,
             mock_init_file_map,
@@ -58,8 +60,8 @@ class TestRenameProcessAllFiles(object):
         mock_sys_exit.assert_called_with(1)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.process_file_map')
-    @patch('photo_rename.rename.init_file_map')
+    @patch('photo_rename.rename.Harvester.process_file_map')
+    @patch('photo_rename.rename.Harvester.init_file_map')
     @patch('photo_rename.rename.os.access')
     def test_process_all_files_access_true(self, mock_os_access,
             mock_init_file_map, mock_process_file_map):
