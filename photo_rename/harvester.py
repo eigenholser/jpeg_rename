@@ -30,7 +30,7 @@ class Harvester(object):
         Implemented for file_map.
         """
         if key == "file_map":
-            return self.file_map_list.file_map
+            return self.file_map_list
         raise KeyError("Invalid key")
 
     def init_file_map(self):
