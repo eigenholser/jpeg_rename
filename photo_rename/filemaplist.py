@@ -14,8 +14,8 @@ class FileMapList(object):
     def add(self, instance):
         """
         Add, whether insert or append, a FileMap instance to the file_map list
-        in the order of instance.new_fn. If there are duplicate new_fn in the
-        list, they will be resolved in instance.move().
+        in the order of instance.new_fn ascending. If there are duplicate
+        new_fn in the list, they will be resolved in instance.move().
         """
         index = 0
         inserted = False
