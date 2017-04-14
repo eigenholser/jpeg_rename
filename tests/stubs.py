@@ -2,6 +2,8 @@
 Stubs shared between different test modules.
 """
 import re
+import pytest
+from photo_rename import Harvester
 
 # Setup valid EXIF data with expected new filename
 EXIF_DATA_VALID = {
@@ -34,3 +36,7 @@ class StubFileMap(object):
     def __init__(self):
         self.old_fn = 'foo.jpg'
         self.new_fn = 'bar.jpg'
+
+@pytest.fixture
+def harvey():
+    return Harvester()

@@ -12,67 +12,6 @@ from photo_rename import FileMap, FileMapList, Harvester
 logger = logging.getLogger(__name__)
 
 
-def init_file_map(workdir, mapfile=None, avoid_collisions=None):
-    """
-    Read the work directory looking for files with extensions defined in the
-    EXTENSIONS constant. Note that this could use a more elaborate magic
-    number mechanism that would be cool.
-    """
-
-    # List of FileMap objects.
-    file_map_list = FileMapList()
-
-    list_workdir = os.listdir(workdir)
-    if mapfile:
-        # Extract files in work dir that match against our alternate file map.
-        #
-        # alt_file_map.keys() = ['abc', 'def', 'ghi', 'jkl', 'mno']
-        # list_workdir = ['abc.jpg', 'ghi.jpg', 'pqr.jpg']
-        # results in...
-        # all_files_list = ['abc.jpg', 'ghi.jpg']
-        alt_file_map = read_alt_file_map(mapfile)
-        all_files_list = []
-        filename_prefix_map = {}
-        for file_prefix in alt_file_map.keys():
-            for filename in list_workdir:
-                if re.search(r"^{}\..+$".format(file_prefix), filename):
-                    all_files_list.append(filename)
-                    filename_prefix_map[filename] = file_prefix
-    else:
-        all_files_list = list_workdir
-
-    # Initialize file_map list.
-    for extension in photo_rename.EXTENSIONS:
-        image_regex = r"\." + re.escape(extension) + r"$"
-        matching_files = [filename for filename in all_files_list
-                if re.search(image_regex, filename, re.IGNORECASE)]
-        logger.debug("Files matching extension {ext}: {files}".format(
-            ext=extension, files=matching_files))
-        for filename in (matching_files):
-            filename_fq = os.path.join(workdir, filename)
-            # TODO: There once was some trouble here that caused me to comment
-            # the directory check. Dunno. Keep an eye on it in case it pops up
-            # again in the future.
-            if os.path.isdir(filename_fq):
-                logger.warn("Skipping directory {0}".format(filename_fq))
-                continue
-            try:
-                image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[extension]
-                if mapfile:
-                    filename_prefix = filename_prefix_map[filename]
-                    new_fn = "{}.{}".format(
-                            alt_file_map[filename_prefix], extension)
-                    file_map_list.add(
-                        FileMap(filename_fq, image_type, avoid_collisions, {},
-                            new_fn))
-                else:
-                    file_map_list.add(FileMap(
-                        filename_fq, image_type, avoid_collisions))
-            except Exception as e:
-                logger.warn("FileMap Error: {0}".format(e))
-    return file_map_list
-
-
 def read_alt_file_map(mapfile, delimiter='\t', lineterm=None):
     """
     Read a filename map for the purpose of transforming the filenames as an

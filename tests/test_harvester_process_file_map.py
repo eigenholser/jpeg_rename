@@ -11,11 +11,6 @@ from .stubs import *
 from . import TEST_RENAME_PROCESS_FILEMAP
 
 
-@pytest.fixture
-def harvey():
-    return Harvester()
-
-
 class TestRenameProcessFilemap(object):
     """
     Tests for method process_file_map() are in this class.
