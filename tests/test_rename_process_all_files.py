@@ -17,71 +17,97 @@ class TestRenameProcessAllFiles(object):
     skiptests = not TEST_RENAME_PROCESS_ALL_FILES
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.Harvester.process_file_map')
-    @patch('photo_rename.rename.Harvester.init_file_map')
+    @patch('photo_rename.rename.Harvester')
+    @patch('photo_rename.rename.sys.exit')
+    @patch('photo_rename.rename.os.path.exists')
     @patch('photo_rename.rename.os.access')
-    def test_process_all_files_workdir_not_none(self, mock_os_access,
-            m_init_file_map, m_process_file_map):
+    def test_process_all_files_exists_and_access(self, m_os_access,
+            m_os_path_exists, m_sys_exit, m_harvey):
         """
         Test process_all_files() with workdir set. Tests negative of branch
-        testing workdir. Verify process_file_map() called with expected
-        arguments.
+        testing workdir. Verify os.path.exists() and os.access() called with
+        proper arguments. Verify sys.exit() not called.
         """
         file_map = [StubFileMap()]
-        m_init_file_map.return_value = file_map
-        mock_os_access.return_value = True
+        m_harvey.__getitem__.return_value = file_map
+        m_harvey.process_file_map.return_value = None
+        m_os_path_exists.return_value = True
+        m_os_access.return_value = True
         process_all_files('.')
-        m_process_file_map.assert_called_with(file_map, None)
+        m_os_path_exists.assert_called_with(".")
+        m_os_access.assert_called_with('.', os.W_OK)
+        m_sys_exit.assert_not_called()
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.Harvester.process_file_map')
-    @patch('photo_rename.rename.Harvester.init_file_map')
-    @patch('photo_rename.rename.os.path.exists')
-    def test_process_all_files_exists_true(self, mock_os_path,
-            mock_init_file_map,
-            mock_process_file_map):
-        """Test process_all_files() with workdir path exists True. Verify that
-        process_file_map() called with correct arguments."""
-        file_map = [StubFileMap()]
-        mock_init_file_map.return_value = file_map
-        mock_os_path.return_value = True
-        process_all_files('.')
-        mock_process_file_map.assert_called_with(file_map, None)
-
-    @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.os.path.exists')
+    @patch('photo_rename.rename.Harvester')
     @patch('photo_rename.rename.sys.exit')
-    def test_process_all_files_exists_false(self, mock_sys_exit, mock_os_path):
-        """Test process_all_files() with workdir path exists False. Tests
-        positive branch of workdir not exists test. Verify that sys.exit() is
-        called with expected argument."""
-        mock_os_path.return_value = False
-        process_all_files('.')
-        mock_sys_exit.assert_called_with(1)
-
-    @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.Harvester.process_file_map')
-    @patch('photo_rename.rename.Harvester.init_file_map')
+    @patch('photo_rename.rename.os.path.exists')
     @patch('photo_rename.rename.os.access')
-    def test_process_all_files_access_true(self, mock_os_access,
-            mock_init_file_map, mock_process_file_map):
-        """Test process_all_files() with workdir access True. Tests for
-        negative branch of W_OK access test. Verify process_file_map() called
-        with expected arguments."""
+    def test_process_all_files_exists_and_not_access(self, m_os_access,
+            m_os_path_exists, m_sys_exit, m_harvey):
+        """
+        Test process_all_files() with workdir path exists. Verify that
+        os.path.exists() called with ".", os_access() not called, and
+        sys.exit() called with 1.
+        """
         file_map = [StubFileMap()]
-        mock_init_file_map.return_value = file_map
-        mock_os_access.return_value = True
+        m_harvey.__getitem__.return_value = file_map
+        m_harvey.process_file_map.return_value = None
+        m_os_path_exists.return_value = True
+        m_os_access.return_value = False
         process_all_files('.')
-        mock_process_file_map.assert_called_with(file_map, None)
+        m_os_path_exists.assert_called_with(".")
+        m_os_access.assert_called_with(".", os.W_OK)
+        m_sys_exit.assert_called_with(1)
+        m_sys_exit.assert_called_once()
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.os.access')
+    @patch('photo_rename.rename.Harvester')
     @patch('photo_rename.rename.sys.exit')
-    def test_process_all_files_access_false(self, mock_sys_exit,
-            mock_os_access):
-        """Test process_all_files() with workdir access False. Tests for
-        positive branch of W_OK access test. Verify sys.exit() called with
-        expected arguments."""
-        mock_os_access.return_value = False
+    @patch('photo_rename.rename.os.path.exists')
+    @patch('photo_rename.rename.os.access')
+    def test_process_all_files_not_exists_and_access(self, m_os_access,
+            m_os_path_exists, m_sys_exit, m_harvey):
+        """
+        Test process_all_files() with workdir path exists False. Verify that
+        os.path.exists() called with ".", os_access() not called, and
+        sys.exit() called with 1 and only once.
+        """
+        file_map = [StubFileMap()]
+        m_harvey.__getitem__.return_value = file_map
+        m_harvey.process_file_map.return_value = None
+        m_os_path_exists.return_value = False
+        m_os_access.return_value = True
         process_all_files('.')
-        mock_sys_exit.assert_called_with(1)
+        m_os_path_exists.assert_called_with(".")
+        m_os_access.assert_called_with(".", os.W_OK)
+        m_sys_exit.assert_called_with(1)
+        m_sys_exit.assert_called_once()
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.rename.Harvester')
+    @patch('photo_rename.rename.sys.exit')
+    @patch('photo_rename.rename.os.path.exists')
+    @patch('photo_rename.rename.os.access')
+    def test_process_all_files_harvey_args(self, m_os_access,
+            m_os_path_exists, m_sys_exit, m_harvey):
+        """
+        Test process_all_files() with workdir set. Tests negative of branch
+        testing workdir. Verify os.path.exists() and os.access() called with
+        proper arguments. Verify sys.exit() not called. Primarily, test that
+        harvester and process_file_map() args correct.
+        """
+        def pfm(fm, ss):
+            pass
+
+        file_map = [StubFileMap()]
+        m_harvey.__getitem__.return_value = file_map
+        m_os_path_exists.return_value = True
+        m_os_access.return_value = True
+        process_all_files('.')
+        m_os_path_exists.assert_called_with(".")
+        m_os_access.assert_called_with('.', os.W_OK)
+        m_sys_exit.assert_not_called()
+        m_harvey.assert_called_with(".", None, None)
+
+

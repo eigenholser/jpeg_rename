@@ -94,10 +94,11 @@ class TestFilemapReadAltFileMap(object):
     # test.
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.Harvester.__init__')
     @patch('photo_rename.Harvester.get_line_term')
     @patch('photo_rename.Harvester.scan_for_dupe_files')
     def test_read_alt_file_map(self, m_scan_for_dupe_files, m_get_line_term,
-            alt_file_map_tab, alt_file_map_dict, harvey):
+            m_harvey_init, alt_file_map_tab, alt_file_map_dict):
         """
         Read alt file map and create dict with default delimiter `\t' and
         Unix line termination.
@@ -105,63 +106,91 @@ class TestFilemapReadAltFileMap(object):
         a = mock_open(read_data=alt_file_map_tab.strip())
         m_get_line_term.return_value = '\n'
         m_scan_for_dupe_files.return_value = False
+        m_harvey_init.return_value = None
+        harvey = Harvester()
+        harvey.lineterm = '\n'
+        harvey.delimiter = '\t'
+        harvey.mapfile = "foo"
         with patch('builtins.open', a) as m:
-            afmd = harvey.read_alt_file_map("foo")
+            afmd = harvey.read_alt_file_map()
             assert afmd == alt_file_map_dict
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.Harvester.__init__')
     @patch('photo_rename.Harvester.scan_for_dupe_files')
     def test_read_alt_file_map_crlf(self, m_scan_for_dupe_files,
-            alt_file_map_term_crlf, alt_file_map_dict, harvey):
+            m_harvey_init, alt_file_map_term_crlf, alt_file_map_dict):
         """
         Read alt file map and create dict with default delimiter `\t' and
         DOS line termination. Skip lineterm branch.
         """
         a = mock_open(read_data=alt_file_map_term_crlf.strip())
         m_scan_for_dupe_files.return_value = False
+        m_harvey_init.return_value = None
+        harvey = Harvester()
+        harvey.lineterm = '\r\n'
+        harvey.delimiter = '\t'
+        harvey.mapfile = "foo"
         with patch('builtins.open', a) as m:
-            afmd = harvey.read_alt_file_map("foo", lineterm='\r\n')
+            afmd = harvey.read_alt_file_map()
             assert afmd == alt_file_map_dict
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.Harvester.__init__')
     @patch('photo_rename.Harvester.scan_for_dupe_files')
     def test_read_alt_file_map_duplicate_source(self, m_scan_for_dupe_files,
-            alt_file_map_duplicate_source, alt_file_map_dict, harvey):
+            m_harvey_init, alt_file_map_duplicate_source, alt_file_map_dict):
         """
         Read alt file map with duplicate source filenames.
         """
         # TODO: don't hardwire assert
         a = mock_open(read_data=alt_file_map_duplicate_source.strip())
         m_scan_for_dupe_files.return_value = False
+        m_harvey_init.return_value = None
+        harvey = Harvester()
+        harvey.lineterm = '\n'
+        harvey.delimiter = '\t'
+        harvey.mapfile = "foo"
         with patch('builtins.open', a) as m:
-            afmd = harvey.read_alt_file_map("foo", lineterm='\n')
+            afmd = harvey.read_alt_file_map()
             assert afmd == {'abc 123': 'MY NEW FILE 2'}
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.Harvester.__init__')
     @patch('photo_rename.Harvester.scan_for_dupe_files')
     def test_read_alt_file_map_duplicate_dest(self, m_scan_for_dupe_files,
-            alt_file_map_duplicate_dest, alt_file_map_dict,
-            harvey):
+            m_harvey_init, alt_file_map_duplicate_dest, alt_file_map_dict):
         """
         Read alt file map with mocked duplicate dest filenames.
         """
         a = mock_open(read_data=alt_file_map_duplicate_dest.strip())
         m_scan_for_dupe_files.return_value = True
+        m_harvey_init.return_value = None
+        harvey = Harvester()
+        harvey.lineterm = '\n'
+        harvey.delimiter = '\t'
+        harvey.mapfile = "foo"
         with patch('builtins.open', a) as m:
             with pytest.raises(Exception):
-                afmd = harvey.read_alt_file_map("foo", lineterm='\n')
+                afmd = harvey.read_alt_file_map()
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.Harvester.__init__')
     @patch('photo_rename.Harvester.scan_for_dupe_files')
     def test_read_alt_file_map_custom_delim(self, m_scan_for_dupe_files,
-            alt_file_map_xxx, alt_file_map_dict, harvey):
+            m_harvey_init, alt_file_map_xxx, alt_file_map_dict):
         """
         Read alt file map and create dict with custom delimiter `xxx'.
         """
         a = mock_open(read_data=alt_file_map_xxx.strip())
         m_scan_for_dupe_files.return_value = False
+        m_harvey_init.return_value = None
+        harvey = Harvester()
+        harvey.lineterm = '\n'
+        harvey.delimiter = 'xxx'
+        harvey.mapfile = "foo"
         with patch('builtins.open', a) as m:
-            afmd = harvey.read_alt_file_map("foo", delimiter="xxx")
+            afmd = harvey.read_alt_file_map()
             assert afmd == alt_file_map_dict
 
 

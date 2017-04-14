@@ -14,7 +14,26 @@ logger = logging.getLogger(__name__)
 
 class Harvester(object):
 
-    def init_file_map(self, workdir, mapfile=None, avoid_collisions=None):
+    def __init__(self, workdir, mapfile=None, avoid_collisions=None,
+            delimiter='\t', lineterm=None):
+        """
+        """
+        self.workdir = workdir
+        self.mapfile = mapfile
+        self.avoid_collisions = avoid_collisions
+        self.delimiter = delimiter
+        self.lineterm = lineterm
+        self.file_map_list = self.init_file_map()
+
+    def __getitem__(self, key):
+        """
+        Implemented for file_map.
+        """
+        if key == "file_map":
+            return self.file_map_list.file_map
+        raise KeyError("Invalid key")
+
+    def init_file_map(self):
         """
         Read the work directory looking for files with extensions defined in
         the EXTENSIONS constant. Note that this could use a more elaborate
@@ -24,8 +43,8 @@ class Harvester(object):
         # List of FileMap objects.
         file_map_list = FileMapList()
 
-        list_workdir = os.listdir(workdir)
-        if mapfile:
+        list_workdir = os.listdir(self.workdir)
+        if self.mapfile:
             # Extract files in work dir that match against our alternate file
             # map.
             #
@@ -33,7 +52,7 @@ class Harvester(object):
             # list_workdir = ['abc.jpg', 'ghi.jpg', 'pqr.jpg']
             # results in...
             # all_files_list = ['abc.jpg', 'ghi.jpg']
-            alt_file_map = self.read_alt_file_map(mapfile)
+            alt_file_map = self.read_alt_file_map()
             all_files_list = []
             filename_prefix_map = {}
             for file_prefix in alt_file_map.keys():
@@ -52,7 +71,7 @@ class Harvester(object):
             logger.debug("Files matching extension {ext}: {files}".format(
                 ext=extension, files=matching_files))
             for filename in (matching_files):
-                filename_fq = os.path.join(workdir, filename)
+                filename_fq = os.path.join(self.workdir, filename)
                 # TODO: There once was some trouble here that caused me to
                 # comment the directory check. Dunno. Keep an eye on it in
                 # case it pops up again in the future.
@@ -62,27 +81,31 @@ class Harvester(object):
                 try:
                     image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[
                             extension]
-                    if mapfile:
+                    if self.mapfile:
                         filename_prefix = filename_prefix_map[filename]
                         new_fn = "{}.{}".format(
                                 alt_file_map[filename_prefix], extension)
                         file_map_list.add(
-                            FileMap(filename_fq, image_type, avoid_collisions,
-                                {}, new_fn))
+                            FileMap(filename_fq, image_type,
+                                self.avoid_collisions, {}, new_fn))
                     else:
                         file_map_list.add(FileMap(
-                            filename_fq, image_type, avoid_collisions))
+                            filename_fq, image_type, self.avoid_collisions))
                 except Exception as e:
                     logger.warn("FileMap Error: {0}".format(e))
         return file_map_list
 
-    def read_alt_file_map(self, mapfile, delimiter='\t', lineterm=None):
+    def read_alt_file_map(self):
         """
         Read a filename map for the purpose of transforming the filenames as
         an alternative to using EXIF/XMP metadata DateTime information. Only
         require map file as an absolute path.
         """
-        with open(mapfile, 'r') as f:
+        # Initialize locally so we do not change instance state.
+        lineterm = self.lineterm
+        delimiter = self.delimiter
+
+        with open(self.mapfile, 'r') as f:
             lines = [
                 line for line in f.readlines() if not line.startswith('#')]
 

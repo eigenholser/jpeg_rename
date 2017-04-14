@@ -23,7 +23,7 @@ class TestRenameInitFileMapMetadata():
     @patch('photo_rename.harvester.re')
     @patch('photo_rename.harvester.os.listdir')
     def test_init_file_map_orthodox(
-            self, m_listdir, m_re, m_filemap, harvey):
+            self, m_listdir, m_re, m_filemap):
         """
         Tests init_file_map() list building. Verifies expected return value.
         """
@@ -31,8 +31,9 @@ class TestRenameInitFileMapMetadata():
         m_filemap.return_value = test_file_map
         m_listdir.return_value = ['/foo/bar']
         m_re.search.return_value = True
-        file_map = harvey.init_file_map('.')
-        assert file_map.file_map == [
+        harvey = Harvester(".")
+        file_map = harvey["file_map"]
+        assert file_map == [
                 test_file_map, test_file_map, test_file_map, test_file_map,
                 test_file_map, test_file_map]
 
@@ -41,7 +42,7 @@ class TestRenameInitFileMapMetadata():
     @patch('photo_rename.harvester.re')
     @patch('photo_rename.harvester.os')
     def test_init_file_map_with_directories(
-            self, m_os, m_re, m_filemap, harvey):
+            self, m_os, m_re, m_filemap):
         """
         Tests init_file_map() with exception handling. Test exception raised
         when append to file_map list. Verify expected file_map returned.
@@ -49,15 +50,16 @@ class TestRenameInitFileMapMetadata():
         m_os.listdir.return_value = ['/foo/bar']
         m_os.path.isdir.return_value = True
         m_re.search.return_value = True
-        file_map = harvey.init_file_map('.')
-        assert file_map.file_map == []
+        harvey = Harvester(".")
+        file_map = harvey["file_map"]
+        assert file_map == []
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.harvester.FileMap')
     @patch('photo_rename.harvester.re')
     @patch('photo_rename.harvester.os.listdir')
     def test_init_file_map_raises_exception(
-            self, m_listdir, m_re, m_filemap, harvey):
+            self, m_listdir, m_re, m_filemap):
         """
         Tests init_file_map() with exception handling. Test exception raised
         when append to file_map list. Verify expected file_map returned.
@@ -65,8 +67,9 @@ class TestRenameInitFileMapMetadata():
         m_filemap.side_effect = Exception("Just testing.")
         m_listdir.return_value = ['/foo/bar']
         m_re.search.return_value = True
-        file_map = harvey.init_file_map('.')
-        assert file_map.file_map == []
+        harvey = Harvester(".")
+        file_map = harvey["file_map"]
+        assert file_map == []
 
 
 class Stub2FileMap(object):
@@ -102,15 +105,16 @@ class TestRenameInitFileMapAlt(object):
     @patch('photo_rename.harvester.FileMap', Stub2FileMap)
     @patch('photo_rename.Harvester.read_alt_file_map')
     @patch('photo_rename.harvester.os.listdir')
-    def test_basic_alt_map(self, m_listdir, m_readfm, harvey):
+    def test_basic_alt_map(self, m_listdir, m_readfm):
         """
         Test happy path against alternate file map.
         """
         expected = ["abc.jpg", "ghi.png"]
         m_readfm.return_value = {"abc": "123", "def": "456", "ghi": "789"}
         m_listdir.return_value = ["abc.jpg", "ghi.png", "jkl.tif"]
-        file_map = harvey.init_file_map('.', mapfile="mapfile.txt")
-        assert len([x for x in file_map.get()]) == len(expected)
-        assert file_map.file_map[0].old_fn in expected
-        assert file_map.file_map[1].old_fn in expected
+        harvey = Harvester(".", mapfile="mapfile.txt")
+        file_map = harvey["file_map"]
+        assert len(file_map) == len(expected)
+        assert file_map[0].old_fn in expected
+        assert file_map[1].old_fn in expected
 

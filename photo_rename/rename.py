@@ -27,8 +27,8 @@ def process_all_files(
                 "Directory {0} is not writable. Exiting.".format(workdir))
         sys.exit(1)
 
-    harvester = Harvester()
-    file_map = harvester.init_file_map(workdir, mapfile, avoid_collisions)
+    harvester = Harvester(workdir, mapfile, avoid_collisions)
+    file_map = harvester["file_map"]
     harvester.process_file_map(file_map, simon_sez)
 
 
