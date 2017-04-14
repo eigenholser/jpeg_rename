@@ -23,7 +23,8 @@ class TestFilemapList(object):
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_file_map_list_add(self):
-        """Tests FileMapList add() method. Adds multiple FileMap instances
+        """
+        Tests FileMapList add() method. Adds multiple FileMap instances
         and verifies expected ordering of instances based on new_fn attribute.
         """
         test_file_map_1 = StubFileMap()
