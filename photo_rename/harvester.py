@@ -84,13 +84,13 @@ class Harvester(object):
             lines = [line for line in f.readlines() if not line.startswith('#')]
 
         if lineterm is None:
-            lineterm = get_line_term(lines)
+            lineterm = self.get_line_term(lines)
 
         # Get a list of destination filenames from map so we can check for dupes.
         # This may seem pedantic but it will avoid a lot of trouble if there is a
         # duplicate new filename because of human error.
         files = [str.split(line.rstrip(lineterm), delimiter)[1] for line in lines]
-        if scan_for_dupe_files(files):
+        if self.scan_for_dupe_files(files):
             raise Exception(
                 "Duplicate destination filename detected: {}".format(ofn))
 

@@ -12,66 +12,6 @@ from photo_rename import FileMap, FileMapList, Harvester
 logger = logging.getLogger(__name__)
 
 
-def read_alt_file_map(mapfile, delimiter='\t', lineterm=None):
-    """
-    Read a filename map for the purpose of transforming the filenames as an
-    alternative to using EXIF/XMP metadata DateTime information. Only require
-    map file as an absolute path.
-    """
-    with open(mapfile, 'r') as f:
-        lines = [line for line in f.readlines() if not line.startswith('#')]
-
-    if lineterm is None:
-        lineterm = get_line_term(lines)
-
-    # Get a list of destination filenames from map so we can check for dupes.
-    # This may seem pedantic but it will avoid a lot of trouble if there is a
-    # duplicate new filename because of human error.
-    files = [str.split(line.rstrip(lineterm), delimiter)[1] for line in lines]
-    if scan_for_dupe_files(files):
-        raise Exception(
-            "Duplicate destination filename detected: {}".format(ofn))
-
-    # XXX: This is soooo cool! List of lists flattened all on one nested
-    # comprehension.
-    # [[k1, v1], [k2, v2], ..., [kn, vn]] --> {k1: v1, k2: v2, ..., kn: vn}
-    return dict(zip(*[iter([x for sublist in [
-        str.split(line.rstrip(lineterm), delimiter) for line in lines]
-        for x in sublist])] * 2))
-
-
-def get_line_term(lines):
-    """
-    Find line termination style. Require every line to have the same
-    termination.
-    """
-    lineterm = None
-    for line in lines:
-        if line.endswith('\r\n'):
-            term = '\r\n'
-        elif line.endswith('\n'):
-            term = '\n'
-        if lineterm is not None and lineterm != term:
-            raise Exception("Inconsistent line termination.")
-        else:
-            lineterm = term
-    return lineterm
-
-def scan_for_dupe_files(files):
-    """
-    O(n^2) scan of desination list for duplicates. Used when processing a map
-    file. Returns True if duplicate files.
-    """
-    for ofile in files:
-        count = 0
-        for ifile in files:
-            if ofile == ifile:
-                count += 1
-            if count > 1:
-                return True
-    return False
-
-
 def process_all_files(
         workdir=None, simon_sez=None, avoid_collisions=None, mapfile=None):
     """

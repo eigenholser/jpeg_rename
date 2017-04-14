@@ -6,12 +6,12 @@ from mock import Mock, mock_open, patch
 app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
-from photo_rename.rename import *
+from photo_rename import Harvester
 from .stubs import *
 from . import (
-        TEST_FILEMAP_READ_ALT_FILE_MAP,
-        TEST_FILEMAP_GET_LINE_TERM,
-        TEST_FILEMAP_SCAN_FOR_DUPE_FILES,
+        TEST_HARVESTER_READ_ALT_FILE_MAP,
+        TEST_HARVESTER_GET_LINE_TERM,
+        TEST_HARVESTER_SCAN_FOR_DUPE_FILES,
     )
 
 
@@ -88,13 +88,16 @@ class TestFilemapReadAltFileMap(object):
     """
     Tests reading alternate file map.
     """
-    skiptests = not TEST_FILEMAP_READ_ALT_FILE_MAP
+    skiptests = not TEST_HARVESTER_READ_ALT_FILE_MAP
+
+    # XXX: get_line_term() requires mock when we do not supply lineterm in
+    # test.
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.get_line_term')
-    @patch('photo_rename.rename.scan_for_dupe_files')
+    @patch('photo_rename.Harvester.get_line_term')
+    @patch('photo_rename.Harvester.scan_for_dupe_files')
     def test_read_alt_file_map(self, m_scan_for_dupe_files, m_get_line_term,
-            alt_file_map_tab, alt_file_map_dict):
+            alt_file_map_tab, alt_file_map_dict, harvey):
         """
         Read alt file map and create dict with default delimiter `\t' and
         Unix line termination.
@@ -103,13 +106,13 @@ class TestFilemapReadAltFileMap(object):
         m_get_line_term.return_value = '\n'
         m_scan_for_dupe_files.return_value = False
         with patch('builtins.open', a) as m:
-            afmd = read_alt_file_map("foo")
+            afmd = harvey.read_alt_file_map("foo")
             assert afmd == alt_file_map_dict
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.scan_for_dupe_files')
+    @patch('photo_rename.Harvester.scan_for_dupe_files')
     def test_read_alt_file_map_crlf(self, m_scan_for_dupe_files,
-            alt_file_map_term_crlf, alt_file_map_dict):
+            alt_file_map_term_crlf, alt_file_map_dict, harvey):
         """
         Read alt file map and create dict with default delimiter `\t' and
         DOS line termination. Skip lineterm branch.
@@ -117,13 +120,13 @@ class TestFilemapReadAltFileMap(object):
         a = mock_open(read_data=alt_file_map_term_crlf.strip())
         m_scan_for_dupe_files.return_value = False
         with patch('builtins.open', a) as m:
-            afmd = read_alt_file_map("foo", lineterm='\r\n')
+            afmd = harvey.read_alt_file_map("foo", lineterm='\r\n')
             assert afmd == alt_file_map_dict
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.scan_for_dupe_files')
+    @patch('photo_rename.Harvester.scan_for_dupe_files')
     def test_read_alt_file_map_duplicate_source(self, m_scan_for_dupe_files,
-            alt_file_map_duplicate_source, alt_file_map_dict):
+            alt_file_map_duplicate_source, alt_file_map_dict, harvey):
         """
         Read alt file map with duplicate source filenames.
         """
@@ -131,35 +134,34 @@ class TestFilemapReadAltFileMap(object):
         a = mock_open(read_data=alt_file_map_duplicate_source.strip())
         m_scan_for_dupe_files.return_value = False
         with patch('builtins.open', a) as m:
-            afmd = read_alt_file_map("foo", lineterm='\n')
+            afmd = harvey.read_alt_file_map("foo", lineterm='\n')
             assert afmd == {'abc 123': 'MY NEW FILE 2'}
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.get_line_term')
-    @patch('photo_rename.rename.scan_for_dupe_files')
+    @patch('photo_rename.Harvester.scan_for_dupe_files')
     def test_read_alt_file_map_duplicate_dest(self, m_scan_for_dupe_files,
-            get_line_term, alt_file_map_duplicate_dest, alt_file_map_dict):
+            alt_file_map_duplicate_dest, alt_file_map_dict,
+            harvey):
         """
         Read alt file map with mocked duplicate dest filenames.
         """
-        # No need to mock get_line_term() because we're passing in lineterm.
         a = mock_open(read_data=alt_file_map_duplicate_dest.strip())
         m_scan_for_dupe_files.return_value = True
         with patch('builtins.open', a) as m:
             with pytest.raises(Exception):
-                afmd = read_alt_file_map("foo", lineterm='\n')
+                afmd = harvey.read_alt_file_map("foo", lineterm='\n')
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.rename.scan_for_dupe_files')
-    def test_read_alt_file_map(self, m_scan_for_dupe_files, alt_file_map_xxx,
-            alt_file_map_dict):
+    @patch('photo_rename.Harvester.scan_for_dupe_files')
+    def test_read_alt_file_map_custom_delim(self, m_scan_for_dupe_files,
+            alt_file_map_xxx, alt_file_map_dict, harvey):
         """
         Read alt file map and create dict with custom delimiter `xxx'.
         """
         a = mock_open(read_data=alt_file_map_xxx.strip())
         m_scan_for_dupe_files.return_value = False
         with patch('builtins.open', a) as m:
-            afmd = read_alt_file_map("foo", delimiter="xxx")
+            afmd = harvey.read_alt_file_map("foo", delimiter="xxx")
             assert afmd == alt_file_map_dict
 
 
@@ -167,10 +169,10 @@ class TestFilemapGetLineTerm(object):
     """
     Tests for function get_line_term().
     """
-    skiptests = not TEST_FILEMAP_GET_LINE_TERM
+    skiptests = not TEST_HARVESTER_GET_LINE_TERM
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    def test_get_line_term_lf(self, alt_file_map_tab):
+    def test_get_line_term_lf(self, alt_file_map_tab, harvey):
         """
         Read filemap with LF terminated lines.
         """
@@ -179,11 +181,11 @@ class TestFilemapGetLineTerm(object):
             with open('foo', 'r') as f:
                 lines = [line for line in f.readlines()
                         if not line.startswith('#')]
-        lineterm = get_line_term(lines)
+        lineterm = harvey.get_line_term(lines)
         assert lineterm == '\n'
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    def test_get_line_term_mixed(self, alt_file_map_term_mixed):
+    def test_get_line_term_mixed(self, alt_file_map_term_mixed, harvey):
         """
         Raises Exception with mixed line terminations.
         """
@@ -193,29 +195,29 @@ class TestFilemapGetLineTerm(object):
                 lines = [line for line in f.readlines()
                         if not line.startswith('#')]
         with pytest.raises(Exception):
-            lineterm = get_line_term(lines)
+            lineterm = harvey.get_line_term(lines)
 
 
 class TestFilemapScanForDupeFiles(object):
     """
     Tests for function scan_for_dupe_files().
     """
-    skiptests = not TEST_FILEMAP_SCAN_FOR_DUPE_FILES
+    skiptests = not TEST_HARVESTER_SCAN_FOR_DUPE_FILES
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    def test_scan_for_dupe_files_unique(self):
+    def test_scan_for_dupe_files_unique(self, harvey):
         """
         Test with unique filenames. Confirm False result.
         """
         files = ['abc', 'def']
-        assert scan_for_dupe_files(files) == False
+        assert harvey.scan_for_dupe_files(files) == False
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    def test_scan_for_dupe_files_duplicate(self):
+    def test_scan_for_dupe_files_duplicate(self, harvey):
         """
         Test with duplicate filenames. Confirm True result.
         """
         files = ['abc', 'abc']
-        assert scan_for_dupe_files(files) == True
+        assert harvey.scan_for_dupe_files(files) == True
 
 
