@@ -16,9 +16,9 @@ class Harvester(object):
 
     def init_file_map(self, workdir, mapfile=None, avoid_collisions=None):
         """
-        Read the work directory looking for files with extensions defined in the
-        EXTENSIONS constant. Note that this could use a more elaborate magic
-        number mechanism that would be cool.
+        Read the work directory looking for files with extensions defined in
+        the EXTENSIONS constant. Note that this could use a more elaborate
+        magic number mechanism that would be cool.
         """
 
         # List of FileMap objects.
@@ -26,7 +26,8 @@ class Harvester(object):
 
         list_workdir = os.listdir(workdir)
         if mapfile:
-            # Extract files in work dir that match against our alternate file map.
+            # Extract files in work dir that match against our alternate file
+            # map.
             #
             # alt_file_map.keys() = ['abc', 'def', 'ghi', 'jkl', 'mno']
             # list_workdir = ['abc.jpg', 'ghi.jpg', 'pqr.jpg']
@@ -52,21 +53,22 @@ class Harvester(object):
                 ext=extension, files=matching_files))
             for filename in (matching_files):
                 filename_fq = os.path.join(workdir, filename)
-                # TODO: There once was some trouble here that caused me to comment
-                # the directory check. Dunno. Keep an eye on it in case it pops up
-                # again in the future.
+                # TODO: There once was some trouble here that caused me to
+                # comment the directory check. Dunno. Keep an eye on it in
+                # case it pops up again in the future.
                 if os.path.isdir(filename_fq):
                     logger.warn("Skipping directory {0}".format(filename_fq))
                     continue
                 try:
-                    image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[extension]
+                    image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[
+                            extension]
                     if mapfile:
                         filename_prefix = filename_prefix_map[filename]
                         new_fn = "{}.{}".format(
                                 alt_file_map[filename_prefix], extension)
                         file_map_list.add(
-                            FileMap(filename_fq, image_type, avoid_collisions, {},
-                                new_fn))
+                            FileMap(filename_fq, image_type, avoid_collisions,
+                                {}, new_fn))
                     else:
                         file_map_list.add(FileMap(
                             filename_fq, image_type, avoid_collisions))
@@ -76,27 +78,30 @@ class Harvester(object):
 
     def read_alt_file_map(self, mapfile, delimiter='\t', lineterm=None):
         """
-        Read a filename map for the purpose of transforming the filenames as an
-        alternative to using EXIF/XMP metadata DateTime information. Only require
-        map file as an absolute path.
+        Read a filename map for the purpose of transforming the filenames as
+        an alternative to using EXIF/XMP metadata DateTime information. Only
+        require map file as an absolute path.
         """
         with open(mapfile, 'r') as f:
-            lines = [line for line in f.readlines() if not line.startswith('#')]
+            lines = [
+                line for line in f.readlines() if not line.startswith('#')]
 
         if lineterm is None:
             lineterm = self.get_line_term(lines)
 
-        # Get a list of destination filenames from map so we can check for dupes.
-        # This may seem pedantic but it will avoid a lot of trouble if there is a
-        # duplicate new filename because of human error.
-        files = [str.split(line.rstrip(lineterm), delimiter)[1] for line in lines]
+        # Get a list of destination filenames from map so we can check for
+        # dupes. This may seem pedantic but it will avoid a lot of trouble if
+        # there is a duplicate new filename because of human error.
+        files = [
+            str.split(line.rstrip(lineterm), delimiter)[1] for line in lines]
         if self.scan_for_dupe_files(files):
             raise Exception(
                 "Duplicate destination filename detected: {}".format(ofn))
 
         # XXX: This is soooo cool! List of lists flattened all on one nested
         # comprehension.
-        # [[k1, v1], [k2, v2], ..., [kn, vn]] --> {k1: v1, k2: v2, ..., kn: vn}
+        # [[k1, v1], [k2, v2], ..., [kn, vn]]
+        #                               --> {k1: v1, k2: v2, ..., kn: vn}
         return dict(zip(*[iter([x for sublist in [
             str.split(line.rstrip(lineterm), delimiter) for line in lines]
             for x in sublist])] * 2))
@@ -120,8 +125,8 @@ class Harvester(object):
 
     def scan_for_dupe_files(self, files):
         """
-        O(n^2) scan of desination list for duplicates. Used when processing a map
-        file. Returns True if duplicate files.
+        O(n^2) scan of desination list for duplicates. Used when processing a
+        map file. Returns True if duplicate files.
         """
         for ofile in files:
             count = 0
