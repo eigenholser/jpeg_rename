@@ -32,7 +32,7 @@ class Harvester(object):
             # list_workdir = ['abc.jpg', 'ghi.jpg', 'pqr.jpg']
             # results in...
             # all_files_list = ['abc.jpg', 'ghi.jpg']
-            alt_file_map = read_alt_file_map(mapfile)
+            alt_file_map = self.read_alt_file_map(mapfile)
             all_files_list = []
             filename_prefix_map = {}
             for file_prefix in alt_file_map.keys():
