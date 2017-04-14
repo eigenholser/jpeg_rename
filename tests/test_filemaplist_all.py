@@ -11,13 +11,17 @@ from . import TEST_FILEMAP_LIST
 
 
 class TestFilemapList(object):
-    """Tests for FileMapList."""
+    """
+    Tests for FileMapList.
+    """
     skiptests = not TEST_FILEMAP_LIST
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_file_map_list_init(self):
-        """Instantiate FileMapList() and test __init__() method. Verify
-        file_map is initialized to empty list."""
+        """
+        Instantiate FileMapList() and test __init__() method. Verify
+        file_map is initialized to empty list.
+        """
         file_map_list = FileMapList()
         assert file_map_list.file_map == []
 
