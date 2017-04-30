@@ -45,8 +45,6 @@ Get usage help like this::
     optional arguments:
       -h, --help            show this help message and exit
       -s, --simon-sez       Really, Simon sez rename the files!
-      -a, --avoid-collisions
-                            Rename until filenames do not collide. Danger!
       -d DIRECTORY, --directory DIRECTORY
                             Read files from this directory.
       -m MAPFILE, --mapfile MAPFILE
@@ -60,15 +58,11 @@ specified.
 
 If ``--mapfile`` is specified, work will be performed in the directory
 containing the map file. Option ``--directory`` is not used or permitted when
-``--mapfile`` is specified. Option ``--avoid-collisions`` is also not
-permitted with ``--mapfile`` since filenames are known in advance.
+``--mapfile`` is specified.
 
 ``zrename.py`` will avoid filename collisions by appending ``_#`` to
-filenames as needed. Since this behavior can be troublesome, it will not occur
-unless explicitly requested with ``--avoid-collisions`` on the command line.
-If not requested, ``zrename.py`` will warn of collisions only. In this
-case, ``zrename.py`` may be safely re-run with ``--avoid-collisions`` to
-rename the leftovers.
+filenames as needed. During the actual file move, a collision will be detected
+and no action will be taken.
 
 
 Map File
