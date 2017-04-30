@@ -52,26 +52,29 @@ class FileMap(object):
         else:
             self.avoid_collisions = avoid_collisions
 
+        # Read EXIF or XMP metadata from old filename
+        if metadata is None:
+            self.metadata = self.read_metadata()
+        else:
+            self.metadata = metadata
+
         if not new_fn:
-            # Read EXIF or XMP metadata from old filename
-            if metadata is None:
-                self.metadata = self.read_metadata()
-            else:
-                self.metadata = metadata
+            # This may be temporary. When the collision check is done it may
+            # change.
             new_fn = self.build_new_fn()
 
         self.logger.debug("Using new_fn: {}".format(new_fn))
-        self.set_dst_fn(new_fn)
+        self.set_dst_fn(os.path.join(self.workdir, new_fn))
         self.logger.debug(
                 "Initializing file mapper object for filename {}".format(
                     self.new_fn))
 
-    def set_dst_fn(self, dst_fn):
+    def set_dst_fn(self, dst_fn_fq):
         """
         Setter for dst_fn.
         """
-        self.new_fn = dst_fn
-        self.new_fn_fq = os.path.join(self.workdir, dst_fn)
+        self.new_fn_fq = dst_fn_fq
+        self.new_fn = os.path.basename(dst_fn_fq)
 
     def read_metadata(self):
         """
@@ -91,8 +94,8 @@ class FileMap(object):
 
         for exifkey in metadata_keys:
             tag = img_md[exifkey].raw_value
-            self.logger.debug(exifkey)
-            self.logger.debug("{}: {}".format(exifkey, tag))
+            #self.logger.debug(exifkey)
+            #self.logger.debug("{}: {}".format(exifkey, tag))
             metadata[exifkey] = tag
 
         if (len(metadata) == 0):
@@ -167,69 +170,26 @@ class FileMap(object):
         """
         Move old_fn to new_fn.
         """
-        # XXX: This call deliberately placed here instead of __init__(). All
-        # initialization is performed before any files are moved. The file
-        # move will change state and may introduce a collision. Doing the
-        # uniqueness check here will check current state.
-        try:
-            self.make_new_fn_unique()
-        except Exception as e:
-            raise e
-
-        if self.collision_detected:
-            self.logger.warn(
-                "{0} => {1} Destination collision. Aborting.".format(
+        if self.old_fn == self.new_fn:
+            self.logger.debug("Not moving {} ==> {}. No change.".format(
                 self.old_fn, self.new_fn))
-                #os.path.basename(self.old_fn), os.path.basename(self.new_fn)))
+            return
+
+        if os.path.exists(self.new_fn_fq):
+            self.collision_detected = True
+            self.logger.warn(
+                "{0} => {1} Destination collision. Doing nothing.".format(
+                self.old_fn, self.new_fn))
             return
 
         try:
             # XXX: Unit tests did not catch this bug.
             # os.rename(self.old_fn, self.new_fn)
             if self.old_fn != self.new_fn:
-                self.logger.info("Moving the files: {0} ==> {1}".format(
+                self.logger.info("Moving file: {0} ==> {1}".format(
                     self.old_fn, self.new_fn))
                 os.rename(self.old_fn_fq, self.new_fn_fq)
             self._chmod()
         except OSError as e:
             self.logger.warn("Unable to rename file: {0}".format(e.strerror))
-
-    def make_new_fn_unique(self):
-        """
-        Check new_fn for uniqueness in 'workdir'. Rename, adding a numerical
-        suffix until it is unique. Impose limits to avoid long loop.
-        """
-        # Rename file by appending number if we have collision.
-        # TODO: I wish I didn't specify \d+_\d+ for the first part. perhaps
-        # not -\d\ before .jpg would be better for the second match.
-        counter = 1
-        while(os.path.exists(self.new_fn_fq)):
-            if (self.old_fn == self.new_fn):
-                # Same file, faux collision.
-                break
-            if (not self.avoid_collisions):
-                # Abort - do not attempt to rename.
-                # If we're using a map file, this will prevent clobbering a
-                # previous file if in error a duplicate new_fn is in the map.
-                self.collision_detected = True
-                break
-
-            # Since we're renaming files that may have already been renamed
-            # with a `-#' suffix, we need to catch that pattern first.
-            new_fn_regex_s1 = r"^(\d+_\d+)-\d+\.{}".format(
-                    photo_rename.EXTENSIONS_PREFERRED[self.image_type])
-            new_fn_regex_s2 = r"^(\d+_\d+)\.{}".format(
-                    photo_rename.EXTENSIONS_PREFERRED[self.image_type])
-            new_fn_regex_r = r"\1-{0}.{1}".format(counter,
-                    photo_rename.EXTENSIONS_PREFERRED[self.image_type])
-            new_fn = re.sub(new_fn_regex_s1, new_fn_regex_r, self.new_fn)
-            new_fn = re.sub(new_fn_regex_s2, new_fn_regex_r, new_fn)
-
-            self.new_fn = new_fn
-            self.new_fn_fq = os.path.join(self.workdir, new_fn)
-
-            counter += 1
-            if counter > self.MAX_RENAME_ATTEMPTS:
-                raise Exception(
-                    "Too many rename attempts: {0}".format(self.new_fn))
 

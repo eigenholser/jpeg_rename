@@ -19,14 +19,17 @@ class TestFilemapInit(object):
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.FileMap.build_new_fn')
-    def test_filemap_init_with_no_new_fn(self, mock_build_new_fn):
+    def test_filemap_init_with_no_new_fn(self, m_build_new_fn):
         """
-
+        Initialize FileMap with no dst_fn. Mock build_new_fn(). Confirm that
+        dst_fn is correctly set and dst_fn_fq is fully qualified.
         """
-#       mock_build_new_fn.return_value = "abc.jpg"
+        m_build_new_fn.return_value = "abc.jpg"
         exif_data = EXIF_DATA_VALID['exif_data']
-        filemap = FileMap(OLD_FN_JPG_LOWER, IMAGE_TYPE_JPEG,
-                avoid_collisions=True, metadata=exif_data, new_fn="abc.jpg")
-        new_fn = filemap.new_fn
-        assert filemap.new_fn == "abc.jpg"
+        filemap = FileMap(os.path.join("/a/b/c/", OLD_FN_JPG_LOWER),
+                IMAGE_TYPE_JPEG, avoid_collisions=True, metadata=exif_data)
+        new_fn = "abc.jpg"
+        new_fn_fq = os.path.join("/a/b/c", new_fn)
+        assert filemap.new_fn == new_fn
+        assert filemap.new_fn_fq == new_fn_fq
 

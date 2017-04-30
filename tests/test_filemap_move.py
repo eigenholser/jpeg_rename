@@ -19,72 +19,51 @@ class TestFilemapMove(object):
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @pytest.mark.parametrize("old_fn", [
         OLD_FN_JPG_LOWER, OLD_FN_JPG_UPPER])
-    @patch('photo_rename.FileMap.make_new_fn_unique')
     @patch('photo_rename.filemap.os.rename')
-    def test_move_orthodox(self, mock_os, mock_fn_unique, old_fn):
+    @patch('photo_rename.FileMap._chmod')
+    def test_move_orthodox(self, m_chmod, m_os, old_fn):
         """
-        Rename file with mocked os.rename. Verify called with args.
+        Rename file with mock os.rename. Verify called with args.
         """
-        mock_fn_unique.return_value = None
+        m_chmod.return_value = None
         exif_data = EXIF_DATA_NOT_VALID
         filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
                 avoid_collisions=None, metadata=exif_data)
         new_fn = filemap.new_fn
         filemap.move()
         if old_fn == new_fn:
-            mock_os.assert_not_called()
+            m_os.assert_not_called()
         else:
-            mock_os.assert_called_with(old_fn, new_fn)
+            m_os.assert_called_with(old_fn, new_fn)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.FileMap.make_new_fn_unique')
     @patch('photo_rename.filemap.os.rename')
-    def test_move_orthodox_rename_raises_exeption(self, mock_os,
-            mock_fn_unique):
+    @patch('photo_rename.FileMap._chmod')
+    def test_move_orthodox_rename_raises_exeption(self, m_chmod, m_os):
         """
         Rename file with mocked os.rename. Verify called with args.
         """
-        mock_fn_unique.return_value = None
-        mock_os.side_effect = OSError((1, "Just testing.",))
+        m_chmod.return_value = None
+        m_os.side_effect = OSError((1, "Just testing.",))
         old_fn = OLD_FN_JPG_UPPER
         exif_data = EXIF_DATA_NOT_VALID
         filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
                 avoid_collisions=None, metadata=exif_data)
         new_fn = filemap.new_fn
         filemap.move()
-        mock_os.assert_called_with(old_fn, new_fn)
+        m_os.assert_called_with(old_fn, new_fn)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.FileMap.make_new_fn_unique')
-    @patch('photo_rename.filemap.os.rename')
-    def test_move_orthodox_fn_unique_raises_exception(self, mock_os,
-            mock_fn_unique):
-        """
-        Rename file with mocked os.rename. Verify called with args.
-        """
-        mock_fn_unique.side_effect = OSError((1, "Just testing.",))
-        old_fn = OLD_FN_JPG_LOWER
-        exif_data = EXIF_DATA_NOT_VALID
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
-                avoid_collisions=None, metadata=exif_data)
-        new_fn = filemap.new_fn
-        with pytest.raises(OSError):
-            filemap.move()
-
-    @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.FileMap.make_new_fn_unique')
     @patch('photo_rename.filemap.os.path.exists')
-    def test_move_collision_detected(self, mock_exists, mock_fn_unique):
-        """Move file with collision_detected simulating avoid_collisions=False.
+    @patch('photo_rename.FileMap._chmod')
+    def test_move_collision_detected(self, m_chmod, m_exists):
         """
-        mock_fn_unique.return_value = None
-        mock_exists.return_value = True
-        old_fn = OLD_FN_JPG_LOWER
-        exif_data = {}
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
-                avoid_collisions=None, metadata=exif_data)
-        filemap.collision_detected = True
-        new_fn = filemap.new_fn
+        Move file with collision_detected. Confirm collision.
+        """
+        m_chmod.return_value = None
+        m_exists.return_value = True
+        filemap = FileMap(OLD_FN_JPG_LOWER, IMAGE_TYPE_JPEG,
+                avoid_collisions=None, metadata={}, new_fn="abc.png")
         filemap.move()
-        assert new_fn == old_fn
+        assert filemap.collision_detected == True
 
