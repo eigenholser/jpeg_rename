@@ -78,7 +78,6 @@ class Harvester(object):
 #       self.metadata_dst_directory = "exifcopy"
         if self.mapfile and self.metadata_dst_directory:
             # Copying EXIF metadata from src to dst.
-            import pdb; pdb.set_trace()
             for src_fn in filename_prefix_map.keys():
                 for filename in os.listdir(self.metadata_dst_directory):
                     if re.search(r"^{}\..+$".format(
@@ -119,7 +118,8 @@ class Harvester(object):
                         new_fn = "{}.{}".format(
                                 alt_file_map[filename_prefix], extension)
                         filemaps.add(
-                            FileMap(filename_fq, image_type, None, new_fn))
+                            FileMap(filename_fq, image_type, new_fn=new_fn,
+                                read_metadata=False))
                     else:
                         filemap = FileMap(filename_fq, image_type)
                         filemaps.add(filemap)

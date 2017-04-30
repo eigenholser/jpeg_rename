@@ -18,7 +18,8 @@ class FileMap(object):
     methods perform all necessary instance functions for the rename.
     """
 
-    def __init__(self, old_fn, image_type, metadata=None, new_fn=None):
+    def __init__(self, old_fn, image_type, metadata=None, new_fn=None,
+            read_metadata=True):
         """
         Initialize FileMap instance.
 
@@ -42,13 +43,14 @@ class FileMap(object):
         self.old_fn_ext = os.path.splitext(self.old_fn)[1][1:]
         self.old_fn_ext_lower = os.path.splitext(self.old_fn)[1][1:].lower()
 
+        # TODO: Deprecated...
         # Avoid filename collisions (dangerous) or log a message if there
         # would be one, and fail the move. When set to False, rename attempt
         # will be aborted for safety.
         self.collision_detected = False
 
         # Read EXIF or XMP metadata from old filename
-        if metadata is None:
+        if metadata is None and read_metadata:
             self.metadata = self.read_metadata()
         else:
             self.metadata = metadata

@@ -74,7 +74,8 @@ class TestRenameInitFileMapMetadata():
 
 class Stub2FileMap(object):
 
-    def __init__(self, old_fn, image_type, metadata=None, new_fn=None):
+    def __init__(self, old_fn, image_type, metadata=None, new_fn=None,
+            read_metadata=False):
         self.old_fn_fq = old_fn
         self.old_fn = os.path.basename(old_fn)
         self.image_type = image_type
