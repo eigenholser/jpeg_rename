@@ -84,7 +84,7 @@ def alt_file_map_dict():
     return {"abc 123": "MY NEW FILE 1", "xyz 999": "MY NEW FILE 2"}
 
 
-class TestFilemapReadAltFileMap(object):
+class TestFilemapReadAltFilemap(object):
     """
     Tests reading alternate file map.
     """

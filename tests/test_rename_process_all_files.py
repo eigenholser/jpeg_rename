@@ -28,7 +28,7 @@ class TestRenameProcessAllFiles(object):
         testing workdir. Verify os.path.exists() and os.access() called with
         proper arguments. Verify sys.exit() not called.
         """
-        file_map = [StubFileMap()]
+        file_map = [StubFilemap()]
         m_harvey.__getitem__.return_value = file_map
         m_harvey.process_file_map.return_value = None
         m_os_path_exists.return_value = True
@@ -50,7 +50,7 @@ class TestRenameProcessAllFiles(object):
         os.path.exists() called with ".", os_access() not called, and
         sys.exit() called with 1.
         """
-        file_map = [StubFileMap()]
+        file_map = [StubFilemap()]
         m_harvey.__getitem__.return_value = file_map
         m_harvey.process_file_map.return_value = None
         m_os_path_exists.return_value = True
@@ -73,7 +73,7 @@ class TestRenameProcessAllFiles(object):
         os.path.exists() called with ".", os_access() not called, and
         sys.exit() called with 1 and only once.
         """
-        file_map = [StubFileMap()]
+        file_map = [StubFilemap()]
         m_harvey.__getitem__.return_value = file_map
         m_harvey.process_file_map.return_value = None
         m_os_path_exists.return_value = False
@@ -100,7 +100,7 @@ class TestRenameProcessAllFiles(object):
         def pfm(fm, ss):
             pass
 
-        file_map = [StubFileMap()]
+        file_map = [StubFilemap()]
         m_harvey.__getitem__.return_value = file_map
         m_os_path_exists.return_value = True
         m_os_access.return_value = True

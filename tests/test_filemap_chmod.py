@@ -27,7 +27,7 @@ class StubStat(object):
 
 class TestFilemapChmod(object):
     """
-    Tests for FileMap method _chmod() are in this class.
+    Tests for Filemap method _chmod() are in this class.
     """
     skiptests = not TEST_FILEMAP_CHMOD
 
@@ -46,7 +46,7 @@ class TestFilemapChmod(object):
         mock_stat.return_value = StubStat(st_mode)
         old_fn = OLD_FN_JPG_LOWER
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG, metadata=exif_data)
+        filemap = Filemap(old_fn, IMAGE_TYPE_JPEG, metadata=exif_data)
         filemap._chmod()
         assert mock_chmod.assert_called_once
 

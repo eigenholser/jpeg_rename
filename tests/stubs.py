@@ -28,9 +28,9 @@ SKIP_TEST = True
 RUN_TEST = False
 
 
-class StubFileMap(object):
+class StubFilemap(object):
     """
-    Stub to be used in place of FileMap().
+    Stub to be used in place of Filemap().
     """
 
     def __init__(self):

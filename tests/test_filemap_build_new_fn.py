@@ -6,7 +6,7 @@ from mock import Mock, patch
 app_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, app_path + '/../')
 
-from photo_rename import FileMap
+from photo_rename import Filemap
 from photo_rename import *
 from .stubs import *
 from . import TEST_FILEMAP_BUILD_NEW_FN
@@ -35,6 +35,6 @@ class TestFilemapBuildNewFn(object):
         """
         Test build_new_fn() with various EXIF data.
         """
-        filemap = FileMap(old_fn, image_type, exif_data)
+        filemap = Filemap(old_fn, image_type, exif_data)
         new_fn = filemap.new_fn
         assert new_fn == expected_new_fn

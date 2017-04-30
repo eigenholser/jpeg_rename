@@ -12,14 +12,14 @@ from . import (
     TEST_HARVESTER_INIT_FILEMAP_METADATA, TEST_HARVESTER_INIT_FILEMAP_ALT)
 
 
-class TestRenameInitFileMapMetadata():
+class TestRenameInitFilemapMetadata():
     """
     Tests for function init_file_map() are in this class.
     """
     skiptests = not TEST_HARVESTER_INIT_FILEMAP_METADATA
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.harvester.FileMap')
+    @patch('photo_rename.harvester.Filemap')
     @patch('photo_rename.harvester.re')
     @patch('photo_rename.harvester.os.listdir')
     def test_init_file_map_orthodox(
@@ -27,7 +27,7 @@ class TestRenameInitFileMapMetadata():
         """
         Tests init_file_map() list building. Verifies expected return value.
         """
-        test_file_map = StubFileMap()
+        test_file_map = StubFilemap()
         m_filemap.return_value = test_file_map
         m_listdir.return_value = ['/foo/bar']
         m_re.search.return_value = True
@@ -38,7 +38,7 @@ class TestRenameInitFileMapMetadata():
                 test_file_map, test_file_map]
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.harvester.FileMap')
+    @patch('photo_rename.harvester.Filemap')
     @patch('photo_rename.harvester.re')
     @patch('photo_rename.harvester.os')
     def test_init_file_map_with_directories(
@@ -55,7 +55,7 @@ class TestRenameInitFileMapMetadata():
         assert filemaps == []
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.harvester.FileMap')
+    @patch('photo_rename.harvester.Filemap')
     @patch('photo_rename.harvester.re')
     @patch('photo_rename.harvester.os.listdir')
     def test_init_file_map_raises_exception(
@@ -72,7 +72,7 @@ class TestRenameInitFileMapMetadata():
         assert filemaps == []
 
 
-class Stub2FileMap(object):
+class Stub2Filemap(object):
 
     def __init__(self, old_fn, image_type, metadata=None, new_fn=None,
             read_metadata=False):
@@ -90,14 +90,14 @@ class Stub2FileMap(object):
         self.new_fn = new_fn
 
 
-class TestRenameInitFileMapAlt(object):
+class TestRenameInitFilemapAlt(object):
     """
     Tests using alternate file map.
     """
     skiptests = not TEST_HARVESTER_INIT_FILEMAP_ALT
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @patch('photo_rename.harvester.FileMap', Stub2FileMap)
+    @patch('photo_rename.harvester.Filemap', Stub2Filemap)
     @patch('photo_rename.Harvester.read_alt_file_map')
     @patch('photo_rename.harvester.os.listdir')
     def test_basic_alt_map(self, m_listdir, m_readfm):

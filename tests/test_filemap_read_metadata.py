@@ -36,7 +36,7 @@ class StubImageMetadata(object):
 
 class TestFilemapReadMetadata(object):
     """
-    Tests for FileMap method read_metadata() are in this class.
+    Tests for Filemap method read_metadata() are in this class.
     """
     skiptests = not TEST_FILEMAP_READ_METADATA
 
@@ -50,7 +50,7 @@ class TestFilemapReadMetadata(object):
         mock_pyexiv2.return_value = StubImageMetadata()
         old_fn = OLD_FN_JPG_LOWER
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = FileMap(old_fn, IMAGE_TYPE_PNG, new_fn="abc.jpg")
+        filemap = Filemap(old_fn, IMAGE_TYPE_PNG, new_fn="abc.jpg")
         assert filemap.read_metadata() == metadata
 
 
@@ -84,7 +84,7 @@ class TestFilemapReadExifData(object):
 
         old_fn = OLD_FN_JPG_LOWER
         mock_img_md.return_value = TestImage()
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG)
+        filemap = Filemap(old_fn, IMAGE_TYPE_JPEG)
         assert filemap.metadata == EXIF_DATA_VALID['exif_data']
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
@@ -109,6 +109,6 @@ class TestFilemapReadExifData(object):
         old_fn = OLD_FN_JPG_LOWER
         mock_img_md.return_value = TestImage()
         with pytest.raises(Exception) as excinfo:
-            filemap = FileMap(old_fn, IMAGE_TYPE_JPEG)
+            filemap = Filemap(old_fn, IMAGE_TYPE_JPEG)
         assert str(excinfo.value) == "{0} has no EXIF data.".format(old_fn)
 

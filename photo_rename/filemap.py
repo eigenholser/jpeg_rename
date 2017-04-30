@@ -12,18 +12,18 @@ logger = logging.getLogger(__name__)
 
 
 @photo_rename.logged_class
-class FileMap(object):
+class Filemap(object):
     """
-    FileMap represents a mapping between the old_fn and the new_fn. It's
+    Filemap represents a mapping between the old_fn and the new_fn. It's
     methods perform all necessary instance functions for the rename.
     """
 
     def __init__(self, old_fn, image_type, metadata=None, new_fn=None,
             read_metadata=True):
         """
-        Initialize FileMap instance.
+        Initialize Filemap instance.
 
-        >>> filemap = FileMap('abc123.jpeg', photo_rename.IMAGE_TYPE_JPEG, None, {})
+        >>> filemap = Filemap('abc123.jpeg', photo_rename.IMAGE_TYPE_JPEG, None, {})
         >>> filemap.old_fn
         'abc123.jpeg'
         >>> filemap.new_fn
@@ -105,7 +105,7 @@ class FileMap(object):
         Generate new filename from old_fn EXIF or XMP data if possible. Even if
         not possible, lowercase old_fn and normalize file extension.
 
-        >>> filemap = FileMap('abc123.jpeg', photo_rename.IMAGE_TYPE_JPEG, metadata={'Exif.Image.DateTime': '2014:08:16 06:20:30'})
+        >>> filemap = Filemap('abc123.jpeg', photo_rename.IMAGE_TYPE_JPEG, metadata={'Exif.Image.DateTime': '2014:08:16 06:20:30'})
         >>> filemap.new_fn
         '20140816_062030.jpg'
 

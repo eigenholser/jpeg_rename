@@ -6,7 +6,7 @@ import stat
 import sys
 import pyexiv2
 import photo_rename
-from photo_rename import Harvester
+from photo_rename import Filemap, FilemapList, Harvester
 
 
 logger = logging.getLogger(__name__)
@@ -38,11 +38,11 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--simon-sez",
-            help="Really, Simon sez rename the files!", action="store_true")
-    parser.add_argument("-d", "--directory",
-            help="Read files from this directory.")
+            help="Really, Simon sez copy the data!", action="store_true")
+    parser.add_argument("-d", "--dst-directory",
+            help="Copy EXIF data to files in this directory.")
     parser.add_argument("-m", "--mapfile",
-            help="Use this map to rename files. Do not use metadata.")
+            help="Use this map to initialize src files.")
     parser.add_argument("-v", "--verbose", help="Log level to DEBUG.",
             action="store_true")
     myargs = parser.parse_args()

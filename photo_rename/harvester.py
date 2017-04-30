@@ -6,7 +6,7 @@ import stat
 import sys
 import pyexiv2
 import photo_rename
-from photo_rename import FileMap, FileList, FileMapList
+from photo_rename import Filemap, FileList, FilemapList
 import photo_rename
 
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class Harvester(object):
     """
-    Initialize FileMap list.
+    Initialize Filemap list.
     """
 
     def __init__(self, workdir, mapfile=None, delimiter='\t', lineterm=None,
@@ -46,8 +46,8 @@ class Harvester(object):
         """
         # TODO: This method becoming very cumbersome. Break it up.
 
-        # List of FileMap objects.
-        filemaps = FileMapList()
+        # List of Filemap objects.
+        filemaps = FilemapList()
         files = FileList()
 
         list_workdir = os.listdir(self.workdir)
@@ -90,7 +90,7 @@ class Harvester(object):
                         # TODO: Image type is meaningless here yet necessary.
                         image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[
                                 src_fn_ext]
-                        filemap = FileMap(src_fn_fq, image_type,
+                        filemap = Filemap(src_fn_fq, image_type,
                                 metadata=None, new_fn=dst_fn_fq)
                         filemaps.add(filemap)
             return filemaps
@@ -118,15 +118,15 @@ class Harvester(object):
                         new_fn = "{}.{}".format(
                                 alt_file_map[filename_prefix], extension)
                         filemaps.add(
-                            FileMap(filename_fq, image_type, new_fn=new_fn,
+                            Filemap(filename_fq, image_type, new_fn=new_fn,
                                 read_metadata=False))
                     else:
-                        filemap = FileMap(filename_fq, image_type)
+                        filemap = Filemap(filename_fq, image_type)
                         filemaps.add(filemap)
                 except Exception as e:
-                    logger.warn("FileMap Error: {0}".format(e))
+                    logger.warn("Filemap Error: {0}".format(e))
 
-        # XXX: Here after all FileMap have been initialized we need to check
+        # XXX: Here after all Filemap have been initialized we need to check
         # for collisions. Not when mapfile used.
         if not self.mapfile:
             for filemap in [fm for fm in filemaps.get()]:
@@ -237,7 +237,7 @@ class Harvester(object):
 
     def process_file_map(self, file_map, simon_sez=None, move_func=None):
         """
-        Iterate through the Python list of FileMap objects. Move the file if
+        Iterate through the Python list of Filemap objects. Move the file if
         Simon sez.
 
         Arguments:
@@ -248,9 +248,9 @@ class Harvester(object):
         Returns:
             None
 
-        >>> filemap = FileMap('IMG0332.JPG', photo_rename.IMAGE_TYPE_JPEG, metadata={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
+        >>> filemap = Filemap('IMG0332.JPG', photo_rename.IMAGE_TYPE_JPEG, metadata={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
         >>> def move_func(old_fn, new_fn): pass
-        >>> filemaps = FileMapList()
+        >>> filemaps = FilemapList()
         >>> filemaps.add(filemap)
         >>> process_file_map(filemaps, True, move_func)
 

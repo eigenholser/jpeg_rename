@@ -4,7 +4,7 @@ import photo_rename
 
 class OrderedListMixin(object):
     """
-    Mixin implementing the logic for FileList and FileMapList.
+    Mixin implementing the logic for FileList and FilemapList.
     """
 
     def __init__(self):
@@ -72,7 +72,7 @@ class FileList(OrderedListMixin):
 
 
 @photo_rename.logged_class
-class FileMapList(OrderedListMixin):
+class FilemapList(OrderedListMixin):
     """
     Ordered list of filemap instances.
     """
