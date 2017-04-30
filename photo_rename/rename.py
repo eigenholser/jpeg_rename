@@ -39,9 +39,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--simon-sez",
             help="Really, Simon sez rename the files!", action="store_true")
-    parser.add_argument("-a", "--avoid-collisions",
-            help="Append suffix until filenames do not collide. 10x max.",
-            action="store_true")
     parser.add_argument("-d", "--directory",
             help="Read files from this directory.")
     parser.add_argument("-m", "--mapfile",
