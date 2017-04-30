@@ -22,8 +22,8 @@ class TestFilemapList(object):
         Instantiate FileMapList() and test __init__() method. Verify
         file_map is initialized to empty list.
         """
-        file_map_list = FileMapList()
-        assert file_map_list.file_map == []
+        filemaps = FileMapList()
+        assert [fm for fm in filemaps.get()] == []
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     def test_file_map_list_add(self):
@@ -34,7 +34,33 @@ class TestFilemapList(object):
         test_file_map_1 = StubFileMap()
         test_file_map_2 = StubFileMap()
         test_file_map_2.new_fn = 'aaa.jpg'
-        file_map_list = FileMapList()
-        file_map_list.add(test_file_map_1)
-        file_map_list.add(test_file_map_2)
-        assert file_map_list.file_map == [test_file_map_2, test_file_map_1]
+        filemaps = FileMapList()
+        filemaps.add(test_file_map_1)
+        filemaps.add(test_file_map_2)
+        assert [fm for fm in filemaps.get()] == [test_file_map_2, test_file_map_1]
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
+    def test_filemaplist_add_dated_with_same_and_seq(self):
+        """
+        Tests FileMapList add() method. Adds files named with YYYYmmdd_HHMMSS
+        to list containing files named YYYYmmdd_HHMMSS-dd where
+        YYYmmdd_HHMMSS is same. Verify proper insertion order.
+        """
+        # These filename chosen to hit the important cases.
+        test_file1 = "19991231_235957.png"
+        test_file2 = "19991231_235958.png"
+        test_file3 = "19991231_235958-1.png"
+        test_file4 = "19991231_235958-2.png"
+        test_file5 = "19991231_235958-3.png"
+        test_file6 = "19991231_235959.png"
+        filemaps = FileMapList()
+        # This order chosen carefully to hit the branches properly.
+        filemaps.add(test_file1)
+        filemaps.add(test_file3)
+        filemaps.add(test_file2)
+        filemaps.add(test_file5)
+        filemaps.add(test_file6)
+        filemaps.add(test_file4)
+        assert [file for file in filemaps.get()] == [test_file1, test_file2,
+                test_file3, test_file4, test_file5, test_file6]
+

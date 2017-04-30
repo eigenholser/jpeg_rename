@@ -61,11 +61,17 @@ class FileMap(object):
             new_fn = self.build_new_fn()
 
         self.logger.debug("Using new_fn: {}".format(new_fn))
-        self.new_fn = new_fn
-        self.new_fn_fq = os.path.join(self.workdir, new_fn)
+        self.set_dst_fn(new_fn)
         self.logger.debug(
                 "Initializing file mapper object for filename {}".format(
                     self.new_fn))
+
+    def set_dst_fn(self, dst_fn):
+        """
+        Setter for dst_fn.
+        """
+        self.new_fn = dst_fn
+        self.new_fn_fq = os.path.join(self.workdir, dst_fn)
 
     def read_metadata(self):
         """

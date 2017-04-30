@@ -37,6 +37,10 @@ class StubFileMap(object):
         self.old_fn = 'foo.jpg'
         self.new_fn = 'bar.jpg'
 
+    def set_dst_fn(self, dst_fn):
+        self.new_fn = dst_fn
+
+
 @pytest.fixture
 def harvey():
     return Harvester('.')

@@ -32,8 +32,8 @@ class TestRenameInitFileMapMetadata():
         m_listdir.return_value = ['/foo/bar']
         m_re.search.return_value = True
         harvey = Harvester(".")
-        file_map = harvey["file_map"].file_map
-        assert file_map == [
+        filemaps = [fm for fm in harvey["filemaps"].get()]
+        assert filemaps == [
                 test_file_map, test_file_map, test_file_map, test_file_map,
                 test_file_map, test_file_map]
 
@@ -51,8 +51,8 @@ class TestRenameInitFileMapMetadata():
         m_os.path.isdir.return_value = True
         m_re.search.return_value = True
         harvey = Harvester(".")
-        file_map = harvey["file_map"].file_map
-        assert file_map == []
+        filemaps = [fm for fm in harvey["filemaps"].get()]
+        assert filemaps == []
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.harvester.FileMap')
@@ -68,8 +68,8 @@ class TestRenameInitFileMapMetadata():
         m_listdir.return_value = ['/foo/bar']
         m_re.search.return_value = True
         harvey = Harvester(".")
-        file_map = harvey["file_map"].file_map
-        assert file_map == []
+        filemaps = [fm for fm in harvey["filemaps"].get()]
+        assert filemaps == []
 
 
 class Stub2FileMap(object):
@@ -113,8 +113,8 @@ class TestRenameInitFileMapAlt(object):
         m_readfm.return_value = {"abc": "123", "def": "456", "ghi": "789"}
         m_listdir.return_value = ["abc.jpg", "ghi.png", "jkl.tif"]
         harvey = Harvester(".", mapfile="mapfile.txt")
-        file_map = harvey["file_map"].file_map
-        assert len(file_map) == len(expected)
-        assert file_map[0].old_fn in expected
-        assert file_map[1].old_fn in expected
+        filemaps = [fm for fm in harvey["filemaps"].get()]
+        assert len(filemaps) == len(expected)
+        assert filemaps[0].old_fn in expected
+        assert filemaps[1].old_fn in expected
 

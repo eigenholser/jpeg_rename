@@ -1,38 +1,78 @@
+import re
 import photo_rename
 
 
-@photo_rename.logged_class
-class FileMapList(object):
+class OrderedListMixin(object):
     """
-    Intelligently add FileMap() instances to file_map list based on order of
-    instance.new_fn attributes.
+    Mixin implementing the logic for FileList and FileMapList.
     """
 
     def __init__(self):
-        self.file_map = []
+        self.list = []
 
-    def add(self, instance):
-        """
-        Add, whether insert or append, a FileMap instance to the file_map list
-        in the order of instance.new_fn ascending. If there are duplicate
-        new_fn in the list, they will be resolved in instance.move().
-        """
+    def add(self, obj):
         index = 0
         inserted = False
-        for fm in self.file_map:
-            if instance.new_fn < fm.new_fn:
-                self.file_map.insert(index, instance)
-                inserted = True
-                break
+
+        if type(obj) is str:
+            add = obj
+        else:
+            add = obj.new_fn
+
+        for elem in self.get():
+            if type(elem) is str:
+                cmp = elem
+            else:
+                cmp = elem.new_fn
+
+            # Since file.jpg > file-1.jpg True and file-1.jpg < file-2.jpg
+            # we must compare because we want ordering :
+            #   file.jpg, file-1.jpg, file-2.jpg
+
+            # Compare add of the form YYYYmmDD_HHMMSS*
+            madd = re.match(r"^\d{8}_\d{6}", add)
+            mcmp = re.match(r"^\d{8}_\d{6}", cmp)
+            if (madd and mcmp) and (madd.group(0) == mcmp.group(0)):
+                if (not re.search(r"-\d+\.", add) and
+                        re.search(r"-\d+\.", cmp)):
+                    #if add > cmp:
+                    self.list.insert(index, obj)
+                    inserted = True
+                    break
+                if (re.search(r"-\d+\.", add) and re.search(r"-\d+\.", cmp)):
+                    if add < cmp:
+                        self.list.insert(index, obj)
+                        inserted = True
+                        break
+            else:
+                # Everything else compares normally.
+                if add < cmp:
+                    self.list.insert(index, obj)
+                    inserted = True
+                    break
             index += 1
 
         # Reached end of list with no insert. Append to list instead.
         if not inserted:
-            self.file_map.append(instance)
+            self.list.append(obj)
 
     def get(self):
         """
-        Define a generator function here to return items on the file_map
+        Define a generator function here to return items on the list.
         list.
         """
-        return (x for x in self.file_map)
+        return (obj for obj in self.list)
+
+
+@photo_rename.logged_class
+class FileList(OrderedListMixin):
+    """
+    Ordered list of files.
+    """
+
+
+@photo_rename.logged_class
+class FileMapList(OrderedListMixin):
+    """
+    Ordered list of filemap instances.
+    """

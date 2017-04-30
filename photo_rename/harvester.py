@@ -6,7 +6,7 @@ import stat
 import sys
 import pyexiv2
 import photo_rename
-from photo_rename import FileMap, FileMapList
+from photo_rename import FileMap, FileList, FileMapList
 
 
 logger = logging.getLogger(__name__)
@@ -23,14 +23,14 @@ class Harvester(object):
         self.avoid_collisions = avoid_collisions
         self.delimiter = delimiter
         self.lineterm = lineterm
-        self.file_map_list = self.init_file_map()
+        self.filemaps = self.init_file_map()
 
     def __getitem__(self, key):
         """
         Implemented for file_map.
         """
-        if key == "file_map":
-            return self.file_map_list
+        if key == "filemaps":
+            return self.filemaps
         raise KeyError("Invalid key")
 
     def init_file_map(self):
@@ -41,7 +41,8 @@ class Harvester(object):
         """
 
         # List of FileMap objects.
-        file_map_list = FileMapList()
+        filemaps = FileMapList()
+        files = FileList()
 
         list_workdir = os.listdir(self.workdir)
         if self.mapfile:
@@ -53,15 +54,17 @@ class Harvester(object):
             # results in...
             # all_files_list = ['abc.jpg', 'ghi.jpg']
             alt_file_map = self.read_alt_file_map()
-            all_files_list = []
             filename_prefix_map = {}
             for file_prefix in alt_file_map.keys():
                 for filename in list_workdir:
                     if re.search(r"^{}\..+$".format(file_prefix), filename):
-                        all_files_list.append(filename)
+                        files.add(filename)
                         filename_prefix_map[filename] = file_prefix
+                all_files_list = [file for file in files.get()]
         else:
-            all_files_list = list_workdir
+            for file_add in list_workdir:
+                files.add(file_add)
+            all_files_list = [file for file in files.get()]
 
         # Initialize file_map list.
         for extension in photo_rename.EXTENSIONS:
@@ -85,15 +88,43 @@ class Harvester(object):
                         filename_prefix = filename_prefix_map[filename]
                         new_fn = "{}.{}".format(
                                 alt_file_map[filename_prefix], extension)
-                        file_map_list.add(
+                        filemaps.add(
                             FileMap(filename_fq, image_type,
                                 self.avoid_collisions, {}, new_fn))
                     else:
-                        file_map_list.add(FileMap(
-                            filename_fq, image_type, self.avoid_collisions))
+                        filemap = FileMap(
+                            filename_fq, image_type, self.avoid_collisions)
+                        filemap.set_dst_fn(self.find_dst_filename_collision(
+                                filemaps, filemap.new_fn))
+                        filemaps.add(filemap)
                 except Exception as e:
                     logger.warn("FileMap Error: {0}".format(e))
-        return file_map_list
+        return filemaps
+
+    def find_dst_filename_collision(self, filemaps, dst_fn):
+        """
+        Scan file map list for new destination filename and adjust if
+        conflict.
+        """
+        counter = 1
+        dst_fn_base = os.path.splitext(dst_fn)[0]
+        dst_fn_ext = os.path.splitext(dst_fn)[1][1:]
+        dst_fn_regex_s1 = r"^(\d+_\d+)-\d+$"
+        dst_fn_regex_s2 = r"^(\d+_\d+)$"
+        for filemap in filemaps.get():
+            dst_fn_regex_r = r"\1-{0}".format(counter)
+            if dst_fn == filemap.new_fn:
+                dst_fn_base = re.sub(
+                        dst_fn_regex_s1, dst_fn_regex_r, dst_fn_base)
+                dst_fn_base = re.sub(
+                        dst_fn_regex_s2, dst_fn_regex_r, dst_fn_base)
+                dst_fn = "{base}.{ext}".format(
+                        base=dst_fn_base, ext=dst_fn_ext)
+                counter += 1
+            if counter > 10:
+                raise Exception("Too many rename attempts: {} {}".format(
+                    dst_fn, counter))
+        return dst_fn
 
     def read_alt_file_map(self):
         """
@@ -176,9 +207,9 @@ class Harvester(object):
 
         >>> filemap = FileMap('IMG0332.JPG', photo_rename.IMAGE_TYPE_JPEG, avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
         >>> def move_func(old_fn, new_fn): pass
-        >>> file_map_list = FileMapList()
-        >>> file_map_list.add(filemap)
-        >>> process_file_map(file_map_list, True, move_func)
+        >>> filemaps = FileMapList()
+        >>> filemaps.add(filemap)
+        >>> process_file_map(filemaps, True, move_func)
 
         """
 
@@ -186,8 +217,7 @@ class Harvester(object):
         if simon_sez is None:
             simon_sez = False
 
-        fm_list = file_map.get()
-        for fm in fm_list:
+        for fm in file_map.get():
             try:
                 if simon_sez:
                     if move_func is None:

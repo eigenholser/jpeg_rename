@@ -28,7 +28,7 @@ def process_all_files(
         sys.exit(1)
 
     harvester = Harvester(workdir, mapfile, avoid_collisions)
-    file_map = harvester["file_map"]
+    file_map = harvester["filemaps"]
     harvester.process_file_map(file_map, simon_sez)
 
 
