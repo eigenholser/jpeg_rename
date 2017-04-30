@@ -17,13 +17,13 @@ class OrderedListMixin(object):
         if type(obj) is str:
             add = obj
         else:
-            add = obj.new_fn
+            add = obj.dst_fn
 
         for elem in self.get():
             if type(elem) is str:
                 cmp = elem
             else:
-                cmp = elem.new_fn
+                cmp = elem.dst_fn
 
             # Since file.jpg > file-1.jpg True and file-1.jpg < file-2.jpg
             # we must compare because we want ordering :

@@ -17,23 +17,23 @@ class TestFilemapMove(object):
     skiptests = not TEST_FILEMAP_MOVE
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
-    @pytest.mark.parametrize("old_fn", [
-        OLD_FN_JPG_LOWER, OLD_FN_JPG_UPPER])
+    @pytest.mark.parametrize("src_fn", [
+        SRC_FN_JPG_LOWER, SRC_FN_JPG_UPPER])
     @patch('photo_rename.filemap.os.rename')
     @patch('photo_rename.Filemap._chmod')
-    def test_move_orthodox(self, m_chmod, m_os, old_fn):
+    def test_move_orthodox(self, m_chmod, m_os, src_fn):
         """
         Rename file with mock os.rename. Verify called with args.
         """
         m_chmod.return_value = None
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = Filemap(old_fn, IMAGE_TYPE_JPEG, metadata=exif_data)
-        new_fn = filemap.new_fn
+        filemap = Filemap(src_fn, IMAGE_TYPE_JPEG, metadata=exif_data)
+        dst_fn = filemap.dst_fn
         filemap.move()
-        if old_fn == new_fn:
+        if src_fn == dst_fn:
             m_os.assert_not_called()
         else:
-            m_os.assert_called_with(old_fn, new_fn)
+            m_os.assert_called_with(src_fn, dst_fn)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.filemap.os.rename')
@@ -44,12 +44,12 @@ class TestFilemapMove(object):
         """
         m_chmod.return_value = None
         m_os.side_effect = OSError((1, "Just testing.",))
-        old_fn = OLD_FN_JPG_UPPER
+        src_fn = SRC_FN_JPG_UPPER
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = Filemap(old_fn, IMAGE_TYPE_JPEG, metadata=exif_data)
-        new_fn = filemap.new_fn
+        filemap = Filemap(src_fn, IMAGE_TYPE_JPEG, metadata=exif_data)
+        dst_fn = filemap.dst_fn
         filemap.move()
-        m_os.assert_called_with(old_fn, new_fn)
+        m_os.assert_called_with(src_fn, dst_fn)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.filemap.os.path.exists')
@@ -60,8 +60,8 @@ class TestFilemapMove(object):
         """
         m_chmod.return_value = None
         m_exists.return_value = True
-        filemap = Filemap(OLD_FN_JPG_LOWER, IMAGE_TYPE_JPEG, metadata={},
-                new_fn="abc.png")
+        filemap = Filemap(SRC_FN_JPG_LOWER, IMAGE_TYPE_JPEG, metadata={},
+                dst_fn="abc.png")
         filemap.move()
         assert filemap.collision_detected == True
 

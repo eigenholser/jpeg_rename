@@ -30,11 +30,11 @@ class TestFilemapList(object):
     def test_file_map_list_add(self):
         """
         Tests FilemapList add() method. Adds multiple Filemap instances
-        and verifies expected ordering of instances based on new_fn attribute.
+        and verifies expected ordering of instances based on dst_fn attribute.
         """
         test_file_map_1 = StubFilemap()
         test_file_map_2 = StubFilemap()
-        test_file_map_2.new_fn = 'aaa.jpg'
+        test_file_map_2.dst_fn = 'aaa.jpg'
         filemaps = FilemapList()
         filemaps.add(test_file_map_1)
         filemaps.add(test_file_map_2)

@@ -74,20 +74,20 @@ class TestRenameInitFilemapMetadata():
 
 class Stub2Filemap(object):
 
-    def __init__(self, old_fn, image_type, metadata=None, new_fn=None,
+    def __init__(self, src_fn, image_type, metadata=None, dst_fn=None,
             read_metadata=False):
-        self.old_fn_fq = old_fn
-        self.old_fn = os.path.basename(old_fn)
+        self.src_fn_fq = src_fn
+        self.src_fn = os.path.basename(src_fn)
         self.image_type = image_type
 
-        if not new_fn:
+        if not dst_fn:
             if metadata is None:
                 self.metadata = {}
             else:
                 self.metadata = metadata
-            new_fn = "filename.jpg"
+            dst_fn = "filename.jpg"
 
-        self.new_fn = new_fn
+        self.dst_fn = dst_fn
 
 
 class TestRenameInitFilemapAlt(object):
@@ -110,6 +110,6 @@ class TestRenameInitFilemapAlt(object):
         harvey = Harvester(".", mapfile="mapfile.txt")
         filemaps = [fm for fm in harvey["filemaps"].get()]
         assert len(filemaps) == len(expected)
-        assert filemaps[0].old_fn in expected
-        assert filemaps[1].old_fn in expected
+        assert filemaps[0].src_fn in expected
+        assert filemaps[1].src_fn in expected
 

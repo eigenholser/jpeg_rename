@@ -12,14 +12,14 @@ EXIF_DATA_VALID = {
     },
 }
 EXIF_DATA_NOT_VALID = {'Exif.Image.DateTime': '2014:08:26 06:20'}
-expected_new_fn = re.sub(r':', r'',
+expected_dst_fn = re.sub(r':', r'',
         EXIF_DATA_VALID['exif_data']['Exif.Image.DateTime'])
-expected_new_fn = re.sub(r' ', r'_', expected_new_fn)
-expected_new_fn = '{0}.jpg'.format(expected_new_fn)
-EXIF_DATA_VALID['expected_new_fn'] = expected_new_fn
-OLD_FN_JPG_LOWER = 'filename.jpg'
-OLD_FN_JPG_UPPER = 'filename.JPG'
-OLD_FN_JPEG = 'filename.jpg'
+expected_dst_fn = re.sub(r' ', r'_', expected_dst_fn)
+expected_dst_fn = '{0}.jpg'.format(expected_dst_fn)
+EXIF_DATA_VALID['expected_dst_fn'] = expected_dst_fn
+SRC_FN_JPG_LOWER = 'filename.jpg'
+SRC_FN_JPG_UPPER = 'filename.JPG'
+SRC_FN_JPEG = 'filename.jpg'
 IMAGE_TYPE_ARW = 1
 IMAGE_TYPE_JPEG = 2
 IMAGE_TYPE_PNG = 3
@@ -34,11 +34,11 @@ class StubFilemap(object):
     """
 
     def __init__(self):
-        self.old_fn = 'foo.jpg'
-        self.new_fn = 'bar.jpg'
+        self.src_fn = 'foo.jpg'
+        self.dst_fn = 'bar.jpg'
 
     def set_dst_fn(self, dst_fn):
-        self.new_fn = dst_fn
+        self.dst_fn = dst_fn
 
 
 @pytest.fixture

@@ -91,7 +91,7 @@ class Harvester(object):
                         image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[
                                 src_fn_ext]
                         filemap = Filemap(src_fn_fq, image_type,
-                                metadata=None, new_fn=dst_fn_fq)
+                                metadata=None, dst_fn=dst_fn_fq)
                         filemaps.add(filemap)
             return filemaps
 
@@ -115,10 +115,10 @@ class Harvester(object):
                             extension]
                     if self.mapfile:
                         filename_prefix = filename_prefix_map[filename]
-                        new_fn = "{}.{}".format(
+                        dst_fn = "{}.{}".format(
                                 alt_file_map[filename_prefix], extension)
                         filemaps.add(
-                            Filemap(filename_fq, image_type, new_fn=new_fn,
+                            Filemap(filename_fq, image_type, dst_fn=dst_fn,
                                 read_metadata=False))
                     else:
                         filemap = Filemap(filename_fq, image_type)
@@ -142,7 +142,7 @@ class Harvester(object):
         conflict.
         """
         seq = 1
-        dst_fn = chk_filemap.new_fn
+        dst_fn = chk_filemap.dst_fn
         old_dst_fn = dst_fn
         dst_fn_base = os.path.splitext(dst_fn)[0]
         dst_fn_ext = os.path.splitext(dst_fn)[1][1:]
@@ -153,7 +153,7 @@ class Harvester(object):
             # Stop if we've reached our position.
             if filemap == chk_filemap:
                 break
-            if dst_fn == filemap.new_fn:
+            if dst_fn == filemap.dst_fn:
                 dst_fn_base = re.sub(
                         dst_fn_regex_s1, dst_fn_regex_r, dst_fn_base)
                 dst_fn_base = re.sub(
@@ -164,9 +164,9 @@ class Harvester(object):
             if seq > photo_rename.MAX_RENAME_ATTEMPTS:
                 raise Exception("Too many rename attempts: {} {}".format(
                     dst_fn, seq))
-        if old_dst_fn != dst_fn and chk_filemap.old_fn != dst_fn:
+        if old_dst_fn != dst_fn and chk_filemap.src_fn != dst_fn:
             logger.info("Avoid collision: {} ==> {}".format(
-                chk_filemap.old_fn, dst_fn))
+                chk_filemap.src_fn, dst_fn))
         return dst_fn
 
     def read_alt_file_map(self):
@@ -242,14 +242,14 @@ class Harvester(object):
 
         Arguments:
             str: workdir - Working directory.
-            dict: file_map - old_fn to new_fn mapping.
+            dict: file_map - src_fn to dst_fn mapping.
             boolean: simon_sez - Dry run or real thing.
             func: move_func - Move function to use for testing or default.
         Returns:
             None
 
         >>> filemap = Filemap('IMG0332.JPG', photo_rename.IMAGE_TYPE_JPEG, metadata={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
-        >>> def move_func(old_fn, new_fn): pass
+        >>> def move_func(src_fn, dst_fn): pass
         >>> filemaps = FilemapList()
         >>> filemaps.add(filemap)
         >>> process_file_map(filemaps, True, move_func)
@@ -266,11 +266,11 @@ class Harvester(object):
                     if move_func is None:
                         fm.move()
                     else:
-                        move_func(fm.old_fn, fm.new_fn)
+                        move_func(fm.src_fn, fm.dst_fn)
                 else:
-                    if fm.old_fn != fm.new_fn:
+                    if fm.src_fn != fm.dst_fn:
                         logging.info("DRY RUN: Moving {0} ==> {1}".format(
-                            fm.old_fn, fm.new_fn))
+                            fm.src_fn, fm.dst_fn))
                         # TODO: Hmm, see about not doing this.
                         fm.same_files = False   # For unit test only.
             except Exception as e:

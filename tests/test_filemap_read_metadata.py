@@ -48,9 +48,9 @@ class TestFilemapReadMetadata(object):
         """
         metadata = {'Exif.Image.DateTime': '2014:08:26 06:20:20'}
         mock_pyexiv2.return_value = StubImageMetadata()
-        old_fn = OLD_FN_JPG_LOWER
+        src_fn = SRC_FN_JPG_LOWER
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = Filemap(old_fn, IMAGE_TYPE_PNG, new_fn="abc.jpg")
+        filemap = Filemap(src_fn, IMAGE_TYPE_PNG, dst_fn="abc.jpg")
         assert filemap.read_metadata() == metadata
 
 
@@ -82,9 +82,9 @@ class TestFilemapReadExifData(object):
                 return ['Exif.Image.DateTime']
 
 
-        old_fn = OLD_FN_JPG_LOWER
+        src_fn = SRC_FN_JPG_LOWER
         mock_img_md.return_value = TestImage()
-        filemap = Filemap(old_fn, IMAGE_TYPE_JPEG)
+        filemap = Filemap(src_fn, IMAGE_TYPE_JPEG)
         assert filemap.metadata == EXIF_DATA_VALID['exif_data']
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
@@ -106,9 +106,9 @@ class TestFilemapReadExifData(object):
             def exif_keys(self):
                 return []
 
-        old_fn = OLD_FN_JPG_LOWER
+        src_fn = SRC_FN_JPG_LOWER
         mock_img_md.return_value = TestImage()
         with pytest.raises(Exception) as excinfo:
-            filemap = Filemap(old_fn, IMAGE_TYPE_JPEG)
-        assert str(excinfo.value) == "{0} has no EXIF data.".format(old_fn)
+            filemap = Filemap(src_fn, IMAGE_TYPE_JPEG)
+        assert str(excinfo.value) == "{0} has no EXIF data.".format(src_fn)
 

@@ -22,7 +22,7 @@ class TestRenameProcessFilemap(object):
         """
         Test process_file_map().
         """
-        def move_func(old_fn, new_fn):
+        def move_func(src_fn, dst_fn):
             pass
 
         file_map_list = FilemapList()
@@ -34,7 +34,7 @@ class TestRenameProcessFilemap(object):
         """
         Test exception handling in process_file_map().
         """
-        def move_func(old_fn, new_fn):
+        def move_func(src_fn, dst_fn):
             raise Exception("Faux failure")
         file_map_list = FilemapList()
         file_map_list.add(StubFilemap())
@@ -45,11 +45,11 @@ class TestRenameProcessFilemap(object):
     def test_process_file_map_simon_sez_false_fn_eq(self, m_fm, harvey):
         """
         Test process_file_map() with simon_sez=False. Tests else branch with
-        old_fn == new_fn. Verify same_files attribute value is True.
+        src_fn == dst_fn. Verify same_files attribute value is True.
         """
         m_fm.same_files = True
-        m_fm.old_fn = OLD_FN_JPG_LOWER
-        m_fm.new_fn = OLD_FN_JPG_LOWER
+        m_fm.src_fn = SRC_FN_JPG_LOWER
+        m_fm.dst_fn = SRC_FN_JPG_LOWER
         file_map_list = FilemapList()
         file_map_list.add(m_fm)
         harvey.process_file_map(file_map_list)
@@ -60,11 +60,11 @@ class TestRenameProcessFilemap(object):
     def test_process_file_map_simon_sez_false_fn_ne(self, m_fm, harvey):
         """
         Test process_file_map() with simon_sez=False. Tests else branch with
-        old_fn != new_fn. Verify same_files attribute value is False.
+        src_fn != dst_fn. Verify same_files attribute value is False.
         """
         m_fm.same_files = False
-        m_fm.old_fn = OLD_FN_JPG_LOWER
-        m_fm.new_fn = ''
+        m_fm.src_fn = SRC_FN_JPG_LOWER
+        m_fm.dst_fn = ''
         file_map_list = FilemapList()
         file_map_list.add(m_fm)
         harvey.process_file_map(file_map_list)
