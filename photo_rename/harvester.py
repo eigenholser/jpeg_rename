@@ -106,13 +106,13 @@ class Harvester(object):
         Scan file map list for new destination filename and adjust if
         conflict.
         """
-        counter = 1
+        seq = 1
         dst_fn_base = os.path.splitext(dst_fn)[0]
         dst_fn_ext = os.path.splitext(dst_fn)[1][1:]
         dst_fn_regex_s1 = r"^(\d+_\d+)-\d+$"
         dst_fn_regex_s2 = r"^(\d+_\d+)$"
         for filemap in filemaps.get():
-            dst_fn_regex_r = r"\1-{0}".format(counter)
+            dst_fn_regex_r = r"\1-{0}".format(seq)
             if dst_fn == filemap.new_fn:
                 dst_fn_base = re.sub(
                         dst_fn_regex_s1, dst_fn_regex_r, dst_fn_base)
@@ -120,10 +120,10 @@ class Harvester(object):
                         dst_fn_regex_s2, dst_fn_regex_r, dst_fn_base)
                 dst_fn = "{base}.{ext}".format(
                         base=dst_fn_base, ext=dst_fn_ext)
-                counter += 1
-            if counter > 10:
+                seq += 1
+            if seq > 10:
                 raise Exception("Too many rename attempts: {} {}".format(
-                    dst_fn, counter))
+                    dst_fn, seq))
         return dst_fn
 
     def read_alt_file_map(self):
