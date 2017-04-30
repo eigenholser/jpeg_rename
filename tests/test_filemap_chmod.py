@@ -46,8 +46,7 @@ class TestFilemapChmod(object):
         mock_stat.return_value = StubStat(st_mode)
         old_fn = OLD_FN_JPG_LOWER
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
-                avoid_collisions=True, metadata=exif_data)
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG, metadata=exif_data)
         filemap._chmod()
         assert mock_chmod.assert_called_once
 

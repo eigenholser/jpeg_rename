@@ -18,14 +18,13 @@ class Harvester(object):
     Initialize FileMap list.
     """
 
-    def __init__(self, workdir, mapfile=None, avoid_collisions=None,
-            delimiter='\t', lineterm=None, metadata_dst_directory=None):
+    def __init__(self, workdir, mapfile=None, delimiter='\t', lineterm=None,
+            metadata_dst_directory=None):
         """
         Set state and initialize list.
         """
         self.workdir = workdir
         self.mapfile = mapfile
-        self.avoid_collisions = avoid_collisions
         self.delimiter = delimiter
         self.lineterm = lineterm
         self.metadata_dst_directory = metadata_dst_directory
@@ -93,8 +92,7 @@ class Harvester(object):
                         image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[
                                 src_fn_ext]
                         filemap = FileMap(src_fn_fq, image_type,
-                                avoid_collisions=None, metadata=None,
-                                new_fn=dst_fn_fq)
+                                metadata=None, new_fn=dst_fn_fq)
                         filemaps.add(filemap)
             return filemaps
 
@@ -121,11 +119,9 @@ class Harvester(object):
                         new_fn = "{}.{}".format(
                                 alt_file_map[filename_prefix], extension)
                         filemaps.add(
-                            FileMap(filename_fq, image_type,
-                                self.avoid_collisions, None, new_fn))
+                            FileMap(filename_fq, image_type, None, new_fn))
                     else:
-                        filemap = FileMap(
-                            filename_fq, image_type, self.avoid_collisions)
+                        filemap = FileMap(filename_fq, image_type)
                         filemaps.add(filemap)
                 except Exception as e:
                     logger.warn("FileMap Error: {0}".format(e))
@@ -252,7 +248,7 @@ class Harvester(object):
         Returns:
             None
 
-        >>> filemap = FileMap('IMG0332.JPG', photo_rename.IMAGE_TYPE_JPEG, avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
+        >>> filemap = FileMap('IMG0332.JPG', photo_rename.IMAGE_TYPE_JPEG, metadata={'Exif.Image.DateTime': '2014-08-18 20:23:83'})
         >>> def move_func(old_fn, new_fn): pass
         >>> filemaps = FileMapList()
         >>> filemaps.add(filemap)

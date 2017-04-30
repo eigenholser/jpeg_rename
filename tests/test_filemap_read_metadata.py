@@ -50,8 +50,7 @@ class TestFilemapReadMetadata(object):
         mock_pyexiv2.return_value = StubImageMetadata()
         old_fn = OLD_FN_JPG_LOWER
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = FileMap(old_fn, IMAGE_TYPE_PNG, avoid_collisions=True,
-                new_fn="abc.jpg")
+        filemap = FileMap(old_fn, IMAGE_TYPE_PNG, new_fn="abc.jpg")
         assert filemap.read_metadata() == metadata
 
 

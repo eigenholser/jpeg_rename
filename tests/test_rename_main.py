@@ -15,12 +15,11 @@ class StubArgs(object):
     Stub class.
     """
 
-    def __init__(self, directory='.', simon_sez=False,
-        avoid_collisions=False, verbose=False, mapfile=None):
+    def __init__(self, directory='.', simon_sez=False, verbose=False,
+            mapfile=None):
 
         self.directory = directory
         self.simon_sez = simon_sez
-        self.avoid_collisions = avoid_collisions
         self.verbose = verbose
         self.mapfile = mapfile
 
@@ -49,16 +48,16 @@ class TestRenameMain(object):
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.rename.argparse.ArgumentParser')
     @patch('photo_rename.rename.process_all_files')
-    def test_main_function(self, mock_process_all_files, mock_argparser):
+    def test_main_function(self, m_process_all_files, m_argparser):
         """
         Test main() function. Mock argparse and replace with stubs. Verify
         process_all_files called with expected arguments.
         """
         myargs = StubArgs()
-        mock_argparser.return_value = StubArgumentParser(myargs)
+        m_argparser.return_value = StubArgumentParser(myargs)
         retval = main()
-        mock_process_all_files.assert_called_with(workdir='.', simon_sez=False,
-                avoid_collisions=False, mapfile=None)
+        m_process_all_files.assert_called_with(workdir='.', simon_sez=False,
+                mapfile=None)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.rename.argparse.ArgumentParser')
@@ -66,8 +65,8 @@ class TestRenameMain(object):
     @patch('photo_rename.rename.os.path.exists')
     @patch('photo_rename.rename.os.access')
     @patch('photo_rename.rename.process_all_files')
-    def test_workdir_is_none(self, mock_process_all_files, mock_access,
-            mock_exists, mock_dirname, mock_argparse):
+    def test_workdir_is_none(self, m_process_all_files, m_access,
+            m_exists, m_dirname, m_argparse):
         """
         Test main() function. Test process_all_files called with expected
         arguments.
@@ -75,20 +74,20 @@ class TestRenameMain(object):
         workdir = "abc"
         mapfile = "foo"
         myargs = StubArgs(directory=None, mapfile=mapfile)
-        mock_argparse.return_value = StubArgumentParser(myargs)
-        mock_access = True
-        mock_exists.return_value = True
-        mock_dirname.return_value = workdir
+        m_argparse.return_value = StubArgumentParser(myargs)
+        m_access = True
+        m_exists.return_value = True
+        m_dirname.return_value = workdir
         retval = main()
-        mock_process_all_files.assert_called_with(workdir=workdir,
-                simon_sez=False, avoid_collisions=False, mapfile=mapfile)
+        m_process_all_files.assert_called_with(workdir=workdir,
+                simon_sez=False, mapfile=mapfile)
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @pytest.mark.parametrize(
-            "directory, simon_sez, verbose, avoid_collisions", [
-            (None, False, False, False),
-            (None, True, True, True),
-            ("foo", False, False, False),
+            "directory, simon_sez, verbose", [
+            (None, False, False),
+            (None, True, True),
+            ("foo", False, False),
         ])
     @patch('photo_rename.rename.argparse.ArgumentParser')
     @patch('photo_rename.rename.os.path.dirname')
@@ -96,9 +95,9 @@ class TestRenameMain(object):
     @patch('photo_rename.rename.os.access')
     @patch('photo_rename.rename.sys.exit')
     @patch('photo_rename.rename.process_all_files')
-    def test_workdir_is_not_none(self, mock_process_all_files, mock_exit,
-            mock_access, mock_exists, mock_dirname, mock_argparse,
-            directory, simon_sez, verbose, avoid_collisions):
+    def test_workdir_is_not_none(self, m_process_all_files, m_exit,
+            m_access, m_exists, m_dirname, m_argparse,
+            directory, simon_sez, verbose):
         """
         Test main() function. Test process_all_files called with expected
         arguments.
@@ -106,19 +105,17 @@ class TestRenameMain(object):
         workdir = "abc"
         mapfile = "foo"
         myargs = StubArgs(directory=directory, simon_sez=simon_sez,
-            verbose=verbose, avoid_collisions=avoid_collisions,
-            mapfile=mapfile)
-        mock_argparse.return_value = StubArgumentParser(myargs)
-        mock_access.return_value = True
-        mock_exists.return_value = True
-        mock_dirname.return_value = workdir
+            verbose=verbose, mapfile=mapfile)
+        m_argparse.return_value = StubArgumentParser(myargs)
+        m_access.return_value = True
+        m_exists.return_value = True
+        m_dirname.return_value = workdir
         retval = main()
         if directory:
-            mock_exit.assert_called_once
+            m_exit.assert_called_once
         else:
-            mock_process_all_files.assert_called_with(workdir=workdir,
-                simon_sez=simon_sez, avoid_collisions=avoid_collisions,
-                mapfile=mapfile)
+            m_process_all_files.assert_called_with(workdir=workdir,
+                simon_sez=simon_sez, mapfile=mapfile)
 
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
@@ -134,8 +131,8 @@ class TestRenameMain(object):
     @patch('photo_rename.rename.os.access')
     @patch('photo_rename.rename.sys.exit')
     @patch('photo_rename.rename.process_all_files')
-    def test_mapfile_errors(self, mock_process_all_files, mock_exit,
-            mock_access, mock_exists, mock_dirname, mock_argparse,
+    def test_mapfile_errors(self, m_process_all_files, m_exit,
+            m_access, m_exists, m_dirname, m_argparse,
             path_exists, os_access):
         """
         Test main() function.
@@ -143,15 +140,14 @@ class TestRenameMain(object):
         workdir = "abc"
         mapfile = "foo"
         myargs = StubArgs(directory=None, simon_sez=None,
-            verbose=None, avoid_collisions=None,
-            mapfile=mapfile)
-        mock_argparse.return_value = StubArgumentParser(myargs)
-        mock_access.return_value = os_access
-        mock_exists.return_value = path_exists
-        mock_dirname.return_value = workdir
+            verbose=None, mapfile=mapfile)
+        m_argparse.return_value = StubArgumentParser(myargs)
+        m_access.return_value = os_access
+        m_exists.return_value = path_exists
+        m_dirname.return_value = workdir
         retval = main()
         if path_exists and os_access:
-            mock_exit.assert_not_called
+            m_exit.assert_not_called
         else:
-            mock_exit.assert_called_once
+            m_exit.assert_called_once
 

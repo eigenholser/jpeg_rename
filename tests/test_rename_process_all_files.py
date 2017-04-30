@@ -108,6 +108,6 @@ class TestRenameProcessAllFiles(object):
         m_os_path_exists.assert_called_with(".")
         m_os_access.assert_called_with('.', os.W_OK)
         m_sys_exit.assert_not_called()
-        m_harvey.assert_called_with(".", None, None)
+        m_harvey.assert_called_with(".", None)
 
 

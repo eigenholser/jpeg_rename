@@ -18,8 +18,7 @@ class FileMap(object):
     methods perform all necessary instance functions for the rename.
     """
 
-    def __init__(self, old_fn, image_type, avoid_collisions=None,
-            metadata=None, new_fn=None):
+    def __init__(self, old_fn, image_type, metadata=None, new_fn=None):
         """
         Initialize FileMap instance.
 
@@ -47,10 +46,6 @@ class FileMap(object):
         # would be one, and fail the move. When set to False, rename attempt
         # will be aborted for safety.
         self.collision_detected = False
-        if avoid_collisions is None:
-            self.avoid_collisions = False
-        else:
-            self.avoid_collisions = avoid_collisions
 
         # Read EXIF or XMP metadata from old filename
         if metadata is None:
@@ -108,7 +103,7 @@ class FileMap(object):
         Generate new filename from old_fn EXIF or XMP data if possible. Even if
         not possible, lowercase old_fn and normalize file extension.
 
-        >>> filemap = FileMap('abc123.jpeg', photo_rename.IMAGE_TYPE_JPEG, avoid_collisions=None, metadata={'Exif.Image.DateTime': '2014:08:16 06:20:30'})
+        >>> filemap = FileMap('abc123.jpeg', photo_rename.IMAGE_TYPE_JPEG, metadata={'Exif.Image.DateTime': '2014:08:16 06:20:30'})
         >>> filemap.new_fn
         '20140816_062030.jpg'
 

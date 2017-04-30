@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def process_all_files(
-        workdir=None, simon_sez=None, avoid_collisions=None, mapfile=None):
+        workdir=None, simon_sez=None, mapfile=None):
     """
     Manage the entire process of gathering data and renaming files.
     """
@@ -27,7 +27,7 @@ def process_all_files(
                 "Directory {0} is not writable. Exiting.".format(workdir))
         sys.exit(1)
 
-    harvester = Harvester(workdir, mapfile, avoid_collisions)
+    harvester = Harvester(workdir, mapfile)
     file_map = harvester["filemaps"]
     harvester.process_file_map(file_map, simon_sez)
 
@@ -72,10 +72,6 @@ def main():
             error = True
         else:
             workdir = os.path.dirname(os.path.abspath(mapfile))
-        if myargs.avoid_collisions:
-            logging.error(
-                    "May not specify --avoid-collisions with --mapfile.")
-            error = True
         if not os.path.exists(mapfile):
             logging.error("Map file {} does not exist.".format(mapfile))
             error = True
@@ -87,7 +83,7 @@ def main():
             sys.exit(1)
 
     process_all_files(workdir=workdir, simon_sez=myargs.simon_sez,
-            avoid_collisions=myargs.avoid_collisions, mapfile=mapfile)
+            mapfile=mapfile)
 
 
 if __name__ == '__main__':  # pragma: no cover

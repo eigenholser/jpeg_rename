@@ -35,6 +35,6 @@ class TestFilemapBuildNewFn(object):
         """
         Test build_new_fn() with various EXIF data.
         """
-        filemap = FileMap(old_fn, image_type, None, exif_data)
+        filemap = FileMap(old_fn, image_type, exif_data)
         new_fn = filemap.new_fn
         assert new_fn == expected_new_fn

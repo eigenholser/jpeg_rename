@@ -27,7 +27,7 @@ class TestFilemapInit(object):
         m_build_new_fn.return_value = "abc.jpg"
         exif_data = EXIF_DATA_VALID['exif_data']
         filemap = FileMap(os.path.join("/a/b/c/", OLD_FN_JPG_LOWER),
-                IMAGE_TYPE_JPEG, avoid_collisions=True, metadata=exif_data)
+                IMAGE_TYPE_JPEG, metadata=exif_data)
         new_fn = "abc.jpg"
         new_fn_fq = os.path.join("/a/b/c", new_fn)
         assert filemap.new_fn == new_fn

@@ -27,8 +27,7 @@ class TestFilemapMove(object):
         """
         m_chmod.return_value = None
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
-                avoid_collisions=None, metadata=exif_data)
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG, metadata=exif_data)
         new_fn = filemap.new_fn
         filemap.move()
         if old_fn == new_fn:
@@ -47,8 +46,7 @@ class TestFilemapMove(object):
         m_os.side_effect = OSError((1, "Just testing.",))
         old_fn = OLD_FN_JPG_UPPER
         exif_data = EXIF_DATA_NOT_VALID
-        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG,
-                avoid_collisions=None, metadata=exif_data)
+        filemap = FileMap(old_fn, IMAGE_TYPE_JPEG, metadata=exif_data)
         new_fn = filemap.new_fn
         filemap.move()
         m_os.assert_called_with(old_fn, new_fn)
@@ -62,8 +60,8 @@ class TestFilemapMove(object):
         """
         m_chmod.return_value = None
         m_exists.return_value = True
-        filemap = FileMap(OLD_FN_JPG_LOWER, IMAGE_TYPE_JPEG,
-                avoid_collisions=None, metadata={}, new_fn="abc.png")
+        filemap = FileMap(OLD_FN_JPG_LOWER, IMAGE_TYPE_JPEG, metadata={},
+                new_fn="abc.png")
         filemap.move()
         assert filemap.collision_detected == True
 

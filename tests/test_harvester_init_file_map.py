@@ -74,16 +74,10 @@ class TestRenameInitFileMapMetadata():
 
 class Stub2FileMap(object):
 
-    def __init__(self, old_fn, image_type, avoid_collisions=None,
-            metadata=None, new_fn=None):
+    def __init__(self, old_fn, image_type, metadata=None, new_fn=None):
         self.old_fn_fq = old_fn
         self.old_fn = os.path.basename(old_fn)
         self.image_type = image_type
-
-        if avoid_collisions is None:
-            self.avoid_collisions = False
-        else:
-            self.avoid_collisions = avoid_collisions
 
         if not new_fn:
             if metadata is None:
