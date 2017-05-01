@@ -12,8 +12,7 @@ from photo_rename import Filemap, FilemapList, Harvester
 logger = logging.getLogger(__name__)
 
 
-def process_all_files(
-        workdir=None, simon_sez=None, mapfile=None):
+def process_all_files(workdir, mapfile, dst_directory, simon_sez=None):
     """
     Manage the entire process of gathering data and renaming files.
     """
@@ -22,14 +21,16 @@ def process_all_files(
                 "Directory {0} does not exist. Exiting.".format(workdir))
         sys.exit(1)
 
-    if not os.access(workdir, os.W_OK):
+    if not os.access(dst_directory, os.W_OK):
         logging.error(
-                "Directory {0} is not writable. Exiting.".format(workdir))
+                "Destination directory {0} is not writable. Exiting.".format(
+                    workdir))
         sys.exit(1)
 
-    harvester = Harvester(workdir, mapfile)
+    harvester = Harvester(workdir, mapfile,
+            metadata_dst_directory=dst_directory)
     file_map = harvester["filemaps"]
-    harvester.process_file_map(file_map, simon_sez)
+    #harvester.process_file_map(file_map, simon_sez)
 
 
 def main():
@@ -47,28 +48,16 @@ def main():
             action="store_true")
     myargs = parser.parse_args()
 
-    if (myargs.verbose):
+    if myargs.verbose:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
 
-    # Use current directory if --directory not specified.
-    workdir = myargs.directory
-    if workdir is None:
-        workdir = os.getcwd()
-        logging.info(
-                "--directory not given. Using workdir={}".format(workdir))
-
     # Validate --map
     mapfile = myargs.mapfile
     if mapfile:
-        # --map is not compatible with --avoid-collisions.
         error = False
-        if myargs.directory:
-            logging.error("May not specify --directory with --mapfile.")
-            error = True
-        else:
-            workdir = os.path.dirname(os.path.abspath(mapfile))
+        workdir = os.path.dirname(os.path.abspath(mapfile))
         if not os.path.exists(mapfile):
             logging.error("Map file {} does not exist.".format(mapfile))
             error = True
@@ -79,8 +68,10 @@ def main():
             logging.error("Exiting due to errors.")
             sys.exit(1)
 
-    process_all_files(workdir=workdir, simon_sez=myargs.simon_sez,
-            mapfile=mapfile)
+    dst_directory = myargs.dst_directory
+
+    process_all_files(workdir, mapfile, dst_directory,
+            simon_sez=myargs.simon_sez)
 
 
 if __name__ == '__main__':  # pragma: no cover
