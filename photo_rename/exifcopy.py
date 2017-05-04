@@ -7,6 +7,7 @@ import sys
 import pyexiv2
 import photo_rename
 from photo_rename import Filemap, FilemapList, Harvester
+from photo_rename.utils import CustomArgumentParser
 
 
 logger = logging.getLogger(__name__)
@@ -27,9 +28,14 @@ def process_all_files(workdir, mapfile, dst_directory, simon_sez=None):
                     workdir))
         sys.exit(1)
 
+    import pdb; pdb.set_trace()
     harvester = Harvester(workdir, mapfile,
             metadata_dst_directory=dst_directory)
-    file_map = harvester["filemaps"]
+    filemap = harvester["filemaps"]
+
+    for fm in filemap.get():
+        print("{} ==> {}".format(fm.src_fn, fm.dst_fn))
+
     #harvester.process_file_map(file_map, simon_sez)
 
 
@@ -37,11 +43,11 @@ def main():
     """
     Parse command-line arguments. Initiate file processing.
     """
-    parser = argparse.ArgumentParser()
+    parser = CustomArgumentParser() #argparse.ArgumentParser()
     parser.add_argument("-s", "--simon-sez",
             help="Really, Simon sez copy the data!", action="store_true")
     parser.add_argument("-d", "--dst-directory",
-            help="Copy EXIF data to files in this directory.")
+            help="Copy EXIF data to matching files in this directory.")
     parser.add_argument("-m", "--mapfile",
             help="Use this map to initialize src files.")
     parser.add_argument("-v", "--verbose", help="Log level to DEBUG.",
@@ -61,12 +67,20 @@ def main():
         if not os.path.exists(mapfile):
             logging.error("Map file {} does not exist.".format(mapfile))
             error = True
+        if os.path.isdir(mapfile):
+            logging.error("Map file {} is a directory.".format(mapfile))
+            error = True
         if not os.access(mapfile, os.R_OK):
             logging.error("Map file {} is not readable.".format(mapfile))
             error = True
-        if error:
-            logging.error("Exiting due to errors.")
-            sys.exit(1)
+    else:
+        logging.error("Must specify --mapfile")
+        error = True
+
+    if error:
+        logging.error("Exiting due to errors.")
+        parser.usage_message()
+        sys.exit(1)
 
     dst_directory = myargs.dst_directory
 
