@@ -107,7 +107,8 @@ setup(
     entry_points={
         'console_scripts': [
             'pz_rename = photo_rename.rename:main',
-            'pz_exifcopy = photo_rename.exifcopy:main'
+            'pz_exifcopy = photo_rename.exifcopy:main',
+            'pz_setdto = photo_rename.setdto:main',
         ]
     },
     install_requires=install_requires_list,
