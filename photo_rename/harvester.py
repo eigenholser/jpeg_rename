@@ -30,6 +30,8 @@ class Harvester(object):
         self.metadata_dst_directory = metadata_dst_directory
         self.filemaps = None
         self.files = None
+        self.filename_prefix_map = None
+        self.alt_file_map = None
 
     def __getitem__(self, key):
         """
@@ -40,16 +42,43 @@ class Harvester(object):
                 self.filemaps = self.init_file_map()
             return self.filemaps
 
-        if key == "files":
+        # Reading from mapfile
+        if key == "files" and self.mapfile:
+            if not self.files:
+                self.files = self.files_from_mapfile(self.mapfile)
+            return self.files
+
+        # Reading from directory
+        if key == "files" and not self.mapfile:
             if not self.files:
                 self.files = self.files_from_directory(self.workdir)
+            return self.files
 
         raise KeyError("Invalid key")
 
-    def files_from_mapfile(self):
+    def files_from_mapfile(self, mapfile):
         """
+        Build list of files matching prefix/basename in mapfile.
         """
-        pass
+        # Extract files in workdir that match against our alternate file
+        # map.
+        #
+        # alt_file_map.keys() = ['abc', 'def', 'ghi', 'jkl', 'mno']
+        # list_workdir = ['abc.jpg', 'ghi.jpg', 'pqr.jpg']
+        # results in...
+        # allfiles = ['abc.jpg', 'ghi.jpg']
+        files = FileList()
+        alt_file_map = self.read_alt_file_map()
+        filename_prefix_map = {}
+        for file_prefix in alt_file_map.keys():
+            for filename in os.listdir(self.workdir):
+                if re.search(r"^{}\..+$".format(file_prefix), filename):
+                    files.add(filename)
+                    filename_prefix_map[filename] = file_prefix
+        self.alt_file_map = alt_file_map
+        self.filename_prefix_map = filename_prefix_map
+        return [file for file in files.get()]
+
 
     def files_from_directory(self, directory):
         """
@@ -74,27 +103,12 @@ class Harvester(object):
 
         # List of Filemap objects.
         filemaps = FilemapList()
-        files = FileList()
 
-        list_workdir = os.listdir(self.workdir)
-        if self.mapfile:
-            # Extract files in workdir that match against our alternate file
-            # map.
-            #
-            # alt_file_map.keys() = ['abc', 'def', 'ghi', 'jkl', 'mno']
-            # list_workdir = ['abc.jpg', 'ghi.jpg', 'pqr.jpg']
-            # results in...
-            # allfiles = ['abc.jpg', 'ghi.jpg']
-            alt_file_map = self.read_alt_file_map()
-            filename_prefix_map = {}
-            for file_prefix in alt_file_map.keys():
-                for filename in list_workdir:
-                    if re.search(r"^{}\..+$".format(file_prefix), filename):
-                        files.add(filename)
-                        filename_prefix_map[filename] = file_prefix
-                allfiles = [file for file in files.get()]
-        else:
-            allfiles = self.files_from_directory(self.workdir)
+        allfiles = self["files"]
+        if self.filename_prefix_map:
+            filename_prefix_map = self.filename_prefix_map
+        if self.alt_file_map:
+            alt_file_map = self.alt_file_map
 
 
         # TODO: Somewhat of a hack with this new feature. Still sorting it
