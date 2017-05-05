@@ -47,6 +47,9 @@ def main():
             help="Really, Simon sez copy the data!", action="store_true")
     parser.add_argument("-d", "--directory",
             help="Set EXIF DateTimeOriginal/XMP on files in this directory.")
+    parser.add_argument("-t", "--timestamp", help="Initial timestamp.")
+    parser.add_argument("-i", "--interval",
+            help="Interval in seconds to use for successive files.")
     parser.add_argument("-v", "--verbose", help="Log level to DEBUG.",
             action="store_true")
     myargs = parser.parse_args()
