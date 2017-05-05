@@ -38,7 +38,12 @@ class Harvester(object):
             return self.filemaps
         raise KeyError("Invalid key")
 
-    def get_image_files(self, directory):
+    def files_from_mapfile(self):
+        """
+        """
+        pass
+
+    def files_from_directory(self, directory):
         """
         Build list of files matching recognized file extension.
         """
@@ -81,7 +86,7 @@ class Harvester(object):
                         filename_prefix_map[filename] = file_prefix
                 allfiles = [file for file in files.get()]
         else:
-            allfiles = self.get_image_files(self.workdir)
+            allfiles = self.files_from_directory(self.workdir)
 
 
         # TODO: Somewhat of a hack with this new feature. Still sorting it

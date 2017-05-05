@@ -111,7 +111,7 @@ class TestRenameInitFilemapAlt(object):
 
 class TestGetImageFiles(object):
     """
-    Tests for Harvester.get_image_filees() method.
+    Tests for Harvester.filees_from_directory() method.
     """
     skiptests = False
 
@@ -119,9 +119,9 @@ class TestGetImageFiles(object):
     @patch('photo_rename.harvester.FileList')
     @patch('photo_rename.harvester.os.listdir')
     @patch('photo_rename.harvester.os.path.splitext')
-    def test_get_image_files_happy(self, m_splitext, m_listdir, m_filelist):
+    def test_files_from_directory_happy(self, m_splitext, m_listdir, m_filelist):
         """
-        Test get_image_files() with list of files, one of which matches a
+        Test files_from_directory() with list of files, one of which matches a
         recognized image extension 'xyz'. Confirm only file with recognized
         extension returned.
         """
@@ -133,6 +133,6 @@ class TestGetImageFiles(object):
         m_get.configure_mock(**attrs)
         m_filelist.return_value = m_get
         harvey = Harvester('.')
-        actual_files = harvey.get_image_files(".")
+        actual_files = harvey.files_from_directory(".")
         assert files[4] == actual_files[4]
 
