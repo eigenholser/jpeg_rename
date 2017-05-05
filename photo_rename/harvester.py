@@ -105,10 +105,8 @@ class Harvester(object):
         filemaps = FilemapList()
 
         allfiles = self["files"]
-        if self.filename_prefix_map:
-            filename_prefix_map = self.filename_prefix_map
-        if self.alt_file_map:
-            alt_file_map = self.alt_file_map
+        filename_prefix_map = self.filename_prefix_map
+        alt_file_map = self.alt_file_map
 
 
         # TODO: Somewhat of a hack with this new feature. Still sorting it
