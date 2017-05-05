@@ -58,7 +58,7 @@ class Harvester(object):
             # alt_file_map.keys() = ['abc', 'def', 'ghi', 'jkl', 'mno']
             # list_workdir = ['abc.jpg', 'ghi.jpg', 'pqr.jpg']
             # results in...
-            # all_files_list = ['abc.jpg', 'ghi.jpg']
+            # allfiles = ['abc.jpg', 'ghi.jpg']
             alt_file_map = self.read_alt_file_map()
             filename_prefix_map = {}
             for file_prefix in alt_file_map.keys():
@@ -66,16 +66,15 @@ class Harvester(object):
                     if re.search(r"^{}\..+$".format(file_prefix), filename):
                         files.add(filename)
                         filename_prefix_map[filename] = file_prefix
-                all_files_list = [file for file in files.get()]
+                allfiles = [file for file in files.get()]
         else:
             for file_add in list_workdir:
                 files.add(file_add)
-            all_files_list = [file for file in files.get()]
+            allfiles = [file for file in files.get()]
 
 
         # TODO: Somewhat of a hack with this new feature. Still sorting it
         # out. This whole method needs chopping apart.
-#       self.metadata_dst_directory = "exifcopy"
         if self.mapfile and self.metadata_dst_directory:
             # Copying EXIF metadata from src to dst.
             for src_fn in filename_prefix_map.keys():
@@ -96,35 +95,32 @@ class Harvester(object):
             return filemaps
 
         # Initialize file_map list.
-        for extension in photo_rename.EXTENSIONS:
-            image_regex = r"\." + re.escape(extension) + r"$"
-            matching_files = [filename for filename in all_files_list
-                    if re.search(image_regex, filename, re.IGNORECASE)]
-            logger.debug("Files matching extension {ext}: {files}".format(
-                ext=extension, files=matching_files))
-            for filename in (matching_files):
-                filename_fq = os.path.join(self.workdir, filename)
-                # TODO: There once was some trouble here that caused me to
-                # comment the directory check. Dunno. Keep an eye on it in
-                # case it pops up again in the future.
-                if os.path.isdir(filename_fq):
-                    logger.warn("Skipping directory {0}".format(filename_fq))
-                    continue
-                try:
-                    image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[
-                            extension]
-                    if self.mapfile:
-                        filename_prefix = filename_prefix_map[filename]
-                        dst_fn = "{}.{}".format(
-                                alt_file_map[filename_prefix], extension)
-                        filemaps.add(
-                            Filemap(filename_fq, image_type, dst_fn=dst_fn,
-                                read_metadata=False))
-                    else:
-                        filemap = Filemap(filename_fq, image_type)
-                        filemaps.add(filemap)
-                except Exception as e:
-                    logger.warn("Filemap Error: {0}".format(e))
+        for filename in (allfiles):
+
+            filename_fq = os.path.join(self.workdir, filename)
+            if os.path.isdir(filename_fq):
+                logger.warn("Skipping directory {0}".format(filename_fq))
+                continue
+
+            src_fn_ext = os.path.splitext(filename)[1][1:]
+            if src_fn_ext in photo_rename.EXTENSION_TO_IMAGE_TYPE:
+                image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[src_fn_ext]
+            else:
+                continue
+
+            try:
+                if self.mapfile:
+                    filename_prefix = filename_prefix_map[filename]
+                    dst_fn = "{}.{}".format(
+                            alt_file_map[filename_prefix], src_fn_ext)
+                    filemaps.add(
+                        Filemap(filename_fq, image_type, dst_fn=dst_fn,
+                            read_metadata=False))
+                else:
+                    filemap = Filemap(filename_fq, image_type)
+                    filemaps.add(filemap)
+            except Exception as e:
+                logger.warn("Filemap Error: {0}".format(e))
 
         # XXX: Here after all Filemap have been initialized we need to check
         # for collisions. Not when mapfile used.

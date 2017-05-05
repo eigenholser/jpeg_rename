@@ -20,22 +20,17 @@ class TestRenameInitFilemapMetadata():
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.harvester.Filemap')
-    @patch('photo_rename.harvester.re')
     @patch('photo_rename.harvester.os.listdir')
-    def test_init_file_map_orthodox(
-            self, m_listdir, m_re, m_filemap):
+    def test_init_file_map_orthodox(self, m_listdir, m_filemap):
         """
         Tests init_file_map() list building. Verifies expected return value.
         """
         test_file_map = StubFilemap()
         m_filemap.return_value = test_file_map
-        m_listdir.return_value = ['/foo/bar']
-        m_re.search.return_value = True
+        m_listdir.return_value = ['abc.jpg']
         harvey = Harvester(".")
         filemaps = [fm for fm in harvey["filemaps"].get()]
-        assert filemaps == [
-                test_file_map, test_file_map, test_file_map, test_file_map,
-                test_file_map, test_file_map]
+        assert filemaps == [test_file_map]
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.harvester.Filemap')
