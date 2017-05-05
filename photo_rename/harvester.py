@@ -38,6 +38,19 @@ class Harvester(object):
             return self.filemaps
         raise KeyError("Invalid key")
 
+    def get_image_files(self, directory):
+        """
+        Build list of files matching recognized file extension.
+        """
+        files = FileList()
+        for filename in os.listdir(directory):
+            src_fn_ext = os.path.splitext(filename)[1][1:].lower()
+            if src_fn_ext in photo_rename.EXTENSION_TO_IMAGE_TYPE:
+                files.add(filename)
+            else:
+                continue
+        return [file for file in files.get()]
+
     def init_file_map(self):
         """
         Read the work directory looking for files with extensions defined in
@@ -68,9 +81,7 @@ class Harvester(object):
                         filename_prefix_map[filename] = file_prefix
                 allfiles = [file for file in files.get()]
         else:
-            for file_add in list_workdir:
-                files.add(file_add)
-            allfiles = [file for file in files.get()]
+            allfiles = self.get_image_files(self.workdir)
 
 
         # TODO: Somewhat of a hack with this new feature. Still sorting it

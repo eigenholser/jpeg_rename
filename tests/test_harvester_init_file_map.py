@@ -108,3 +108,31 @@ class TestRenameInitFilemapAlt(object):
         assert filemaps[0].src_fn in expected
         assert filemaps[1].src_fn in expected
 
+
+class TestGetImageFiles(object):
+    """
+    Tests for Harvester.get_image_filees() method.
+    """
+    skiptests = False
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.harvester.FileList')
+    @patch('photo_rename.harvester.os.listdir')
+    @patch('photo_rename.harvester.os.path.splitext')
+    def test_get_image_files_happy(self, m_splitext, m_listdir, m_filelist):
+        """
+        Test get_image_files() with list of files, one of which matches a
+        recognized image extension 'xyz'. Confirm only file with recognized
+        extension returned.
+        """
+        files = ['12.jpg', '34.png', '56.arw', '78.tif', '90.xyz']
+        m_splitext.return_value = ('ABC', '.XYZ')
+        m_listdir.return_value = files
+        attrs = {'get.return_value': files}
+        m_get = Mock()
+        m_get.configure_mock(**attrs)
+        m_filelist.return_value = m_get
+        harvey = Harvester('.')
+        actual_files = harvey.get_image_files(".")
+        assert files[4] == actual_files[4]
+
