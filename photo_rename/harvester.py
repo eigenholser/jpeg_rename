@@ -28,14 +28,22 @@ class Harvester(object):
         self.delimiter = delimiter
         self.lineterm = lineterm
         self.metadata_dst_directory = metadata_dst_directory
-        self.filemaps = self.init_file_map()
+        self.filemaps = None
+        self.files = None
 
     def __getitem__(self, key):
         """
-        Implemented for file_map.
+        Initialize and return data.
         """
         if key == "filemaps":
+            if not self.filemaps:
+                self.filemaps = self.init_file_map()
             return self.filemaps
+
+        if key == "files":
+            if not self.files:
+                self.files = self.files_from_directory(self.workdir)
+
         raise KeyError("Invalid key")
 
     def files_from_mapfile(self):
