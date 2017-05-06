@@ -5,7 +5,7 @@ Demo code written for SLC Python.
 
 ``zrename.py`` will find all supported files in ``DIRECTORY``. Currently
 the list of supported file types is ARW, JPEG, PNG, and TIFF. It will read
-the ``DateTimeOriginal`` EXIF tag if JPEG, TIFF, ARW, or ``CreateDate`` XMP
+the ``DateTime`` EXIF tag if JPEG, TIFF, ARW, or ``CreateDate`` XMP
 tag if PNG. Each found file will be renamed using the metadata. Alternatively,
 a map file may be specified which will be used for renaming.
 
@@ -88,3 +88,9 @@ coverage like this::
 
 Coverage reports will be written to ``./htmlcov``. View the report by opening
 ``./htmlcov/index.html`` with your favorite browser.
+
+References
+==========
+https://python3-exiv2.readthedocs.io/en/latest/api.html
+http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html
+http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/XMP.html#xmp
