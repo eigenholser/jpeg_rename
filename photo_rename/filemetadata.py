@@ -43,9 +43,6 @@ class FileMetadata(object):
             tag = self.img_md[key].raw_value
             metadata[key] = tag
 
-        if (len(metadata) == 0):
-            raise Exception("{0} has no EXIF/XMP data.".format(self.src_fn))
-
         return metadata
 
     def set_datetime(self, new_datetime):
