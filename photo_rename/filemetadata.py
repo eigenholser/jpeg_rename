@@ -22,6 +22,8 @@ class FileMetadata(object):
         Object that reads, writes, and stores EXIF and XMP metadata from file.
         """
         self.file = file
+        self.img_md = pyexiv2.ImageMetadata("{}".format(file))
+        self.img_md.read()
         self.metadata = self.read_metadata(file)
 
     def read_metadata(self, file):
@@ -30,17 +32,15 @@ class FileMetadata(object):
         """
         # Xmp.xmp.CreateDate
         # Exif.Image.DateTime
-        img_md = pyexiv2.ImageMetadata("{}".format(file))
-        img_md.read()
 
         metadata = {}
 
         import pdb; pdb.set_trace()
-        xmp_keys = [md_key for md_key in img_md.xmp_keys]
-        exif_keys = [md_key for md_key in img_md.exif_keys]
+        xmp_keys = [md_key for md_key in self.img_md.xmp_keys]
+        exif_keys = [md_key for md_key in self.img_md.exif_keys]
 
         for key in xmp_keys + exif_keys:
-            tag = img_md[key].raw_value
+            tag = self.img_md[key].raw_value
             metadata[key] = tag
 
         if (len(metadata) == 0):
@@ -62,19 +62,16 @@ class FileMetadata(object):
         exif_datetime = new_datetime.strftime('%Y:%m:%d %H:%M:%S')
         logger.debug("XMP: {} : EXIF: {}".format(xmp_datetime, exif_datetime))
 
-        img_md = pyexiv2.ImageMetadata("{}".format(self.file))
-        img_md.read()
-
         # Shotwell requires Xmp.xmp.CreateDate to be set.
-        img_md['Xmp.xmp.CreateDate'] = pyexiv2.XmpTag(
+        self.img_md['Xmp.xmp.CreateDate'] = pyexiv2.XmpTag(
                 'Xmp.xmp.CreateDate', new_datetime)
-        img_md['Exif.Image.DateTime'] = pyexiv2.ExifTag(
+        self.img_md['Exif.Image.DateTime'] = pyexiv2.ExifTag(
                 'Exif.Image.DateTime', new_datetime)
-        img_md['Exif.Photo.DateTimeOriginal'] = pyexiv2.ExifTag(
+        self.img_md['Exif.Photo.DateTimeOriginal'] = pyexiv2.ExifTag(
                 'Exif.Photo.DateTimeOriginal', new_datetime)
 
         try:
-            img_md.write()
+            self.img_md.write()
         except Exception as e:
             logger.error(e)
 
