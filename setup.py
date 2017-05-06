@@ -108,7 +108,7 @@ setup(
         'console_scripts': [
             'pz_rename = photo_rename.rename:main',
             'pz_exifcopy = photo_rename.exifcopy:main',
-            'pz_setdto = photo_rename.setdto:main',
+            'pz_set_datetime = photo_rename.set_datetime:main',
         ]
     },
     install_requires=install_requires_list,
