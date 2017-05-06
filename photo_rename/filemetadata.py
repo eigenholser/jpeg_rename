@@ -65,16 +65,13 @@ class FileMetadata(object):
         img_md = pyexiv2.ImageMetadata("{}".format(self.file))
         img_md.read()
 
-        if 'Xmp.xmp.MetadataDate' in self.metadata:
-            pass
-        if 'Xmp.xmp.CreateDate' in self.metadata:
-            pass
-        if 'Exif.Image.DateTime' in self.metadata:
-            img_md['Exif.Image.DateTime'] = pyexiv2.ExifTag(
-                    'Exif.Image.DateTime', exif_datetime)
-        if 'Exif.Photo.DateTimeOriginal' in self.metadata:
-            img_md['Exif.Photo.DateTimeOriginal'] = pyexiv2.ExifTag(
-                    'Exif.Photo.DateTimeOriginal', exif_datetime)
+        # Shotwell requires Xmp.xmp.CreateDate to be set.
+        img_md['Xmp.xmp.CreateDate'] = pyexiv2.XmpTag(
+                'Xmp.xmp.CreateDate', new_datetime)
+        img_md['Exif.Image.DateTime'] = pyexiv2.ExifTag(
+                'Exif.Image.DateTime', new_datetime)
+        img_md['Exif.Photo.DateTimeOriginal'] = pyexiv2.ExifTag(
+                'Exif.Photo.DateTimeOriginal', new_datetime)
 
         try:
             img_md.write()
