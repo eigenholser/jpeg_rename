@@ -24,7 +24,16 @@ class FileMetadata(object):
         self.file = file
         self.img_md = pyexiv2.ImageMetadata("{}".format(file))
         self.img_md.read()
-        self.metadata = self.read_metadata(file)
+        self.metadata = None
+
+    def __getitem__(self, key):
+        """
+        Magic method for getting data.
+        """
+        if key == "metadata":
+            if not self.metadata:
+                self.metadata = self.read_metadata(self.file)
+            return self.metadata
 
     def read_metadata(self, file):
         """

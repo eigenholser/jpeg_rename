@@ -43,7 +43,7 @@ def process_all_files(workdir, initial_dt, interval, simon_sez=None):
 
         fmds.append(fmd)
         print("*************** {} : {}".format(fn, this_dt.strftime('%Y:%m:%d %H:%M:%S')))
-        for md in fmd.metadata.keys():
+        for md in fmd["metadata"].keys():
             if "Date" in md or "SubSec" in md or "Time" in md or "Offset" in md:
                 print("{} : {}".format(md, fmd.metadata[md]))
 
