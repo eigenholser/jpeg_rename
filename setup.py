@@ -107,7 +107,7 @@ setup(
     entry_points={
         'console_scripts': [
             'pz_rename = photo_rename.rename:main',
-            'pz_exifcopy = photo_rename.exifcopy:main',
+            'pz_copy_metadata = photo_rename.copy_metadata:main',
             'pz_set_datetime = photo_rename.set_datetime:main',
         ]
     },
