@@ -35,7 +35,6 @@ class FileMetadata(object):
 
         metadata = {}
 
-        import pdb; pdb.set_trace()
         xmp_keys = [md_key for md_key in self.img_md.xmp_keys]
         exif_keys = [md_key for md_key in self.img_md.exif_keys]
 
