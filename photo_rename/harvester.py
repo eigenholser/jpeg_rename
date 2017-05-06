@@ -87,7 +87,8 @@ class Harvester(object):
         files = FileList()
         for filename in os.listdir(directory):
             src_fn_ext = os.path.splitext(filename)[1][1:].lower()
-            if src_fn_ext in photo_rename.EXTENSION_TO_IMAGE_TYPE:
+            if (src_fn_ext in photo_rename.EXTENSION_TO_IMAGE_TYPE and
+                    not os.path.isdir(os.path.join(directory, filename))):
                 files.add(filename)
             else:
                 continue
