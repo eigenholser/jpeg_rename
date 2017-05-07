@@ -52,7 +52,7 @@ class Harvester(object):
                 self.files = self.files_from_directory(self.workdir)
             return self.files
 
-        raise KeyError("Invalid key")
+        raise KeyError("Invalid key '{}'".format(key))
 
     def files_from_mapfile(self, mapfile):
         """
