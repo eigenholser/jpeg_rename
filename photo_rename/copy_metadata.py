@@ -30,9 +30,11 @@ def process_all_files(src_directory, dst_directory, simon_sez=None):
         sys.exit(1)
 
     harvester = Harvester(src_directory, metadata_dst_directory=dst_directory)
-    filemap = harvester["filemaps"]
+    filemaps = harvester["filemaps"]
 
-    for fm in filemap.get():
+    count = 0
+    for fm in filemaps.get():
+        count += 1
         src_fmd = FileMetadata(os.path.join(src_directory, fm.src_fn))
         if simon_sez:
             logger.info(
@@ -43,7 +45,8 @@ def process_all_files(src_directory, dst_directory, simon_sez=None):
             logger.info(
                     "DRY RUN: Copying metadata from {} ==> {}".format(
                         fm.src_fn, fm.dst_fn))
-
+    if count == 0:
+        logger.warn("No matching files found. Check src and dst.")
 
 def main():
     """
