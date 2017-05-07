@@ -94,6 +94,19 @@ class Harvester(object):
                 continue
         return [file for file in files.get()]
 
+    def filename_prefixes_from_directory(self, directory):
+        """
+        Build filename prefixes from directory.
+        """
+        filename_prefix_map = {}
+        for filename in os.listdir(self.workdir):
+            if os.path.isdir(os.path.join(self.workdir, filename)):
+                continue
+            filename_ext = os.path.splitext(filename)[1][1:].lower()
+            if filename_ext in photo_rename.EXTENSION_TO_IMAGE_TYPE:
+                filename_prefix_map[filename] = os.path.splitext(filename)[0]
+        return filename_prefix_map
+
     def init_file_map(self):
         """
         Read the work directory looking for files with extensions defined in
@@ -112,8 +125,10 @@ class Harvester(object):
 
         # TODO: Somewhat of a hack with this new feature. Still sorting it
         # out. This whole method needs chopping apart.
-        if self.mapfile and self.metadata_dst_directory:
+        if self.metadata_dst_directory:
             # Copying EXIF metadata from src to dst.
+            filename_prefix_map = self.filename_prefixes_from_directory(
+                    self.workdir)
             for src_fn in filename_prefix_map.keys():
                 for filename in os.listdir(self.metadata_dst_directory):
                     if re.search(r"^{}\..+$".format(
