@@ -6,37 +6,38 @@ import stat
 import sys
 import pyexiv2
 import photo_rename
-from photo_rename import Filemap, FilemapList, Harvester
+from photo_rename import FileMetadata, Harvester
 from photo_rename.utils import CustomArgumentParser
 
 
 logger = logging.getLogger(__name__)
 
 
-def process_all_files(workdir, mapfile, dst_directory, simon_sez=None):
+def process_all_files(src_directory, dst_directory, simon_sez=None):
     """
     Manage the entire process of gathering data and renaming files.
     """
-    if not os.path.exists(workdir):
+    if not os.path.exists(src_directory):
         logging.error(
-                "Directory {0} does not exist. Exiting.".format(workdir))
+                "Directory {0} does not exist. Exiting.".format(
+                    src_directory))
         sys.exit(1)
 
     if not os.access(dst_directory, os.W_OK):
         logging.error(
                 "Destination directory {0} is not writable. Exiting.".format(
-                    workdir))
+                    dst_directory))
         sys.exit(1)
 
-    import pdb; pdb.set_trace()
-    harvester = Harvester(workdir, mapfile,
-            metadata_dst_directory=dst_directory)
+    harvester = Harvester(src_directory, metadata_dst_directory=dst_directory)
     filemap = harvester["filemaps"]
 
     for fm in filemap.get():
-        print("{} ==> {}".format(fm.src_fn, fm.dst_fn))
-
-    #harvester.process_file_map(file_map, simon_sez)
+        logger.info(
+                "Copying metadata from {} ==> {}".format(
+                    fm.src_fn, fm.dst_fn))
+        src_fmd = FileMetadata(os.path.join(src_directory, fm.src_fn))
+        src_fmd.copy_metadata(os.path.join(dst_directory, fm.dst_fn))
 
 
 def main():
@@ -46,10 +47,10 @@ def main():
     parser = CustomArgumentParser() #argparse.ArgumentParser()
     parser.add_argument("-s", "--simon-sez",
             help="Really, Simon sez copy the data!", action="store_true")
+    parser.add_argument("-r", "--src-directory",
+            help="Copy metadata from files in this directory.")
     parser.add_argument("-d", "--dst-directory",
-            help="Copy EXIF data to matching files in this directory.")
-    parser.add_argument("-m", "--mapfile",
-            help="Use this map to initialize src files.")
+            help="Copy metadata to matching files in this directory.")
     parser.add_argument("-v", "--verbose", help="Log level to DEBUG.",
             action="store_true")
     myargs = parser.parse_args()
@@ -59,32 +60,18 @@ def main():
     else:
         logging.basicConfig(level=logging.INFO)
 
-    # Validate --map
-    mapfile = myargs.mapfile
-    if mapfile:
-        error = False
-        workdir = os.path.dirname(os.path.abspath(mapfile))
-        if not os.path.exists(mapfile):
-            logging.error("Map file {} does not exist.".format(mapfile))
-            error = True
-        if os.path.isdir(mapfile):
-            logging.error("Map file {} is a directory.".format(mapfile))
-            error = True
-        if not os.access(mapfile, os.R_OK):
-            logging.error("Map file {} is not readable.".format(mapfile))
-            error = True
-    else:
-        logging.error("Must specify --mapfile")
-        error = True
+    error = False
 
     if error:
         logging.error("Exiting due to errors.")
         parser.usage_message()
         sys.exit(1)
 
+    # TODO: validate src/dst directory args.
+    src_directory = myargs.src_directory
     dst_directory = myargs.dst_directory
 
-    process_all_files(workdir, mapfile, dst_directory,
+    process_all_files(src_directory, dst_directory,
             simon_sez=myargs.simon_sez)
 
 

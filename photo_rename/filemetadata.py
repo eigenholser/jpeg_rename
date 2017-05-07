@@ -72,3 +72,19 @@ class FileMetadata(object):
         except Exception as e:
             logger.error(e)
 
+    def copy_metadata(self, tgt_fn):
+        """
+        Copy metadata from self.file to tgt_fn.
+        """
+        tgt_md = pyexiv2.ImageMetadata("{}".format(tgt_fn))
+        tgt_md.read()
+
+        self.img_md.copy(tgt_md, exif=True, iptc=True, xmp=True, comment=True)
+
+        try:
+            tgt_md.write()
+        except Exception as e:
+            logger.error(e)
+
+
+
