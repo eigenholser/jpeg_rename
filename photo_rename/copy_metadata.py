@@ -33,11 +33,16 @@ def process_all_files(src_directory, dst_directory, simon_sez=None):
     filemap = harvester["filemaps"]
 
     for fm in filemap.get():
-        logger.info(
-                "Copying metadata from {} ==> {}".format(
-                    fm.src_fn, fm.dst_fn))
         src_fmd = FileMetadata(os.path.join(src_directory, fm.src_fn))
-        src_fmd.copy_metadata(os.path.join(dst_directory, fm.dst_fn))
+        if simon_sez:
+            logger.info(
+                    "Copying metadata from {} ==> {}".format(
+                        fm.src_fn, fm.dst_fn))
+            src_fmd.copy_metadata(os.path.join(dst_directory, fm.dst_fn))
+        else:
+            logger.info(
+                    "DRY RUN: Copying metadata from {} ==> {}".format(
+                        fm.src_fn, fm.dst_fn))
 
 
 def main():
