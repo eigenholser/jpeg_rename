@@ -36,8 +36,10 @@ class Harvester(object):
         Initialize and return data.
         """
         if key == "filemaps":
-            if not self.filemaps:
+            if not self.filemaps and not self.metadata_dst_directory:
                 self.filemaps = self.init_file_map()
+            if not self.filemaps and self.metadata_dst_directory:
+                self.filemaps = self.filemaps_for_metadata_copy()
             return self.filemaps
 
         # Reading from mapfile
@@ -75,7 +77,7 @@ class Harvester(object):
 
     def files_from_directory(self, directory):
         """
-        Build list of files matching recognized file extension.
+        Build list of files matching recognized file extensions.
         """
         files = FileList()
         for filename in os.listdir(directory):
@@ -87,44 +89,44 @@ class Harvester(object):
                 continue
         return [file for file in files.get()]
 
+    def filemaps_for_metadata_copy(self):
+        """
+        Find two sets of matching files for copying metadata. Generate a list
+        of source files from the source directory. Find a list of matching
+        files with the same filename sans extension in the destination
+        directory. Create and return filemaps.
+        """
+        filemaps = FilemapList()
+        for filename in os.listdir(self.metadata_dst_directory):
+            for src_fn in self["files"]:
+                src_fn_prefix = os.path.splitext(src_fn)[0]
+                if re.search(r"^{}\..+$".format(src_fn_prefix), filename):
+                    src_fn_fq = os.path.join(self.workdir, src_fn)
+                    dst_fn_fq = os.path.join(
+                            self.metadata_dst_directory, filename)
+                    src_fn_ext = os.path.splitext(src_fn)[1][1:]
+                    dst_fn_ext = os.path.splitext(filename)[1][1:]
+                    # TODO: Image type is meaningless here yet necessary.
+                    image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[
+                            src_fn_ext]
+                    filemap = Filemap(src_fn_fq, image_type,
+                            metadata=None, dst_fn=dst_fn_fq)
+                    filemaps.add(filemap)
+        return filemaps
+
     def init_file_map(self):
         """
         Read the work directory looking for files with extensions defined in
         the EXTENSIONS constant. Note that this could use a more elaborate
         magic number mechanism that would be cool.
         """
-        # TODO: This method becoming very cumbersome. Break it up.
-
-        # List of Filemap objects.
-        filemaps = FilemapList()
-        allfiles = self["files"]
-
-        # TODO: Somewhat of a hack with this new feature. Still sorting it
-        # out. This whole method needs chopping apart.
-        if self.metadata_dst_directory:
-            # Copying EXIF metadata from src to dst.
-            for filename in os.listdir(self.metadata_dst_directory):
-                for src_fn in allfiles:
-                    src_fn_prefix = os.path.splitext(src_fn)[0]
-                    if re.search(r"^{}\..+$".format(src_fn_prefix), filename):
-                        src_fn_fq = os.path.join(self.workdir, src_fn)
-                        dst_fn_fq = os.path.join(
-                                self.metadata_dst_directory, filename)
-                        src_fn_ext = os.path.splitext(src_fn)[1][1:]
-                        dst_fn_ext = os.path.splitext(filename)[1][1:]
-                        # TODO: Image type is meaningless here yet necessary.
-                        image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[
-                                src_fn_ext]
-                        filemap = Filemap(src_fn_fq, image_type,
-                                metadata=None, dst_fn=dst_fn_fq)
-                        filemaps.add(filemap)
-            return filemaps
-
+        # XXX: If processing a mapfile, need alt_file_map.
         if self.mapfile:
             alt_file_map = self.read_alt_file_map()
 
         # Initialize file_map list.
-        for filename in (allfiles):
+        filemaps = FilemapList()
+        for filename in self["files"]:
             filename_fq = os.path.join(self.workdir, filename)
             if os.path.isdir(filename_fq):
                 logger.warn("Skipping directory {0}".format(filename_fq))
