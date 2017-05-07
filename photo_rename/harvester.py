@@ -30,7 +30,6 @@ class Harvester(object):
         self.metadata_dst_directory = metadata_dst_directory
         self.filemaps = None
         self.files = None
-        self.filename_prefix_map = None
         self.alt_file_map = None
 
     def __getitem__(self, key):
@@ -69,14 +68,11 @@ class Harvester(object):
         # allfiles = ['abc.jpg', 'ghi.jpg']
         files = FileList()
         alt_file_map = self.read_alt_file_map()
-        filename_prefix_map = {}
         for file_prefix in alt_file_map.keys():
             for filename in os.listdir(self.workdir):
                 if re.search(r"^{}\..+$".format(file_prefix), filename):
                     files.add(filename)
-                    filename_prefix_map[filename] = file_prefix
         self.alt_file_map = alt_file_map
-        self.filename_prefix_map = filename_prefix_map
         return [file for file in files.get()]
 
 
@@ -94,19 +90,6 @@ class Harvester(object):
                 continue
         return [file for file in files.get()]
 
-    def filename_prefixes_from_directory(self, directory):
-        """
-        Build filename prefixes from directory.
-        """
-        filename_prefix_map = {}
-        for filename in os.listdir(self.workdir):
-            if os.path.isdir(os.path.join(self.workdir, filename)):
-                continue
-            filename_ext = os.path.splitext(filename)[1][1:].lower()
-            if filename_ext in photo_rename.EXTENSION_TO_IMAGE_TYPE:
-                filename_prefix_map[filename] = os.path.splitext(filename)[0]
-        return filename_prefix_map
-
     def init_file_map(self):
         """
         Read the work directory looking for files with extensions defined in
@@ -119,7 +102,6 @@ class Harvester(object):
         filemaps = FilemapList()
 
         allfiles = self["files"]
-        filename_prefix_map = self.filename_prefix_map
         alt_file_map = self.alt_file_map
 
 
@@ -127,12 +109,10 @@ class Harvester(object):
         # out. This whole method needs chopping apart.
         if self.metadata_dst_directory:
             # Copying EXIF metadata from src to dst.
-            filename_prefix_map = self.filename_prefixes_from_directory(
-                    self.workdir)
-            for src_fn in filename_prefix_map.keys():
-                for filename in os.listdir(self.metadata_dst_directory):
-                    if re.search(r"^{}\..+$".format(
-                            filename_prefix_map[src_fn]), filename):
+            for filename in os.listdir(self.metadata_dst_directory):
+                for src_fn in allfiles:
+                    src_fn_prefix = os.path.splitext(src_fn)[0]
+                    if re.search(r"^{}\..+$".format(src_fn_prefix), filename):
                         src_fn_fq = os.path.join(self.workdir, src_fn)
                         dst_fn_fq = os.path.join(
                                 self.metadata_dst_directory, filename)
@@ -162,7 +142,7 @@ class Harvester(object):
 
             try:
                 if self.mapfile:
-                    filename_prefix = filename_prefix_map[filename]
+                    filename_prefix = os.path.splitext(filename)[0]
                     dst_fn = "{}.{}".format(
                             alt_file_map[filename_prefix], src_fn_ext)
                     filemaps.add(
