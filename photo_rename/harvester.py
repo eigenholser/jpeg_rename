@@ -30,7 +30,6 @@ class Harvester(object):
         self.metadata_dst_directory = metadata_dst_directory
         self.filemaps = None
         self.files = None
-        self.alt_file_map = None
 
     def __getitem__(self, key):
         """
@@ -72,9 +71,7 @@ class Harvester(object):
             for filename in os.listdir(self.workdir):
                 if re.search(r"^{}\..+$".format(file_prefix), filename):
                     files.add(filename)
-        self.alt_file_map = alt_file_map
         return [file for file in files.get()]
-
 
     def files_from_directory(self, directory):
         """
@@ -100,10 +97,7 @@ class Harvester(object):
 
         # List of Filemap objects.
         filemaps = FilemapList()
-
         allfiles = self["files"]
-        alt_file_map = self.alt_file_map
-
 
         # TODO: Somewhat of a hack with this new feature. Still sorting it
         # out. This whole method needs chopping apart.
@@ -126,9 +120,11 @@ class Harvester(object):
                         filemaps.add(filemap)
             return filemaps
 
+        if self.mapfile:
+            alt_file_map = self.read_alt_file_map()
+
         # Initialize file_map list.
         for filename in (allfiles):
-
             filename_fq = os.path.join(self.workdir, filename)
             if os.path.isdir(filename_fq):
                 logger.warn("Skipping directory {0}".format(filename_fq))
