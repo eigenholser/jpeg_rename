@@ -9,7 +9,8 @@ import photo_rename
 from photo_rename.rename import *
 from .stubs import *
 from . import (
-    TEST_HARVESTER_INIT_FILEMAP_METADATA, TEST_HARVESTER_INIT_FILEMAP_ALT)
+    TEST_HARVESTER_INIT_FILEMAP_METADATA, TEST_HARVESTER_INIT_FILEMAP_ALT,
+    TEST_HARVESTER_FILES_FROM_DIRECTORY)
 
 
 class TestRenameInitFilemapMetadata():
@@ -109,11 +110,11 @@ class TestRenameInitFilemapAlt(object):
         assert filemaps[1].src_fn in expected
 
 
-class TestGetImageFiles(object):
+class TestFilesFromDirectory(object):
     """
     Tests for Harvester.filees_from_directory() method.
     """
-    skiptests = False
+    skiptests = not TEST_HARVESTER_FILES_FROM_DIRECTORY
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.harvester.FileList')
