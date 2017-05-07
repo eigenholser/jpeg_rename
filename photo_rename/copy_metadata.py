@@ -49,7 +49,7 @@ def main():
     """
     Parse command-line arguments. Initiate file processing.
     """
-    parser = CustomArgumentParser() #argparse.ArgumentParser()
+    parser = CustomArgumentParser()
     parser.add_argument("-s", "--simon-sez",
             help="Really, Simon sez copy the data!", action="store_true")
     parser.add_argument("-r", "--src-directory",
@@ -58,26 +58,44 @@ def main():
             help="Copy metadata to matching files in this directory.")
     parser.add_argument("-v", "--verbose", help="Log level to DEBUG.",
             action="store_true")
-    myargs = parser.parse_args()
+    args = parser.parse_args()
 
-    if myargs.verbose:
+    if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
 
     error = False
 
+    # Require these two arguments.
+    for arg in [args.src_directory, args.dst_directory]:
+        if not arg:
+            parser.usage_message()
+
+    if (os.path.exists(args.src_directory) and
+            os.path.isdir(args.src_directory)):
+        src_directory = args.src_directory
+    else:
+        logger.error(
+            "--src-directory={} does not exist or is not a directory.".format(
+                args.dst_directory))
+        error = True
+
+    if (os.path.exists(args.dst_directory) and
+            os.path.isdir(args.dst_directory)):
+        dst_directory = args.dst_directory
+    else:
+        logger.error(
+            "--dst-directory={} does not exist or is not a directory.".format(
+                args.dst_directory))
+        error = True
+
     if error:
         logging.error("Exiting due to errors.")
         parser.usage_message()
         sys.exit(1)
 
-    # TODO: validate src/dst directory args.
-    src_directory = myargs.src_directory
-    dst_directory = myargs.dst_directory
-
-    process_all_files(src_directory, dst_directory,
-            simon_sez=myargs.simon_sez)
+    process_all_files(src_directory, dst_directory, simon_sez=args.simon_sez)
 
 
 if __name__ == '__main__':  # pragma: no cover
