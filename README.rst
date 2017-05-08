@@ -20,6 +20,11 @@ Or::
 
     python setup.py develop
 
+It is probably best to stick with the virtual environment and not install
+globally. See `requirements.txt` for what else will be installed.
+
+See below for unit tests.
+
 
 Console Scripts
 ===============
@@ -95,6 +100,34 @@ filenames as needed. During the actual file move, a collision will be detected
 and no action will be taken.
 
 
+Map File
+~~~~~~~~
+
+The map file contains a tab delimited current filename to new filename mapping
+on each row. Create any filename you like. It must live with the photos to be
+renamed. If ``--mapfile`` is specified, image metadata will not be used.
+Filename extensions must not be used in the mapfile.
+
+For example, given the images::
+
+    file 01.jpg
+    file 02.jpg
+    file 03.jpg
+
+Suppose we want to rename them according to this mapfile named `mymap.txt`::
+
+    file 01     Dorfman-Campaign-E01
+    file 03     Dorfman-Campaign-E02
+    file 02     Dorfman-Campaign-E03
+
+Given this mapfile, and supposing the images are JPEG,
+`pz_rename --mapfile mymap.txt` will rename the source files as follows::
+
+    file 01.jpg ==> Dorfman-Campaign-E01.jpg
+    file 03.jpg ==> Dorfman-Campaign-E02.jpg
+    file 02.jpg ==> Dorfman-Campaign-E03.jpg
+
+
 ``pz_copy_metadata``
 --------------------
 
@@ -134,15 +167,6 @@ Get usage help like this::
       -v, --verbose         Log level to DEBUG.
 
 
-Map File
-========
-
-The map file contains a tab delimited current filename to new filename mapping
-on each row. Create any filename you like. It must live with the photos to be
-renamed. If ``--mapfile`` is specified, image metadata will not be used.
-Filename extensions must not be used in the mapfile.
-
-
 Run Tests
 =========
 
@@ -157,6 +181,7 @@ coverage like this::
 
 Coverage reports will be written to ``./htmlcov``. View the report by opening
 ``./htmlcov/index.html`` with your favorite browser.
+
 
 References
 ==========
