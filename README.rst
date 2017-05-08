@@ -160,6 +160,6 @@ Coverage reports will be written to ``./htmlcov``. View the report by opening
 
 References
 ==========
-https://python3-exiv2.readthedocs.io/en/latest/api.html
-http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html
-http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/XMP.html#xmp
+- https://python3-exiv2.readthedocs.io/en/latest/api.html
+- http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html
+- http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/XMP.html#xmp
