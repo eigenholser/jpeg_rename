@@ -133,8 +133,9 @@ class Harvester(object):
                 continue
 
             src_fn_ext = os.path.splitext(filename)[1][1:]
-            if src_fn_ext in photo_rename.EXTENSION_TO_IMAGE_TYPE:
-                image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[src_fn_ext]
+            if src_fn_ext.lower() in photo_rename.EXTENSION_TO_IMAGE_TYPE:
+                image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[
+                        src_fn_ext.lower()]
             else:
                 continue
 
