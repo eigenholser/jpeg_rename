@@ -114,7 +114,7 @@ For example, given the images::
     file 02.jpg
     file 03.jpg
 
-Suppose we want to rename them according to this mapfile named `mymap.txt`::
+Suppose we want to rename them according to this mapfile named `mymap.txt` ::
 
     file 01     Dorfman-Campaign-E01
     file 03     Dorfman-Campaign-E02
