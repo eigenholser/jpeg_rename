@@ -21,17 +21,17 @@ class TestRenameInitFilemapMetadata():
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.harvester.Filemap')
-    @patch('photo_rename.harvester.os.listdir')
-    def test_init_file_map_orthodox(self, m_listdir, m_filemap):
+    def test_init_file_map_orthodox(self, m_filemap):
         """
-        Tests init_file_map() list building. Verifies expected return value.
+        Tests init_file_map() list building from directory. Code cares about
+        capitalization of filenames. Verifies expected return value.
         """
         test_file_map = StubFilemap()
         m_filemap.return_value = test_file_map
-        m_listdir.return_value = ['abc.jpg']
         harvey = Harvester(".")
+        harvey.files = ['abc.jpg', '123.JPG']
         filemaps = [fm for fm in harvey["filemaps"].get()]
-        assert filemaps == [test_file_map]
+        assert filemaps == [test_file_map, test_file_map]
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.harvester.Filemap')
