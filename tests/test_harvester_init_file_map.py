@@ -79,6 +79,7 @@ class TestRenameInitFilemapMetadata():
         m_os.path.isdir.return_value = True
         m_re.search.return_value = True
         harvey = Harvester(".")
+        harvey.files = ["/foo/bar"]
         filemaps = [fm for fm in harvey["filemaps"].get()]
         assert filemaps == []
 
@@ -151,20 +152,45 @@ class TestFilesFromDirectory(object):
     @patch('photo_rename.harvester.FileList')
     @patch('photo_rename.harvester.os.listdir')
     @patch('photo_rename.harvester.os.path.splitext')
-    def test_files_from_directory_happy(self, m_splitext, m_listdir, m_filelist):
+    def test_files_from_directory_supported_ext(
+            self, m_splitext, m_listdir, m_filelist):
         """
-        Test files_from_directory() with list of files, one of which matches a
-        recognized image extension 'xyz'. Confirm only file with recognized
-        extension returned.
+        Test files_from_directory() with list of files, where only one
+        supported file extension is returned -- 'JPG'. Confirm only one
+        matching file in list is returned.
         """
         files = ['12.jpg', '34.png', '56.arw', '78.tif', '90.xyz']
-        m_splitext.return_value = ('ABC', '.XYZ')
+        expected_files = [files[1]]
+        m_splitext.return_value = ('ABC', '.JPG')
         m_listdir.return_value = files
-        attrs = {'get.return_value': files}
+        attrs = {'get.return_value': expected_files}
         m_get = Mock()
         m_get.configure_mock(**attrs)
         m_filelist.return_value = m_get
         harvey = Harvester('.')
         actual_files = harvey.files_from_directory(".")
-        assert files[4] == actual_files[4]
+        assert actual_files == expected_files
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.harvester.FileList')
+    @patch('photo_rename.harvester.os.listdir')
+    @patch('photo_rename.harvester.os.path.splitext')
+    def test_files_from_directory_not_supported_ext(
+            self, m_splitext, m_listdir, m_filelist):
+        """
+        Test files_from_directory() with list of files, where the file
+        extension returned is not supported -- 'XYZ'. Confirm files list
+        returned is empty.
+        """
+        files = ['12.jpg', '34.png', '56.arw', '78.tif', '90.xyz']
+        expected_files = []
+        m_splitext.return_value = ('ABC', '.XYZ')
+        m_listdir.return_value = files
+        attrs = {'get.return_value': expected_files}
+        m_get = Mock()
+        m_get.configure_mock(**attrs)
+        m_filelist.return_value = m_get
+        harvey = Harvester('.')
+        actual_files = harvey.files_from_directory(".")
+        assert actual_files == expected_files
 

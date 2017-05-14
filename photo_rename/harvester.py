@@ -86,6 +86,10 @@ class Harvester(object):
                     not os.path.isdir(os.path.join(directory, filename))):
                 files.add(filename)
             else:
+                # XXX: This here only so coverage report works.
+                logger.debug(
+                        "Skipping file with unknown extension {}.".format(
+                            src_fn_ext))
                 continue
         return [file for file in files.get()]
 
@@ -137,6 +141,7 @@ class Harvester(object):
                 image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[
                         src_fn_ext.lower()]
             else:
+                # XXX: This here only so coverage report works.
                 logger.debug(
                         "Skipping file with unknown extension {}.".format(
                             src_fn_ext))
