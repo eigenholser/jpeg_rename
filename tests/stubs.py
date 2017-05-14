@@ -46,3 +46,4 @@ class StubFilemap(object):
 @pytest.fixture
 def harvey():
     return Harvester('.')
+
