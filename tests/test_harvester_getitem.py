@@ -17,6 +17,10 @@ class TestGetItem(object):
     """
     skiptests = not TEST_HARVESTER_GETITEM
 
+    ##
+    ## not filemaps and not metadata_dst_dir
+    ##
+
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.harvester.Harvester.init_file_map')
     def test_getitem_filemap_will_initialize(self, m_init_file_map):
@@ -46,6 +50,26 @@ class TestGetItem(object):
         harvey.filemaps = expected_filemaps
         actual_filemaps = harvey["filemaps"]
         m_init_file_map.assert_not_called()
+        assert expected_filemaps == actual_filemaps
+
+    ##
+    ## not filemaps and not metadata_dst_dir
+    ##
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.harvester.Harvester.filemaps_for_metadata_copy')
+    def test_getitem_not_filemap_not_md_dst_dir(
+            self, m_filemaps_for_metadata_copy):
+        """
+        Test get filemaps for metadata copy before init.  Verify that
+        filemaps_for_metadata_copy() called. Verify correct return value.
+        """
+        expected_filemaps = 1234
+        harvey = Harvester('.', metadata_dst_directory=".")
+        # Initialization branch will be taken. Our mock will return value.
+        m_filemaps_for_metadata_copy.return_value = expected_filemaps
+        actual_filemaps = harvey["filemaps"]
+        m_filemaps_for_metadata_copy.assert_called_once()
         assert expected_filemaps == actual_filemaps
 
     ##
