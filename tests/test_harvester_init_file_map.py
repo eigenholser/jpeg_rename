@@ -26,12 +26,45 @@ class TestRenameInitFilemapMetadata():
         Tests init_file_map() list building from directory. Code cares about
         capitalization of filenames. Verifies expected return value.
         """
+        # XXX: Calls init_file_map() indirectly via __getitem__().
         test_file_map = StubFilemap()
         m_filemap.return_value = test_file_map
         harvey = Harvester(".")
         harvey.files = ['abc.jpg', '123.JPG']
         filemaps = [fm for fm in harvey["filemaps"].get()]
         assert filemaps == [test_file_map, test_file_map]
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.harvester.Filemap')
+    def test_init_file_map_orthodox_unsupported_src_fn_ext(self, m_filemap):
+        """
+        Test init_file_map() list building when matching files are files with
+        unsupported filename extensions. Confirm returned filemaps list is
+        empty.
+        """
+        test_file_map = StubFilemap()
+        m_filemap.return_value = test_file_map
+        harvey = Harvester(".")
+        harvey.files = ['abc.xxx', '123.XXX']
+        filemaps = harvey.init_file_map()
+        assert [fm for fm in filemaps.get()] == []
+
+    @pytest.mark.skipif(skiptests, reason="Work in progress")
+    @patch('photo_rename.harvester.Filemap')
+    @patch('photo_rename.harvester.os.path.isdir')
+    def test_init_file_map_orthodox_isdir(self, m_isdir, m_filemap):
+        """
+        Test init_file_map() list building when matching files are
+        directories. Confirm returned filemaps list is empty.
+        """
+        # XXX: Calls init_file_map() indirectly via __getitem__().
+        test_file_map = StubFilemap()
+        m_isdir.return_value = True
+        m_filemap.return_value = test_file_map
+        harvey = Harvester(".")
+        harvey.files = ['abc.jpg', '123.JPG']
+        filemaps = [fm for fm in harvey["filemaps"].get()]
+        assert filemaps == []
 
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.harvester.Filemap')
