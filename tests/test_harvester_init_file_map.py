@@ -37,8 +37,7 @@ class TestRenameInitFilemapMetadata():
     @patch('photo_rename.harvester.Filemap')
     @patch('photo_rename.harvester.re')
     @patch('photo_rename.harvester.os')
-    def test_init_file_map_with_directories(
-            self, m_os, m_re, m_filemap):
+    def test_init_file_map_with_directories(self, m_os, m_re, m_filemap):
         """
         Tests init_file_map() with exception handling. Test exception raised
         when append to file_map list. Verify expected file_map returned.
@@ -54,8 +53,7 @@ class TestRenameInitFilemapMetadata():
     @patch('photo_rename.harvester.Filemap')
     @patch('photo_rename.harvester.re')
     @patch('photo_rename.harvester.os.listdir')
-    def test_init_file_map_raises_exception(
-            self, m_listdir, m_re, m_filemap):
+    def test_init_file_map_raises_exception(self, m_listdir, m_re, m_filemap):
         """
         Tests init_file_map() with exception handling. Test exception raised
         when append to file_map list. Verify expected file_map returned.
