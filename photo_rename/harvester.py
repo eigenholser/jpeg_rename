@@ -137,6 +137,9 @@ class Harvester(object):
                 image_type = photo_rename.EXTENSION_TO_IMAGE_TYPE[
                         src_fn_ext.lower()]
             else:
+                logger.debug(
+                        "Skipping file with unknown extension {}.".format(
+                            src_fn_ext))
                 continue
 
             try:
