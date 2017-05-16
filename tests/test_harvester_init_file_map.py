@@ -144,7 +144,7 @@ class TestRenameInitFilemapAlt(object):
 
 class TestFilesFromDirectory(object):
     """
-    Tests for Harvester.filees_from_directory() method.
+    Tests for Harvester.files_from_directory() method.
     """
     skiptests = not TEST_HARVESTER_FILES_FROM_DIRECTORY
 
