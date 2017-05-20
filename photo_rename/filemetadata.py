@@ -78,8 +78,15 @@ class FileMetadata(object):
         """
         tgt_md = pyexiv2.ImageMetadata("{}".format(tgt_fn))
         tgt_md.read()
+        # At this point, I know comments are not supported by pyexiv2 in TIFF
+        # images.
+        if tgt_md.mime_type in ["image/tiff"]:
+            comment = False
+        else:
+            comment = True
 
-        self.img_md.copy(tgt_md, exif=True, iptc=True, xmp=True, comment=True)
+        self.img_md.copy(
+                tgt_md, exif=True, iptc=True, xmp=True, comment=comment)
 
         try:
             tgt_md.write()
