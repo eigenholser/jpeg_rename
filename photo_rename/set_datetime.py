@@ -73,12 +73,12 @@ def main():
     else:
         logging.basicConfig(level=logging.INFO)
 
+    # Use current directory if --directory not specified.
     workdir = myargs.directory
-
-    if not workdir:
-        logging.error("Exiting due to errors.")
-        parser.usage_message()
-        sys.exit(1)
+    if workdir is None:
+        workdir = os.getcwd()
+        logging.info(
+                "--directory not given. Using workdir={}".format(workdir))
 
     if not re.match(r'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d', myargs.datetime):
         logging.error("Invalid datetime. Use YYYY-mm-DD HH:MM:SS.")
