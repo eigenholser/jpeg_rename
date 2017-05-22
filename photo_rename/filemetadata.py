@@ -30,10 +30,12 @@ class FileMetadata(object):
         """
         if key == "metadata":
             if not self.metadata:
-                self.metadata = self.read_metadata(self.file)
+                self.metadata = self.read_metadata()
             return self.metadata
 
-    def read_metadata(self, file):
+        raise KeyError("Invalid key '{}'".format(key))
+
+    def read_metadata(self):
         """
         Read EXIF or XMP data from file. Convert to Python dict.
         """
