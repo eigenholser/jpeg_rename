@@ -11,7 +11,7 @@ from .stubs import *
 from . import TEST_HARVESTER_GETITEM
 
 
-class TestGetItem(object):
+class TestHarvesterGetItem(object):
     """
     Tests for __getitem__() magic method.
     """
