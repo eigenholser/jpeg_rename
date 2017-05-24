@@ -50,11 +50,6 @@ def process_all_files(workdir, initial_dt, interval, simon_sez=None):
             fmd = FileMetadata(os.path.join(workdir, fn))
             fmds.append(fmd)
 
-            for md in fmd["metadata"].keys():
-                if ("Date" in md or "SubSec" in md or "Time" in md or
-                        "Offset" in md):
-                    logger.debug("{} : {}".format(md, fmd.metadata[md]))
-
             # Set the date and time
             msg = "Set datetime: {} : {}".format(
                     fn, this_dt.strftime('%Y:%m:%d %H:%M:%S'))
