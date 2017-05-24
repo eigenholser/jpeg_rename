@@ -12,7 +12,7 @@ def logged_class(cls):
     return cls
 
 
-class CustomArgumentParser(argparse.ArgumentParser):
+class CustomArgumentParser(argparse.ArgumentParser): # pragma: no cover
     """
     Custom argparser.
     """
