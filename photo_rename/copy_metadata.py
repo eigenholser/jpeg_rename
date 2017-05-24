@@ -72,7 +72,10 @@ def main():
     # Require these two arguments.
     for arg in [args.src_directory, args.dst_directory]:
         if not arg:
-            parser.usage_message()
+            logger.error(
+                    "Required src or dst direectory parameter missing.")
+            error = True
+            break
 
     if (os.path.exists(args.src_directory) and
             os.path.isdir(args.src_directory)):
