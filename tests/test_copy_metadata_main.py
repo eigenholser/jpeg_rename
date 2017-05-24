@@ -65,7 +65,6 @@ class TestCopyMetadataMain(object):
         m_process_all_files.assert_called_with('/abc', '/def', simon_sez=True)
 
 
-    # TODO: Check the m_exit mock. Is it useful? Something wrong with this.
     @pytest.mark.skipif(skiptests, reason="Work in progress")
     @patch('photo_rename.copy_metadata.CustomArgumentParser')
     @patch('photo_rename.copy_metadata.process_all_files')
