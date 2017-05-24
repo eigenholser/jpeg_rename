@@ -99,8 +99,8 @@ def main():
         logger.error("Exiting due to errors.")
         parser.usage_message()
         sys.exit(1)
-
-    process_all_files(src_directory, dst_directory, simon_sez=args.simon_sez)
+    else:
+        process_all_files(src_directory, dst_directory, simon_sez=args.simon_sez)
 
 
 if __name__ == '__main__':  # pragma: no cover
