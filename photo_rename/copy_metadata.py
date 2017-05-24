@@ -17,13 +17,13 @@ def process_all_files(src_directory, dst_directory, simon_sez=None):
     Manage the entire process of gathering data and renaming files.
     """
     if not os.path.exists(src_directory):
-        logging.error(
+        logger.error(
                 "Directory {0} does not exist. Exiting.".format(
                     src_directory))
         sys.exit(1)
 
     if not os.access(dst_directory, os.W_OK):
-        logging.error(
+        logger.error(
                 "Destination directory {0} is not writable. Exiting.".format(
                     dst_directory))
         sys.exit(1)
@@ -93,7 +93,7 @@ def main():
         error = True
 
     if error:
-        logging.error("Exiting due to errors.")
+        logger.error("Exiting due to errors.")
         parser.usage_message()
         sys.exit(1)
 
