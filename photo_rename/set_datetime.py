@@ -19,12 +19,12 @@ def process_all_files(workdir, initial_dt, interval, simon_sez=None):
     Manage the entire process of gathering data and renaming files.
     """
     if not os.path.exists(workdir):
-        logging.error(
+        logger.error(
                 "Directory {0} does not exist. Exiting.".format(workdir))
         sys.exit(1)
 
     if not os.access(workdir, os.W_OK):
-        logging.error(
+        logger.error(
                 "Destination directory {0} is not writable. Exiting.".format(
                     workdir))
         sys.exit(1)
@@ -77,11 +77,11 @@ def main():
     workdir = myargs.directory
     if workdir is None:
         workdir = os.getcwd()
-        logging.info(
+        logger.info(
                 "--directory not given. Using workdir={}".format(workdir))
 
     if not re.match(r'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d', myargs.datetime):
-        logging.error("Invalid datetime. Use YYYY-mm-DD HH:MM:SS.")
+        logger.error("Invalid datetime. Use YYYY-mm-DD HH:MM:SS.")
         parser.usage_message()
         sys.exit(1)
 
