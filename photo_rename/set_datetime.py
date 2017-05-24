@@ -66,42 +66,42 @@ def main():
             help="Interval in seconds to use for successive files.")
     parser.add_argument("-v", "--verbose", help="Log level to DEBUG.",
             action="store_true")
-    myargs = parser.parse_args()
+    args = parser.parse_args()
 
     error = False
 
-    if myargs.verbose:
+    if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
 
     # Use current directory if --directory not specified.
-    workdir = myargs.directory
+    workdir = args.directory
     if workdir is None:
         workdir = os.getcwd()
         logger.info(
                 "--directory not given. Using workdir={}".format(workdir))
 
-    if not re.match(r'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d', myargs.datetime):
+    if not re.match(r'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d', args.datetime):
         logger.error("Invalid datetime. Use YYYY-mm-DD HH:MM:SS.")
         error = True
 
-    if not myargs.interval:
+    if not args.interval:
         # Default to 1 second.
         interval = 1
         logger.warn(
                 "--interval not specified. Using {} second interval".format(
                     interval))
     else:
-        interval = int(myargs.interval)
+        interval = int(args.interval)
 
     if error:
         logger.error("Exiting due to errors.")
         parser.usage_message()
         sys.exit(1)
     else:
-        process_all_files(workdir, myargs.datetime, interval,
-            simon_sez=myargs.simon_sez)
+        process_all_files(
+                workdir, args.datetime, interval, simon_sez=args.simon_sez)
 
 
 if __name__ == '__main__':  # pragma: no cover
