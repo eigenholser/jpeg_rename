@@ -68,6 +68,8 @@ def main():
             action="store_true")
     myargs = parser.parse_args()
 
+    error = False
+
     if myargs.verbose:
         logging.basicConfig(level=logging.DEBUG)
     else:
@@ -82,8 +84,7 @@ def main():
 
     if not re.match(r'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d', myargs.datetime):
         logger.error("Invalid datetime. Use YYYY-mm-DD HH:MM:SS.")
-        parser.usage_message()
-        sys.exit(1)
+        error = True
 
     if not myargs.interval:
         # Default to 1 second.
@@ -94,7 +95,12 @@ def main():
     else:
         interval = int(myargs.interval)
 
-    process_all_files(workdir, myargs.datetime, interval,
+    if error:
+        logger.error("Exiting due to errors.")
+        parser.usage_message()
+        sys.exit(1)
+    else:
+        process_all_files(workdir, myargs.datetime, interval,
             simon_sez=myargs.simon_sez)
 
 
