@@ -10,6 +10,10 @@ from .stubs import *
 from . import TEST_SET_DATETIME_MAIN
 
 
+@pytest.fixture
+def new_datetime():
+    return "1999-12-31 23:59:59"
+
 class TestSetDatetimeMain(object):
     """
     Tests for set_datetime.py main() function.
@@ -29,14 +33,13 @@ class TestSetDatetimeMain(object):
     @patch('photo_rename.set_datetime.logging')
     def test_set_datetime_main_args_with_verbose_params(self,
             m_logging, m_exists, m_isdir, m_process_all_files, m_argparser,
-            verbose, log_level):
+            verbose, log_level, new_datetime):
         """
         Test main() function. Mock CustomArgumentParser to return values
         desired for test. Verify process_all_files called with expected
         arguments.
         """
         workdir = "/abc"
-        new_datetime = "1999-12-31 23:59:59"
         interval = "1"
         m_exists.return_value = True
         m_isdir.return_value = True
@@ -75,13 +78,12 @@ class TestSetDatetimeMain(object):
     @patch('photo_rename.set_datetime.os.path.exists')
     def test_set_datetime_main_args_with_workdir_params(self,
             m_exists, m_isdir, m_process_all_files, m_argparser,
-            workdir):
+            workdir, new_datetime):
         """
         Test set_datetime main() function. Paramatrize workdir. Mock all
         necessary arguments. Confirm process_all_files() method call is
         correct.
         """
-        new_datetime = "1999-12-31 23:59:59"
         interval = "1"
         m_exists.return_value = True
         m_isdir.return_value = True
@@ -124,14 +126,13 @@ class TestSetDatetimeMain(object):
     @patch('photo_rename.set_datetime.logger')
     def test_set_datetime_main_args_invalid_datetime(self, m_logger,
             m_exit, m_match, m_exists, m_isdir, m_process_all_files,
-            m_argparser):
+            m_argparser, new_datetime):
         """
         Test set_datetime main() function. Mock re.match() and set return
         value = False for datetime validity check. Verify correct behavior
         by confirming correct calls to logger, usage_message, and exit.
         """
         workdir = "/abc/def"
-        new_datetime = "1999-12-31 23:59:59"
         interval = "1"
         m_exists.return_value = True
         m_isdir.return_value = True
@@ -171,13 +172,13 @@ class TestSetDatetimeMain(object):
     @patch('photo_rename.set_datetime.os.path.exists')
     @patch('photo_rename.set_datetime.logger')
     def test_set_datetime_main_args_with_interval_params(self, m_logger,
-            m_exists, m_isdir, m_process_all_files, m_argparser, interval):
+            m_exists, m_isdir, m_process_all_files, m_argparser, interval,
+            new_datetime):
         """
         Test set_datetime main() function. Parametrize interval. Mock needed
         args. Verify correct behavior by confirming method calls.
         """
         workdir = "/"
-        new_datetime = "1999-12-31 23:59:59"
         m_exists.return_value = True
         m_isdir.return_value = True
 
