@@ -34,27 +34,33 @@ def process_all_files(workdir, initial_dt, interval, simon_sez=None):
     if error:
         logger.warn("Exiting due to errors.")
         sys.exit(1)
+    else:
+        start_datetime = datetime.strptime(initial_dt, '%Y-%m-%d %H:%M:%S')
+        counter = 0
 
-    start_datetime = datetime.strptime(initial_dt, '%Y-%m-%d %H:%M:%S')
-    counter = 0
+        harvester = Harvester(workdir)
+        files = harvester["files"]
 
-    harvester = Harvester(workdir)
-    files = harvester["files"]
+        fmds = []
+        for fn in files:
+            # Compute delta. Add to start_datetime.
+            dt_delta = counter * interval
+            this_dt = start_datetime + timedelta(0, dt_delta)
 
-    fmds = []
-    for fn in files:
-        dt_delta = counter * interval
-        this_dt = start_datetime + timedelta(0, dt_delta)
-        fmd = FileMetadata(os.path.join(workdir, fn))
+            fmd = FileMetadata(os.path.join(workdir, fn))
+            fmds.append(fmd)
 
-        fmds.append(fmd)
-        print("*************** {} : {}".format(fn, this_dt.strftime('%Y:%m:%d %H:%M:%S')))
-        for md in fmd["metadata"].keys():
-            if "Date" in md or "SubSec" in md or "Time" in md or "Offset" in md:
-                print("{} : {}".format(md, fmd.metadata[md]))
+            logger.info(
+                "{} : {}".format(fn, this_dt.strftime('%Y:%m:%d %H:%M:%S')))
 
-        fmd.set_datetime(this_dt)
-        counter += 1
+            for md in fmd["metadata"].keys():
+                if ("Date" in md or "SubSec" in md or "Time" in md or
+                        "Offset" in md):
+                    logger.debug("{} : {}".format(md, fmd.metadata[md]))
+
+            # Set the date and time
+            fmd.set_datetime(this_dt)
+            counter += 1
 
 
 def main():
