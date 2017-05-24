@@ -16,16 +16,22 @@ def process_all_files(src_directory, dst_directory, simon_sez=None):
     """
     Manage the entire process of gathering data and renaming files.
     """
+    error = False
+
     if not os.path.exists(src_directory):
         logger.error(
                 "Directory {0} does not exist. Exiting.".format(
                     src_directory))
-        sys.exit(1)
+        error = True
 
     if not os.access(dst_directory, os.W_OK):
         logger.error(
                 "Destination directory {0} is not writable. Exiting.".format(
                     dst_directory))
+        error = True
+
+    if error:
+        logger.warn("Exiting due to errors.")
         sys.exit(1)
 
     harvester = Harvester(src_directory, metadata_dst_directory=dst_directory)
