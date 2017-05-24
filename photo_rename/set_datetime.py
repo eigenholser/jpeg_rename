@@ -18,15 +18,21 @@ def process_all_files(workdir, initial_dt, interval, simon_sez=None):
     """
     Manage the entire process of gathering data and renaming files.
     """
+    error = False
+
     if not os.path.exists(workdir):
         logger.error(
                 "Directory {0} does not exist. Exiting.".format(workdir))
-        sys.exit(1)
+        error = True
 
     if not os.access(workdir, os.W_OK):
         logger.error(
                 "Destination directory {0} is not writable. Exiting.".format(
                     workdir))
+        error = True
+
+    if error:
+        logger.warn("Exiting due to errors.")
         sys.exit(1)
 
     start_datetime = datetime.strptime(initial_dt, '%Y-%m-%d %H:%M:%S')
