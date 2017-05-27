@@ -1,6 +1,7 @@
 """
 Stubs shared between different test modules.
 """
+import os
 import re
 import pytest
 from photo_rename import Harvester
@@ -37,10 +38,12 @@ class StubFilemap(object):
         self.src_fn = 'foo.jpg'
         self.dst_fn = 'bar.jpg'
 
-    def set_dst_fn(self, dst_fn):
-        self.dst_fn = dst_fn
+    def set_dst_fn(self, dst_fn_fq):
+        self.dst_fn_fq = dst_fn_fq
+        self.dst_fn = os.path.basename(dst_fn_fq)
 
 
 @pytest.fixture
 def harvey():
     return Harvester('.')
+

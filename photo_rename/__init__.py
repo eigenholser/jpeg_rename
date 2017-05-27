@@ -1,6 +1,7 @@
 from .utils import logged_class
 from .filemap import Filemap
 from .filemaplist import FileList, FilemapList
+from .filemetadata import FileMetadata
 from .harvester import Harvester
 
 __version__ = "0.5"
