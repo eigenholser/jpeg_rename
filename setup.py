@@ -83,15 +83,15 @@ def get_package_data(directories):
 
 
 version = get_version('photo_rename')
-install_requires = 'requirements/install.txt'
-tests_require = 'requirements/test.txt'
-if os.getenv('LASERFORMS_API_DEV', None):
-    install_requires = 'requirements/dev.txt'
+install_requires = 'requirements.txt'
+tests_require = 'requirements.txt'
+if os.getenv('PHOTOZ_DEV', None):
+    install_requires = 'requirements.txt'
 
 install_requires_list = requires(install_requires)
 tests_require_list = requires(tests_require)
 
-package_directories = ['laserforms_api', 'dms', 'forms_portal']
+package_directories = ['photo_rename',]
 
 setup(
     name='photo_rename',
