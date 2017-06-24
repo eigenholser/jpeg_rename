@@ -156,12 +156,16 @@ class Filemap(object):
         st = os.stat(self.dst_fn_fq)
         self.logger.info(
                 "Removing execute permissions on {0}.".format(self.dst_fn))
+        mode = st.st_mode
         if bool(st.st_mode & stat.S_IXUSR):
-            os.chmod(self.dst_fn_fq, st.st_mode ^ stat.S_IXUSR)
+            mode = mode ^ stat.S_IXUSR
+            os.chmod(self.dst_fn_fq, mode)
         if bool(st.st_mode & stat.S_IXGRP):
-            os.chmod(self.dst_fn_fq, st.st_mode ^ stat.S_IXGRP)
+            mode = mode ^ stat.S_IXGRP
+            os.chmod(self.dst_fn_fq, mode)
         if bool(st.st_mode & stat.S_IXOTH):
-            os.chmod(self.dst_fn_fq, st.st_mode ^ stat.S_IXOTH)
+            mode = mode ^ stat.S_IXOTH
+            os.chmod(self.dst_fn_fq, mode)
 
     def move(self):
         """
