@@ -79,9 +79,12 @@ def main():
     for arg in [args.src_directory, args.dst_directory]:
         if not arg:
             logger.error(
-                    "Required src or dst direectory parameter missing.")
+                    "Required src or dst directory parameter missing.")
             error = True
-            break
+            # XXX: Duplicates exit below. Can't check directory if null.
+            logger.error("Exiting due to errors.")
+            parser.usage_message()
+            sys.exit(1)
 
     if (os.path.exists(args.src_directory) and
             os.path.isdir(args.src_directory)):
