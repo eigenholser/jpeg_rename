@@ -70,7 +70,7 @@ def main():
     parser.add_argument("-s", "--simon-sez",
             help="Really, Simon sez copy the data!", action="store_true")
     parser.add_argument("-d", "--directory",
-            help="Set EXIF DateTime/XMP on files in this directory.")
+            help="Set EXIF/XMP DateTime on files in this directory.")
     parser.add_argument("-t", "--datetime",
             help="Initial datetime YYYY-mm-DD HH:MM:SS.")
     parser.add_argument("-i", "--interval",
