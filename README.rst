@@ -9,6 +9,9 @@ a talk Unit Testing in Python for SLC Python.
 Installation
 ============
 
+Install `libboost-python-dev` Ubuntu package first. That is a dependency for
+the `py3exiv2` Python package.
+
 Create a virtual environment. These instructions assume ``virtualenvwrapper``::
 
     cd $PROJECT_HOME
