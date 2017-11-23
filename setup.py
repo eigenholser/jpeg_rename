@@ -109,6 +109,7 @@ setup(
             'pz_rename = photo_rename.rename:main',
             'pz_copy_metadata = photo_rename.copy_metadata:main',
             'pz_set_datetime = photo_rename.set_datetime:main',
+            'pz_delta_datetime = photo_rename.delta_datetime:main',
         ]
     },
     install_requires=install_requires_list,
