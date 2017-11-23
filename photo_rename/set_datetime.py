@@ -93,13 +93,17 @@ def main():
         logger.info(
                 "--directory not given. Using workdir={}".format(workdir))
 
-    if not re.match(r'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d', args.datetime):
+    if not args.datetime:
+        logger.error("Initial datetime not set.")
+        error = True
+
+    if args.datetime and not re.match(r'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d', args.datetime):
         logger.error("Invalid datetime. Use YYYY-mm-DD HH:MM:SS.")
         error = True
 
     if not args.interval:
-        # Default to 1 second.
-        interval = 1
+        # Default to 60 second.
+        interval = 60
         logger.warn(
                 "--interval not specified. Using {} second interval".format(
                     interval))
